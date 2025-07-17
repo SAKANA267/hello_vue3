@@ -2,17 +2,23 @@
     <!-- html -->
      <div class="app">
         <h1>Hello Vue3</h1>
-        <Test />
+        <Person/>
+        <Comment/>
+        <CarAndGames/>
      </div>
 </template>
 
 <script lang="ts">
     //js or ts
-    import Test from './components/Test.vue';
+    import Person from './components/Person.vue';
+    import Comment from './components/Comment.vue';
+    import CarAndGames from './components/CarAndGames.vue';
     export default {
         name: 'App',
         components: {
-            Test
+            Person,
+            Comment,
+            CarAndGames
         },
     }
 </script>
