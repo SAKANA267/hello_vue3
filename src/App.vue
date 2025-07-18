@@ -3,8 +3,14 @@
      <div class="app">
         <h1>Hello Vue3</h1>
         <Person/>
+        <hr>
         <Comment/>
+        <hr>
         <CarAndGames/>
+        <hr>
+        <ComputeFullName/>
+        <hr>
+        <WatchPerson/>
      </div>
 </template>
 
@@ -13,12 +19,16 @@
     import Person from './components/Person.vue';
     import Comment from './components/Comment.vue';
     import CarAndGames from './components/CarAndGames.vue';
+    import ComputeFullName from './components/ComputeFullName.vue';
+    import WatchPerson from './components/WatchPerson.vue';
     export default {
         name: 'App',
         components: {
             Person,
             Comment,
-            CarAndGames
+            CarAndGames,
+            ComputeFullName,
+            WatchPerson
         },
     }
 </script>

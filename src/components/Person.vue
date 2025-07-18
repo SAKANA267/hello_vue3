@@ -7,16 +7,25 @@
         <h2>年龄：{{ age }}</h2>
         <button @click = 'changeName'>修改姓名</button>
         <button @click = 'changeGender'>修改性别</button>
-        <button @click = 'showAge'>修改年龄</button>
+        <button @click = 'showAge'>修改年龄</button><span>监听ref</span>
      </div>
 </template>
 
 <script lang="ts" setup name="Person">
-    import { ref } from 'vue';
+    import { ref, watch } from 'vue';
 
     let name = ref('张三');
     let gender = ref('男');
     let age = ref(25);
+    watch(age,(newValue,oldValue) => {
+        if (newValue >= 30) {
+            age.value = 0; // 重置年龄
+            console.log('年龄超过，已重置为0');
+        }else {
+            console.log(`年龄从 ${oldValue} 改变为 ${newValue}`);
+        }
+    },{immediate: true,deep: true}
+    )
 
     function changeName() {
         name.value = '李四';
@@ -30,9 +39,6 @@
 
     function showAge() {
         age.value ++;
-        if (age.value > 100) {
-            age.value = 0; // 重置年龄
-        }
     }
 </script>
 
