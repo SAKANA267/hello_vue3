@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import CommonAside from '@/components/CommonAside.vue';
+import CommonHeader from '@/components/CommonHeader.vue';
 
 </script>
 
@@ -33,7 +34,9 @@ import CommonAside from '@/components/CommonAside.vue';
 }
 
 .el-header {
-  background-color: #333;
+  background-color: #4facfe;
+  display: flex;
+  align-items: center;
 }
 
 .el-main {
