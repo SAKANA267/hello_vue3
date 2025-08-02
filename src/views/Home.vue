@@ -9,13 +9,11 @@
     <el-container class="lay-container">
       <common-aside />
       <el-container>
-        <el-header>
+        <el-header class="top-header">
           <common-header />
         </el-header>
-        <el-main>
-          Main
-          <br>
-          footer
+        <el-main class="right-main">
+          <router-view />
         </el-main>
       </el-container>
     </el-container>
