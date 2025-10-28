@@ -1,3 +1,7 @@
+/*
+项目统一api管理
+*/
+
 import request from "./request";
 
 export default {

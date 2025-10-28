@@ -11,7 +11,6 @@
     <hr>
     <ContributionGraph :contributions="mockContributions" />
     <hr>
-
   </div>
 </template>
 

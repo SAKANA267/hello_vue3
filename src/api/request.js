@@ -1,3 +1,7 @@
+/* 
+把所有与 HTTP 请求相关的通用逻辑（如错误处理、认证）都集中到了此处，当需要修改请求逻辑时，只需修改此处即可，无需逐个修改每个请求
+*/
+
 import axios from "axios";
 import { ElMessage } from "element-plus";
 

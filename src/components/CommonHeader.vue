@@ -8,7 +8,7 @@
     <div class="header">
         <!-- 左侧内容 -->
         <div class="l-cont">
-            <el-button @click="toggleCollapse">
+            <el-button @click="toggleCollapse" role="button" aria-label="toggleCollapse" size="large" type="primary" text>
                 <el-icon>
                     <IconMenu />
                 </el-icon>

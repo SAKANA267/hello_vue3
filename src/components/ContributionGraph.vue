@@ -7,7 +7,7 @@
 <template>
     <div class="contribution-graph">
       <div class="contribution-header">
-        <h3>{{ contributions.length }} contributions in the last year</h3>
+        <h1>{{ contributions.length }} contributions in the last year</h1>
         <div class="legend">
           <span>Less</span>
           <div class="legend-colors">
@@ -241,7 +241,7 @@
     margin-bottom: 16px;
   }
   
-  .contribution-header h3 {
+  .contribution-header h1 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
