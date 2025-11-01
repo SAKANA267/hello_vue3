@@ -37,6 +37,23 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <!-- 移动端卡片布局 -->
+    <div class="mobile-cards">
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column type="expand">
+          <template #default="props">
+            <div m="4">
+              <p m="t-0 b-2">地址: {{ props.row.address }}</p>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="日期" prop="date" />
+        <el-table-column label="姓名" prop="name" />
+      </el-table>
+    </div>
+
+
   </div>
 </template>
 
@@ -73,6 +90,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.mobile-cards {
+  display: none;
+}
+
 .header{
   display: flex;
   justify-content: space-between;
@@ -84,5 +105,21 @@ onMounted(() => {
   background: #fff;
   padding: 20px;
   border-radius: 2px;
+  width: 90%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media screen and (max-width: 768px) {
+  /* 隐藏桌面端表格 */
+  .table {
+    display: none;
+  }
+
+  /* 显示移动端卡片布局 */
+  .mobile-cards {
+    display: block;
+    width: 100%;
+  }
 }
 </style>
