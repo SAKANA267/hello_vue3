@@ -16,5 +16,11 @@ export default {
             url: "/api/user/getLoginInfo",
             method: "get"
         });
-    }
+    },
+    getTableData() {
+        return request({
+            url: "/api/table/getTableData",
+            method: "get"
+        });
+    },
 };
