@@ -9,12 +9,12 @@
 
     <div class="header">
       <el-button type="primary">新增对象</el-button>
-      <el-form :inline="true">
+      <el-form :inline="true" :model="formInline">
         <el-form-item label="请输入">
-          <el-input placeholder="请输入查询内容"></el-input>
+          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">查询</el-button>
+          <el-button type="primary" @click="handleSearch()">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -43,8 +43,8 @@
       <el-table :data="tableData" style="width: 100%">
         <el-table-column type="expand">
           <template #default="props">
-            <div m="4">
-              <p m="t-0 b-2">地址: {{ props.row.address }}</p>
+            <div class="mobile-card-content">
+              <p>地址: {{ props.row.address }}</p>
             </div>
           </template>
         </el-table-column>
@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance} from 'vue'
+import { ref, onMounted, getCurrentInstance, reactive} from 'vue'
 import type { ComponentInternalInstance } from 'vue'
 import type { TableItem } from '@/assets/types/objectTable.ts'
 
@@ -71,9 +71,14 @@ const tableData = ref<TableItem[]>([
   },
 ])
 const getTableData = async () => {
-  const table = await proxy?.$api.getTableData();
-  tableData.value = table;
-  console.log('tableData', table);
+  const table = await proxy?.$api.getTableData(config);
+  tableData.value = table.list;
+  console.log('tableData', table.list);
+}
+
+const handleSearch = () => {
+  config.name = formInline.keyWord
+  getTableData()
 }
 
 const handleEdit = (row: TableItem) => {
@@ -84,6 +89,12 @@ const handleDelete = (row: TableItem) => {
   console.log('删除', row)
 }
 
+const formInline = reactive({
+  keyWord: ''
+})
+const config = reactive({
+  name: ''
+})
 onMounted(() => {
   getTableData()
 })
@@ -92,6 +103,9 @@ onMounted(() => {
 <style scoped>
 .mobile-cards {
   display: none;
+}
+.mobile-card-content {
+  margin: 10px;
 }
 
 .header{

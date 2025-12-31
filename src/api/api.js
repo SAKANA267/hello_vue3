@@ -7,20 +7,21 @@ import request from "./request";
 export default {
     getUserInfo() {
         return request({
-            url: "/api/user/getUserInfo",
+            url: "/user/getUserInfo",
             method: "get"
         });
     },
     getLoginInfo() {
         return request({
-            url: "/api/user/getLoginInfo",
+            url: "/user/getLoginInfo",
             method: "get"
         });
     },
-    getTableData() {
+    getTableData(data) {
         return request({
-            url: "/api/table/getTableData",
-            method: "get"
+            url: "/table/getTableData",
+            method: "get",
+            data,
         });
     },
 };

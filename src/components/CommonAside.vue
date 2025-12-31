@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref} from 'vue'
+import { computed, ref, markRaw} from 'vue'
 import { useAllDataStore } from '@/stores/index.js';
 import {
     Document,
@@ -48,7 +48,7 @@ const menuItems = ref([
     {
         index: '1',
         title: '导航',
-        icon: Location,
+        icon: markRaw(Location),
         children: [
             { index: '1-1', title: '对象管理', route: '/objectManagement' },
             { index: '1-2', title: '用户管理', route: '/objectManagement' }, 
@@ -57,7 +57,7 @@ const menuItems = ref([
     {
         index: '2',
         title: '菜单',
-        icon: IconMenu,
+        icon: markRaw(IconMenu),
         children: [
             { index: '2-1', title: '仪表盘', route: '/dashboard' },
             { index: '2-2', title: '个人资料', route: '/profile' },
@@ -66,7 +66,7 @@ const menuItems = ref([
     {
         index: '3',
         title: '文档',
-        icon: Document,
+        icon: markRaw(Document),
         children: [
             { index: '3-1', title: '快速开始', route: '/quickStart' },
             { index: '3-2', title: 'API 文档', route: '/apiDocs' },
@@ -75,7 +75,7 @@ const menuItems = ref([
     {
         index: '4',
         title: '其他',
-        icon: MoreFilled,
+        icon: markRaw(MoreFilled),
         children: [
             { index: '4-1', title: '设置', route: '/settings' },
             { index: '4-2', title: '帮助', route: '/help' },

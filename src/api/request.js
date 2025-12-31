@@ -4,30 +4,83 @@
 
 import axios from "axios";
 import { ElMessage } from "element-plus";
-
-const service = axios.create()
+import config from "@/config";
+const service = axios.create({
+    baseURL: config.baseApi,
+})
 // 添加请求拦截器
-service.interceptors.request.use(function (config) {
-    // 在发送请求之前做些什么
-    return config;
-}, function (error) {
-    // 对请求错误做些什么
-    return Promise.reject(error);
-});
+service.interceptors.request.use(
+    function (config) {
+        // 在发送请求之前做些什么
+
+        // 记录请求开始时间
+        config.metadata = { startTime: Date.now() };
+
+        console.log('[Request Start]', {
+            url: config.url,
+            fullUrl: `${config.baseURL || ''}${config.url}`,
+            method: config.method?.toUpperCase(),
+            params: config.params,
+            data: config.data,
+            headers: config.headers,
+            timeout: config.timeout,
+            timestamp: new Date().toISOString()
+        });
+        return config;
+    }, function (error) {
+        // 对请求错误做些什么
+
+        // 请求配置错误
+        console.error('[Request Config Error]', error);
+        return Promise.reject(error);
+    });
 
 // 添加响应拦截器
-service.interceptors.response.use((res) => {
-    const { code, data, msg } = res.data
-    if (code === 200) {
-        return data;
-    } else {
-        ElMessage.error(msg || 'Network Error');
-        return Promise.reject(msg || 'Network Error');
-    }
-});
+service.interceptors.response.use(
+    (res) => {
+
+        const { code, data, msg } = res.data
+        if (code === 200) {
+            return data;
+        } else {
+            // 业务错误处理
+            console.error('[Business Error]', {
+                url: res.config.url,
+                method: res.config.method,
+                requestData: res.config.data,
+                requestParams: res.config.params,
+                responseStatus: res.status,
+                responseData: res.data,
+                businessCode: code,
+                businessMessage: msg
+            });
+
+            const errorMsg = msg || `Business Error: Code ${code}`;
+            ElMessage.error(errorMsg);
+            return Promise.reject(new Error(errorMsg));
+        }
+
+    });
 
 function request(options) {
     options.method = options.method || 'get';
+    // 修复GET请求参数处理
+    if (options.method.toLowerCase() === 'get') {
+        options.params = options.data;
+    }
+
+    let isMock = config.mock;
+    if (typeof options.mock != 'undefined') {
+        isMock = options.mock;
+    }
+
+    if (config.env === 'prod') {
+        service.defaults.baseURL = config.baseApi
+    }
+    else {
+        service.defaults.baseURL = isMock ? config.mockApi : config.baseApi
+    }
+
     return service(options)
 }
 
