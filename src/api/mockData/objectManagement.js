@@ -30,7 +30,7 @@ for (let i = 0; i < count; i++) {
 
 export default {
     getTableData:(config) => {
-        const{ name, page = 1, limit = 20 } = param2Obj(config.url);
+        const{ name, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
             if (name && item.name.indexOf(name) === -1) return false;

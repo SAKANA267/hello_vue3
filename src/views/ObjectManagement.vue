@@ -53,12 +53,21 @@
       </el-table>
     </div>
 
+    <div class="pagination">
+      <el-pagination 
+        :background = !isMobile
+        layout="prev, pager, next" 
+        :total="config.totle" 
+        :size="isMobile ? 'small' : 'large'" 
+        @current-change="handleChange"
+      />
+    </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance, reactive} from 'vue'
+import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
 import type { ComponentInternalInstance } from 'vue'
 import type { TableItem } from '@/assets/types/objectTable.ts'
 
@@ -70,14 +79,29 @@ const tableData = ref<TableItem[]>([
     address: '加载中'
   },
 ])
+
+const formInline = reactive({
+  keyWord: ''
+})
+const config = reactive({
+  name: '',
+  totle:0,
+  page:1,
+})
 const getTableData = async () => {
   const table = await proxy?.$api.getTableData(config);
   tableData.value = table.list;
   console.log('tableData', table.list);
+  config.totle = table.count;
+  console.log('totle', config.totle);
 }
 
 const handleSearch = () => {
   config.name = formInline.keyWord
+  getTableData()
+}
+const handleChange = (page: number) => {
+  config.page = page;
   getTableData()
 }
 
@@ -89,14 +113,15 @@ const handleDelete = (row: TableItem) => {
   console.log('删除', row)
 }
 
-const formInline = reactive({
-  keyWord: ''
-})
-const config = reactive({
-  name: ''
-})
+
 onMounted(() => {
   getTableData()
+})
+
+const isMobile = ref(window.innerWidth <= 768)
+
+window.addEventListener('resize', () => {
+  isMobile.value = window.innerWidth <= 768
 })
 </script>
 
@@ -104,18 +129,19 @@ onMounted(() => {
 .mobile-cards {
   display: none;
 }
+
 .mobile-card-content {
   margin: 10px;
 }
 
-.header{
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.table{
+.table {
   background: #fff;
   padding: 20px;
   border-radius: 2px;
@@ -125,6 +151,7 @@ onMounted(() => {
 }
 
 @media screen and (max-width: 768px) {
+
   /* 隐藏桌面端表格 */
   .table {
     display: none;
@@ -135,5 +162,17 @@ onMounted(() => {
     display: block;
     width: 100%;
   }
+
+  /* 调整分页宽度 */
+  .pagination {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+.pagination {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
 }
 </style>
