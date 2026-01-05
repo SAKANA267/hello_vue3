@@ -19,7 +19,7 @@
       </el-form>
     </div>
 
-    <div class="table">
+    <div id="table">
       <el-table :data="tableData" border style="width: 100%"
         :header-cell-style="{ background: '#f5f7fa', color: '#606266' }">
         <el-table-column prop="date" label="日期" width="180" />
@@ -54,26 +54,20 @@
     </div>
 
     <div class="pagination">
-      <el-pagination 
-        :background = !isMobile
-        layout="prev, pager, next" 
-        :total="config.totle" 
-        :size="isMobile ? 'small' : 'large'" 
-        @current-change="handleChange"
-      />
+      <el-pagination :background=!isMobile layout="prev, pager, next" :total="config.totle"
+        :size="isMobile ? 'small' : 'large'" @current-change="handleChange" />
     </div>
 
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup >
 import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
-import type { ComponentInternalInstance } from 'vue'
-import type { TableItem } from '@/assets/types/objectTable.ts'
 
-const { proxy } = getCurrentInstance() as ComponentInternalInstance;
-const tableData = ref<TableItem[]>([
+const { proxy } = getCurrentInstance();
+const tableData = ref([
   {
+    id: 0,
     date: '加载中',
     name: '加载中',
     address: '加载中'
@@ -85,8 +79,8 @@ const formInline = reactive({
 })
 const config = reactive({
   name: '',
-  totle:0,
-  page:1,
+  totle: 0,
+  page: 1,
 })
 const getTableData = async () => {
   const table = await proxy?.$api.getTableData(config);
@@ -100,17 +94,31 @@ const handleSearch = () => {
   config.name = formInline.keyWord
   getTableData()
 }
-const handleChange = (page: number) => {
+const handleChange = (page) => {
   config.page = page;
   getTableData()
 }
 
-const handleEdit = (row: TableItem) => {
+const handleEdit = (row) => {
   console.log('编辑', row)
 }
 
-const handleDelete = (row: TableItem) => {
-  console.log('删除', row)
+const handleDelete = (val) => {
+  ElMessageBox.confirm("是否确认删除该对象?", '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      await proxy?.$api.deleteObject({ id: val.id })
+      ElMessage({
+        showClose: true,
+        message: '删除成功',
+        type: 'success',
+      })
+      await getTableData()
+      console.log('删除', val)
+    })
 }
 
 
@@ -141,7 +149,7 @@ window.addEventListener('resize', () => {
   margin-bottom: 20px;
 }
 
-.table {
+#table {
   background: #fff;
   padding: 20px;
   border-radius: 2px;

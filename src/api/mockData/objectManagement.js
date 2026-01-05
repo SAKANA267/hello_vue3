@@ -1,3 +1,4 @@
+import { useDelayedToggle } from "element-plus";
 import Mock from "mockjs";
 
 function param2Obj(url){
@@ -29,7 +30,7 @@ for (let i = 0; i < count; i++) {
 }
 
 export default {
-    getTableData:(config) => {
+    getObjectList:(config) => {
         const{ name, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
@@ -48,4 +49,22 @@ export default {
             },
         }
     },
+
+    /* 删除对象 */
+    deleteObject:(config) => {
+        const{id} = param2Obj(config.url);
+
+        if(!id){
+            return {
+                code: 500,
+                message: "参数错误",
+            };
+        } else{
+            List = List.filter((item) => item.id !== id);
+            return {
+                code: 200,
+                message: "删除成功",
+            };
+        }
+    }
 };
