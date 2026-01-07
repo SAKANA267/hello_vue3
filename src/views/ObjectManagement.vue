@@ -10,7 +10,7 @@
     <div class="header">
       <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
       <el-form :inline="true" :model="formInline">
-        <el-form-item label="请输入">
+        <el-form-item>
           <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
         </el-form-item>
         <el-form-item>
@@ -19,47 +19,12 @@
       </el-form>
     </div>
 
-    <!-- 桌面端表格布局 -->
-    <div id="table" v-show="!isMobile">
-      <el-table :data="tableData" border style="width: 100%"
-        :header-cell-style="{ background: '#f5f7fa', color: '#606266' }">
-        <el-table-column prop="date" label="日期" width="110" />
-        <el-table-column prop="name" label="姓名" width="80" />
-        <el-table-column prop="address" label="地址" />
-        <el-table-column fixed="right" label="操作" width="150">
-          <template #default="scope">
-            <el-button @click="handleEdit(scope.row)" type="text" size="small">
-              编辑
-            </el-button>
-            <el-button @click="handleDelete(scope.row)" type="text" size="small" style="color: #f56c6c">
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
-    <!-- 移动端卡片布局 -->
-    <div class="mobile-cards" v-show="isMobile">
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column type="expand">
-          <template #default="props">
-            <div class="mobile-card-content">
-              <p>地址: {{ props.row.address }}</p>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="日期" prop="date" />
-        <el-table-column label="姓名" prop="name" />
-      </el-table>
-    </div>
-    <!--分页-->
-    <div class="pagination">
-      <el-pagination :background=!isMobile layout="prev, pager, next" :total="config.totle"
-        :size="isMobile ? 'small' : 'large'" @current-change="handleChange" />
+    <div class="object-table">
+      <CommonTable :tableLabel="tableLabel"/>
     </div>
 
     <!--新增用户对话框-->
-    <el-dialog v-model="dialogFormVisible" title="新增对象" width="50%" :before-close="handleClose">
+    <el-dialog v-model="dialogFormVisible" title="新增对象" :width="isMobile? '90%': '50%'" :before-close="handleClose">
       <el-form :model="form" :rules="rules" ref="objectForm">
         <el-form-item label="日期" :label-width="labelWidth" prop="date">
           <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
@@ -84,9 +49,17 @@
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
-import { Calendar, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
+import CommonTable from '@/components/CommonTable.vue';
 
 const { proxy } = getCurrentInstance();
+
+//表格列配置
+const tableLabel = [
+    { prop: 'date', label: '日期', width:"110"},
+    { prop: 'name', label: '姓名', width:"80"},
+    { prop: 'address', label: '地址', },
+]
 
 const tableData = ref([
   {
@@ -170,6 +143,8 @@ const objectForm = ref({})
 const handleClose = (done) => {
   ElMessageBox.confirm('确定要关闭对话框吗?')
     .then(() => {
+      objectForm.value.resetFields()
+      dialogFormVisible.value = false
       done()
     })
     .catch(() => {

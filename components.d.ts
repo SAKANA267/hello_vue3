@@ -12,6 +12,7 @@ declare module 'vue' {
     Comment: typeof import('./src/components/Comment.vue')['default']
     CommonAside: typeof import('./src/components/CommonAside.vue')['default']
     CommonHeader: typeof import('./src/components/CommonHeader.vue')['default']
+    CommonTable: typeof import('./src/components/CommonTable.vue')['default']
     ComputeFullName: typeof import('./src/components/ComputeFullName.vue')['default']
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']

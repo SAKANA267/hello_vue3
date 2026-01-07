@@ -79,6 +79,7 @@ const menuItems = ref([
         children: [
             { index: '4-1', title: '设置', route: '/settings' },
             { index: '4-2', title: '帮助', route: '/help' },
+            { index: '4-3', title: '测试页面', route: '/test' },
         ],
     },
 ]);
