@@ -11,7 +11,7 @@
       <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
       <el-form :inline="true" :model="formInline">
         <el-form-item label="请输入">
-          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord"></el-input>
+          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch()">查询</el-button>
@@ -61,13 +61,13 @@
     <!--新增用户对话框-->
     <el-dialog v-model="dialogFormVisible" title="新增对象" width="50%" :before-close="handleClose">
       <el-form :model="form" :rules="rules" ref="objectForm">
-        <el-form-item label="日期" label-width="80px" prop="date">
-          <el-input v-model="form.date" autocomplete="off" />
+        <el-form-item label="日期" :label-width="labelWidth" prop="date">
+          <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
         </el-form-item>
-        <el-form-item label="姓名" label-width="80px" prop="name">
+        <el-form-item label="姓名" :label-width="labelWidth" prop="name">
           <el-input v-model="form.name" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="地址" label-width="80px" prop="address">
+        <el-form-item label="地址" :label-width="labelWidth" prop="address">
           <el-input v-model="form.address" autocomplete="off" />
         </el-form-item>
       </el-form>
@@ -83,7 +83,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
+import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
+import { Calendar, Search } from '@element-plus/icons-vue'
 
 const { proxy } = getCurrentInstance();
 
@@ -156,7 +157,12 @@ const form = reactive({
   address: '',
 })
 const rules = reactive({
-  date: [{ required: true, message: '请输入日期', trigger: 'blur' }],
+  date: [{ required: true, message: '请输入日期', trigger: 'blur' },
+  {
+    pattern: /^\d{4}-\d{2}-\d{2}$/,
+    message: '日期格式必须为 yyyy-MM-dd',
+    trigger: 'blur'
+  }],
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
 })
@@ -171,10 +177,23 @@ const handleClose = (done) => {
     })
 }
 const handleSubmit = async () => {
-  if (!objectForm.value) return
-  await objectForm.value.validate((valid) => {
+  await objectForm.value.validate(async (valid) => {
     if (valid) {
-      dialogFormVisible.value = false
+      try {
+        await proxy?.$api.createObject(form)
+        ElMessage({
+          showClose: true,
+          message: '创建成功',
+          type: 'success',
+        });
+        dialogFormVisible.value = false
+        objectForm.value.resetFields()
+        await getTableData() // 添加这行来刷新表格数据
+      } catch (error) {
+        console.error('创建失败', error)
+      }
+    }else {
+      console.log('表单验证失败')
     }
   })
 }
@@ -183,11 +202,13 @@ onMounted(() => {
   getTableData()
 })
 
+//响应式布局检测
 const isMobile = ref(window.innerWidth <= 768)
-
+const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
 window.addEventListener('resize', () => {
   isMobile.value = window.innerWidth <= 768
 })
+
 </script>
 
 <style scoped>

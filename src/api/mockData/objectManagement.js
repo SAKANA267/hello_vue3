@@ -50,7 +50,7 @@ export default {
         }
     },
 
-    /* 删除对象 */
+    //删除对象
     deleteObject:(config) => {
         const{id} = param2Obj(config.url);
 
@@ -66,5 +66,20 @@ export default {
                 message: "删除成功",
             };
         }
+    },
+
+    //添加对象
+    createObject:(config) => {
+        const { name, address, date } = JSON.parse(config.body);
+        List.unshift({
+            id: Mock.Random.guid(),
+            name: name,
+            address: address,
+            date: date,
+        });
+        return {
+            code: 200,
+            message: "添加成功",
+        };
     }
 };

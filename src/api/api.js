@@ -33,4 +33,11 @@ export default {
             data,
         });
     },
+    createObject(data) {
+        return request({
+            url: "/table/createObject",
+            method: "post",
+            data,
+        });
+    },
 };
