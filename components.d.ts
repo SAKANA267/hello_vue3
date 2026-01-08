@@ -48,6 +48,7 @@ declare module 'vue' {
     Person: typeof import('./src/components/Person.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TableEditDialog: typeof import('./src/components/TableEditDialog.vue')['default']
     UserInfo: typeof import('./src/components/UserInfo.vue')['default']
     WatchPerson: typeof import('./src/components/WatchPerson.vue')['default']
   }

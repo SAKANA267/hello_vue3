@@ -8,14 +8,19 @@ const routes = [
         component:() => import('@/views/Home.vue'),
         children:[
             {
+                path: '/profile',
+                name: 'profile',
+                component:() => import('@/views/Profile.vue')
+            },
+            {
                 path: '/objectManagement',
                 name: 'objectManagement',
                 component:() => import('@/views/ObjectManagement.vue')
             },
             {
-                path: '/profile',
-                name: 'profile',
-                component:() => import('@/views/Profile.vue')
+                path:'/userManagement',
+                name:'userManagement',
+                component:() => import('@/views/UserManagement.vue')
             },
             {
                 path:'/test',

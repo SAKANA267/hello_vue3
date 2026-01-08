@@ -52,7 +52,9 @@
  *   { prop: 'name', label: '姓名', width: '80' }
  * ]" />
  */
+import { id } from 'element-plus/es/locales.mjs';
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
+import { watch } from 'vue'
 
 const { proxy } = getCurrentInstance();
 
@@ -62,34 +64,45 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => []
+  },
+  queryParams: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  getApi: {
+    type: Function,
+    required: false,
+    default: () => ({})
+  },
+  deleteApi: {
+    type: Function,
+    required: false,
+    default: () => ({})
   }
 })
 
-const formInline = reactive({
-    keyWord: ''
-})
+//表格数据
+const tableData = ref([])
 
-//获取表格数据
-const tableData = ref([
-    {
-        id: 0,
-        date: '加载中',
-        name: '加载中',
-        address: '加载中'
-    },
-])
 const config = reactive({
     name: '',
     totle: 0,
     page: 1,
 })
 const getTableData = async () => {
-    const table = await proxy?.$api.getTableData(config);
+    const table = await props.getApi(config);
     tableData.value = table.list;
     console.log('tableData', table.list);
     config.totle = table.count;
     console.log('totle', config.totle);
 }
+//暴露搜索方法
+const search = () => {
+  config.name = props.queryParams || ''
+  getTableData()
+}
+
 //分页
 const handleChange = (page) => {
     config.page = page;
@@ -103,21 +116,40 @@ const handleDelete = (val) => {
             cancelButtonText: '取消',
             type: 'warning',
         }).then(async () => {
-            await proxy?.$api.deleteObject({ id: val.id })
-            ElMessage({
-                showClose: true,
-                message: '删除成功',
-                type: 'success',
-            })
-            await getTableData()
-            console.log('删除', val)
+            try {
+                console.log('要删除的对象id:', val.id);
+                const res = await props.deleteApi({id: val.id});
+                console.log('res:', res);
+                
+                // 修改响应检查逻辑
+                if (res && res.success) {  
+                    ElMessage({
+                        showClose: true,
+                        message: '删除成功',
+                        type: 'success',
+                    });
+                    await getTableData();
+                    console.log('删除了', val);
+                } else {
+                    throw new Error(res?.msg || '删除失败');
+                }
+            } catch (error) {
+                console.error('删除操作失败:', error);
+                ElMessage({
+                    showClose: true,
+                    message: error.message || '删除操作失败，请重试',
+                    type: 'error',
+                });
+            }
         }).catch(() => {
             ElMessage({
                 type: 'info',
-                message: '已取消',
-            })
+                message: '已取消删除',
+            });
         })
 }
+
+
 
 onMounted(() => {
     getTableData()
@@ -128,6 +160,11 @@ const isMobile = ref(window.innerWidth <= 768)
 const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
 window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth <= 768
+})
+
+// 使用defineExpose暴露方法
+defineExpose({
+  search
 })
 </script>
 

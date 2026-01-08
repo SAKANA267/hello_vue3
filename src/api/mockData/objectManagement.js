@@ -1,4 +1,3 @@
-import { useDelayedToggle } from "element-plus";
 import Mock from "mockjs";
 
 function param2Obj(url){
@@ -44,9 +43,11 @@ export default {
         return {
             code: 200,
             data: {
+                success: true,
                 list: pageList,
                 count: mockList.length,
             },
+            msg: "获取成功",
         }
     },
 
@@ -57,13 +58,15 @@ export default {
         if(!id){
             return {
                 code: 500,
-                message: "参数错误",
+                data: {success: false},
+                msg: "参数错误",
             };
         } else{
             List = List.filter((item) => item.id !== id);
             return {
                 code: 200,
-                message: "删除成功",
+                data: {success: true},
+                msg: "删除成功",
             };
         }
     },
@@ -79,7 +82,8 @@ export default {
         });
         return {
             code: 200,
-            message: "添加成功",
+            data: {success: true},
+            msg: "添加成功",
         };
     }
 };

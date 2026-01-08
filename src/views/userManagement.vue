@@ -1,57 +1,57 @@
 <!--
  * new page
  * @author: SAKANA267
- * @since: 2025-10-28
- * ObjectManagement.vue
+ * @since: 2026-01-08
+ * userManagement.vue
 -->
 <template>
   <div class="container">
 
-    <div class="header">
-      <el-form :inline="true" :model="formInline">
-        <el-form-item>
-          <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch()">查询</el-button>
-        </el-form-item>
-      </el-form>
+<div class="header">
+  <el-form :inline="true" :model="formInline">
+    <el-form-item>
+      <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
+    </el-form-item>
+    <el-form-item>
+      <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="handleSearch()">查询</el-button>
+    </el-form-item>
+  </el-form>
+</div>
+
+<div class="object-table">
+  <CommonTable 
+  ref="tableRef" 
+  :tableLabel="tableLabel" 
+  :queryParams="formInline.keyWord"
+  :getApi="proxy?.$api.getUserList"
+  :deleteApi="proxy?.$api.deleteUser"/>
+</div>
+
+<!--新增用户对话框-->
+<el-dialog v-model="dialogFormVisible" title="新增对象" :width="isMobile? '90%': '50%'" :before-close="handleClose">
+  <el-form :model="form" :rules="rules" ref="objectForm">
+    <el-form-item label="日期" :label-width="labelWidth" prop="date">
+      <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
+    </el-form-item>
+    <el-form-item label="姓名" :label-width="labelWidth" prop="name">
+      <el-input v-model="form.name" autocomplete="off" />
+    </el-form-item>
+    <el-form-item label="地址" :label-width="labelWidth" prop="address">
+      <el-input v-model="form.address" autocomplete="off" />
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <div class="dialog-footer">
+      <el-button @click="handleClose">取消</el-button>
+      <el-button type="primary" @click="handleSubmit">确定</el-button>
     </div>
+  </template>
+</el-dialog>
 
-    <div class="object-table">
-      <CommonTable 
-      ref="tableRef" 
-      :tableLabel="tableLabel" 
-      :queryParams="formInline.keyWord"
-      :getApi="proxy?.$api.getTableData"
-      :deleteApi="proxy?.$api.deleteObject"/>
-    </div>
-
-    <!--新增用户对话框-->
-    <el-dialog v-model="dialogFormVisible" title="新增对象" :width="isMobile? '90%': '50%'" :before-close="handleClose">
-      <el-form :model="form" :rules="rules" ref="objectForm">
-        <el-form-item label="日期" :label-width="labelWidth" prop="date">
-          <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
-        </el-form-item>
-        <el-form-item label="姓名" :label-width="labelWidth" prop="name">
-          <el-input v-model="form.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="地址" :label-width="labelWidth" prop="address">
-          <el-input v-model="form.address" autocomplete="off" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="handleClose">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-  </div>
+</div>
 </template>
 
 <script setup>
@@ -64,10 +64,16 @@ const tableRef = ref(null)
 
 //表格列配置
 const tableLabel = [
-    { prop: 'date', label: '日期', width:"110"},
-    { prop: 'name', label: '姓名', width:"80"},
-    { prop: 'address', label: '地址', },
+    { prop: 'username', label: '用户名', width: "120" },
+    { prop: 'name', label: '姓名', width: "100" },
+    { prop: 'email', label: '邮箱', width: "180" },
+    { prop: 'phone', label: '电话', width: "130" },
+    { prop: 'role', label: '角色', width: "100" },
+    { prop: 'status', label: '状态', width: "100" },
+    { prop: 'createTime', label: '创建时间', width: "180" },
+    { prop: 'lastLogin', label: '最后登录', width: "180" }
 ]
+
 
 
 const formInline = reactive({
@@ -149,7 +155,6 @@ const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
 window.addEventListener('resize', () => {
   isMobile.value = window.innerWidth <= 768
 })
-
 </script>
 
 <style scoped>

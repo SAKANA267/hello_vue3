@@ -51,7 +51,7 @@ const menuItems = ref([
         icon: markRaw(Location),
         children: [
             { index: '1-1', title: '对象管理', route: '/objectManagement' },
-            { index: '1-2', title: '用户管理', route: '/objectManagement' }, 
+            { index: '1-2', title: '用户管理', route: '/userManagement' }, 
         ],
     },
     {

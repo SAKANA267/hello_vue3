@@ -40,4 +40,34 @@ export default {
             data,
         });
     },
+    //user management
+    getUserList(data) {
+        return request({
+            url: "/user/getUserList",
+            method: "get",
+            data,
+        });
+    },
+    deleteUser(data) {
+        return request({
+            url: "/user/deleteUser",
+            method: "get",
+            data,
+        });
+    },
+    createUser(data) {
+        return request({
+            url: "/user/createUser",
+            method: "post",
+            data,
+        });
+    },
+    updateUser(data) {
+        return request({
+            url: "/user/updateUser",
+            method: "post",
+            data,
+        });
+    }
+
 };
