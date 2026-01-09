@@ -71,7 +71,7 @@ const tableLabel = [
     { prop: 'role', label: '角色', width: "100" },
     { prop: 'status', label: '状态', width: "100" },
     { prop: 'createTime', label: '创建时间', width: "180" },
-    { prop: 'lastLogin', label: '最后登录', width: "180" }
+    { prop: 'lastLogin', label: '最后登录',}
 ]
 
 
