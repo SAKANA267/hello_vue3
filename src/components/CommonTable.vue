@@ -70,13 +70,9 @@
  * />
  */
 
-import { id } from 'element-plus/es/locales.mjs';
-import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
-import { watch } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 
-const { proxy } = getCurrentInstance();
-
-//表格列配置
+//组件属性定义
 const props = defineProps({
     tableLabel: {
         type: Array,
@@ -167,6 +163,11 @@ const handleDelete = (val) => {
         })
 }
 
+const emit = defineEmits(['edit'])
+const handleEdit = (row) => {
+    console.log('handleEdit()编辑对象:', row);
+    emit('edit', row);
+}
 
 
 onMounted(() => {

@@ -7,146 +7,119 @@
 <template>
   <div class="container">
 
-<div class="header">
-  <el-form :inline="true" :model="formInline">
-    <el-form-item>
-      <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
-    </el-form-item>
-    <el-form-item>
-      <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="handleSearch()">查询</el-button>
-    </el-form-item>
-  </el-form>
-</div>
-
-<div class="object-table">
-  <CommonTable 
-  ref="tableRef" 
-  :tableLabel="tableLabel" 
-  :queryParams="formInline.keyWord"
-  :getApi="proxy?.$api.getUserList"
-  :deleteApi="proxy?.$api.deleteUser"/>
-</div>
-
-<!--新增用户对话框-->
-<el-dialog v-model="dialogFormVisible" title="新增对象" :width="isMobile? '90%': '50%'" :before-close="handleClose">
-  <el-form :model="form" :rules="rules" ref="objectForm">
-    <el-form-item label="日期" :label-width="labelWidth" prop="date">
-      <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
-    </el-form-item>
-    <el-form-item label="姓名" :label-width="labelWidth" prop="name">
-      <el-input v-model="form.name" autocomplete="off" />
-    </el-form-item>
-    <el-form-item label="地址" :label-width="labelWidth" prop="address">
-      <el-input v-model="form.address" autocomplete="off" />
-    </el-form-item>
-  </el-form>
-  <template #footer>
-    <div class="dialog-footer">
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSubmit">确定</el-button>
+    <div class="header">
+      <el-form :inline="true" :model="formInline">
+        <el-form-item>
+          <el-button type="primary" @click="openDialog('add')">新增用户</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch()">查询</el-button>
+        </el-form-item>
+      </el-form>
     </div>
-  </template>
-</el-dialog>
 
-</div>
+    <CommonTable 
+      ref="tableRef" 
+      :tableLabel="tableLabel" 
+      :queryParams="formInline.keyWord"
+      :getApi="proxy?.$api.getUserList" 
+      :deleteApi="proxy?.$api.deleteUser"
+      @edit="openDialog('edit', $event)"
+    />
+    
+
+    <!--新增用户对话框-->
+    <TableEditDialog 
+      v-model="dialogVisible" 
+      ref="tableEditDialogRef" 
+      :formFields="formFields" 
+      :rules="rules" 
+      :action="dialogAction"
+      :rowData="currentRow"
+      :addApi="proxy?.$api.createUser" 
+      :editApi="proxy?.$api.updateUser" 
+      @refresh="handleSearch()"
+    />
+
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import CommonTable from '@/components/CommonTable.vue';
+import TableEditDialog from '@/components/TableEditDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const tableRef = ref(null)
+const tableEditDialogRef = ref(null)
 
-//表格列配置
+//表格列配置 用于v-for创建表格列
 const tableLabel = [
-    { prop: 'username', label: '用户名', width: "120" },
-    { prop: 'name', label: '姓名', width: "100" },
-    { prop: 'email', label: '邮箱', width: "180" },
-    { prop: 'phone', label: '电话', width: "130" },
-    { prop: 'role', label: '角色', width: "100" },
-    { prop: 'status', label: '状态', width: "100" },
-    { prop: 'createTime', label: '创建时间', width: "180" },
-    { prop: 'lastLogin', label: '最后登录',}
+  { prop: 'username', label: '用户名', width: "120" },
+  { prop: 'name', label: '姓名', width: "100" },
+  { prop: 'email', label: '邮箱', width: "180" },
+  { prop: 'phone', label: '电话', width: "130" },
+  { prop: 'role', label: '角色', width: "100" },
+  { prop: 'status', label: '状态', width: "100" },
+  { prop: 'createTime', label: '创建时间', width: "180" },
+  { prop: 'lastLogin', label: '最后登录', }
+]
+//编辑与创建用户 用于v-for创建编辑/新增表单
+const formFields = [
+  { prop: 'username', label: '用户名', type: 'input' },
+  { prop: 'name', label: '姓名', type: 'input' },
+  { prop: 'email', label: '邮箱', type: 'input' },
+  { prop: 'phone', label: '电话', type: 'input' },
+  { prop: 'role', label: '角色', type: 'select', options: ['admin', 'user', 'editor'] },
+  { prop: 'status', label: '状态', type: 'select', options: ['active', 'inactive'] },
+  { prop: 'createTime', label: '创建时间', type: 'date' },
+  { prop: 'lastLogin', label: '最后登录', type: 'date' }
 ]
 
+// 表单验证规则 用于el-form的rules属性
+const rules = reactive({
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, message: '请输入电话', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+  ],
+  role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+  status: [{ required: true, message: '请选择状态', trigger: 'change' }],
+  createTime: [{ required: true, message: '请选择创建时间', trigger: 'change' }],
+  lastLogin: [{ required: true, message: '请选择最后登录时间', trigger: 'change' }]
+})
 
 
+//搜索相关
 const formInline = reactive({
   keyWord: ''
 })
-const config = reactive({
-  name: '',
-  totle: 0,
-  page: 1,
-})
-
 const handleSearch = () => {
   tableRef.value?.search()
 }
 
-const handleChange = (page) => {
-  config.page = page;
-  getTableData()
-}
-
 //对话框表单相关
-const dialogFormVisible = ref(false)
-const form = reactive({
-  date: '',
-  name: '',
-  address: '',
-})
-const rules = reactive({
-  date: [{ required: true, message: '请输入日期', trigger: 'blur' },
-  {
-    pattern: /^\d{4}-\d{2}-\d{2}$/,
-    message: '日期格式必须为 yyyy-MM-dd',
-    trigger: 'blur'
-  }],
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-})
-const objectForm = ref({})
-const handleClose = (done) => {
-  ElMessageBox.confirm('确定要关闭对话框吗?')
-    .then(() => {
-      objectForm.value.resetFields()
-      dialogFormVisible.value = false
-      done()
-    })
-    .catch(() => {
-      // catch error
-    })
-}
-const handleSubmit = async () => {
-  await objectForm.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        await proxy?.$api.createObject(form)
-        ElMessage({
-          showClose: true,
-          message: '创建成功',
-          type: 'success',
-        });
-        dialogFormVisible.value = false
-        objectForm.value.resetFields()
-        await getTableData() // 添加这行来刷新表格数据
-      } catch (error) {
-        console.error('创建失败', error)
-      }
-    }else {
-      console.log('表单验证失败')
-    }
-  })
-}
+const dialogVisible = ref(false);
+const dialogAction = ref('add');
+const currentRow = ref(null);
+const openDialog = (action, row = null) => {
+  console.log('openDialog() row:', row);
+  dialogAction.value = action;
+  currentRow.value = row;
+  dialogVisible.value = true;
+};
 
 onMounted(() => {
-  
+
 })
 
 //响应式布局检测
