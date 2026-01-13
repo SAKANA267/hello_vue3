@@ -5,7 +5,8 @@
  * TableEditDialog.vue
 -->
 <template>
-  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" :width="isMobile ? '90%' : '50%'" :before-close="handleClose">
+  <el-dialog :model-value="dialogVisible" :title="dialogTitle" :width="isMobile ? '90%' : '50%'"
+    :before-close="handleClose">
     <el-form :model="form" :rules="rules" ref="objectForm">
       <el-form-item v-for="field in formFields" :key="field.prop" :label="field.label" :prop="field.prop">
         <el-input v-if="field.type === 'input'" v-model="form[field.prop]" />
@@ -16,8 +17,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSubmit">确定</el-button>
+      <el-button type="primary" @click="handleSubmit">提交</el-button>
     </template>
   </el-dialog>
 </template>
@@ -49,10 +49,11 @@
  * />
  */
 import { ElMessage } from 'element-plus'
-import { ref, reactive, computed, watch} from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 
 //组件属性定义
 const props = defineProps({
+  dialogVisible: Boolean,
   formFields: Array,
   rules: Object,
   action: String,
@@ -61,59 +62,54 @@ const props = defineProps({
   editApi: Function,
 })
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['update:dialogVisible', 'refresh'])
 
-const dialogFormVisible = ref(false);
 // 初始化表单数据
 const initForm = (fields) => {
-  const form = {};
   fields.forEach((field) => {
-    form[field.prop] = '';
-  });
-  console.log('initForm', form);
-  return form;
-};
+    form[field.prop] = ''
+  })
+}
+
 //表单数据 用于el-form的model属性
-const form = reactive(initForm(props.formFields))
+const form = reactive({})
+initForm(props.formFields)
+
 const dialogTitle = computed(() => (props.action === 'edit' ? '编辑对象' : '新增对象'));
 
-//对话框
-const dialogAction = ref(props.action) // 当前操作类型 add/edit
 //编辑与创建用户 用于v-for创建编辑/新增表单
 const formFields = props.formFields
 // 表单验证规则 用于el-form的rules属性
 const rules = reactive(props.rules)
 
-// 监听 rowData 变化，用于编辑时填充数据
-watch(() => props.rowData, (newVal) => {
-  if (newVal) {
+// 根据 action 初始化表单
+const initializeForm = () => {
+  if (props.action === 'edit' && props.rowData) {
     // 编辑时填充数据
-    props.formFields.forEach(field => {
-      form[field.prop] = newVal[field.prop] || ''
-    })
-  } else {
+    props.formFields.forEach((field) => {
+      form[field.prop] = props.rowData[field.prop] || '';
+    });
+  } else if (props.action === 'add') {
     // 新增时重置表单
-    initForm(props.formFields)
+    initForm(props.formFields);
   }
-}, { immediate: true })
-
-const handleClose = (done) => {
-  ElMessageBox.confirm('确定要关闭对话框吗?')
-    .then(() => {
-      console.log('formFileds', formFields);
-      dialogFormVisible.value = false
-      done()
-    })
-    .catch(() => {
-      // catch error
-    })
-}
-
-const objectForm = ref(null);
-
-const resetForm = () => {
-  objectForm.value?.resetFields();
 };
+// 每次打开对话框时初始化表单
+const dialogVisible = computed(() => props.dialogVisible);
+watch(
+  dialogVisible,
+  (visible) => {
+    if (visible) {
+      initializeForm(); // 根据 action 初始化表单
+    }
+  },
+  { immediate: true }
+);
+
+const handleClose = () => {
+  initForm(props.formFields);
+  emit('update:dialogVisible', false);
+}
 
 const handleSubmit = async () => {
   try {
@@ -121,8 +117,8 @@ const handleSubmit = async () => {
       const res = await props.addApi(form);
       if (res.success) {
         ElMessage.success('新增成功');
-        resetForm();
-        dialogFormVisible.value = false;
+        emit('update:dialogVisible', false);
+        initForm(props.formFields);
         emit('refresh');
       } else {
         ElMessage.error('新增失败');
@@ -135,8 +131,8 @@ const handleSubmit = async () => {
       const res = await props.editApi(updateData);
       if (res.success) {
         ElMessage.success('编辑成功');
-        resetForm();
-        dialogFormVisible.value = false;
+        emit('update:dialogVisible', false);
+        initForm(props.formFields);
         emit('refresh');
       } else {
         ElMessage.error('编辑失败');
@@ -157,6 +153,4 @@ window.addEventListener('resize', () => {
 })
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

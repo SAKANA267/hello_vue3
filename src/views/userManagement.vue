@@ -10,7 +10,7 @@
     <div class="header">
       <el-form :inline="true" :model="formInline">
         <el-form-item>
-          <el-button type="primary" @click="openDialog('add')">新增用户</el-button>
+          <el-button type="primary" @click="openDialog('add', null)">新增用户</el-button>
         </el-form-item>
         <el-form-item>
           <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
@@ -34,7 +34,8 @@
     <!--新增用户对话框-->
     <TableEditDialog 
       v-model="dialogVisible" 
-      ref="tableEditDialogRef" 
+      ref="tableEditDialogRef"
+      :dialogVisible ="dialogVisible"
       :formFields="formFields" 
       :rules="rules" 
       :action="dialogAction"
@@ -42,6 +43,7 @@
       :addApi="proxy?.$api.createUser" 
       :editApi="proxy?.$api.updateUser" 
       @refresh="handleSearch()"
+      @update:dialogVisible="dialogVisible = $event"
     />
 
   </div>
@@ -112,7 +114,6 @@ const dialogVisible = ref(false);
 const dialogAction = ref('add');
 const currentRow = ref(null);
 const openDialog = (action, row = null) => {
-  console.log('openDialog() row:', row);
   dialogAction.value = action;
   currentRow.value = row;
   dialogVisible.value = true;
