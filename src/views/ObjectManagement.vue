@@ -10,7 +10,7 @@
     <div class="header">
       <el-form :inline="true" :model="formInline">
         <el-form-item>
-          <el-button type="primary" @click="dialogFormVisible = true">新增对象</el-button>
+          <el-button type="primary" @click="openDialog('add', null)">新增对象</el-button>
         </el-form-item>
         <el-form-item>
           <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
@@ -27,29 +27,25 @@
       :tableLabel="tableLabel" 
       :queryParams="formInline.keyWord"
       :getApi="proxy?.$api.getTableData"
-      :deleteApi="proxy?.$api.deleteObject"/>
+      :deleteApi="proxy?.$api.deleteObject"
+      @edit="openDialog('edit', $event)"
+    />
     </div>
 
     <!--新增用户对话框-->
-    <el-dialog v-model="dialogFormVisible" title="新增对象" :width="isMobile? '90%': '50%'" :before-close="handleClose">
-      <el-form :model="form" :rules="rules" ref="objectForm">
-        <el-form-item label="日期" :label-width="labelWidth" prop="date">
-          <el-date-picker v-model="form.date" placeholder="选择日期" value-format="YYYY-MM-DD"/>
-        </el-form-item>
-        <el-form-item label="姓名" :label-width="labelWidth" prop="name">
-          <el-input v-model="form.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="地址" :label-width="labelWidth" prop="address">
-          <el-input v-model="form.address" autocomplete="off" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="handleClose">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <TableEditDialog 
+      v-model="dialogVisible" 
+      ref="tableEditDialogRef"
+      :dialogVisible ="dialogVisible"
+      :formFields="formFields" 
+      :rules="rules" 
+      :action="dialogAction"
+      :rowData="currentRow"
+      :addApi="proxy?.$api.createObject" 
+      :editApi="proxy?.$api.updateObject" 
+      @refresh="handleSearch()"
+      @update:dialogVisible="dialogVisible = $event"
+    />
 
   </div>
 </template>
@@ -58,9 +54,11 @@
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import CommonTable from '@/components/CommonTable.vue';
+import TableEditDialog from '@/components/TableEditDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const tableRef = ref(null)
+const tableEditDialogRef = ref(null)
 
 //表格列配置
 const tableLabel = [
@@ -69,32 +67,14 @@ const tableLabel = [
     { prop: 'address', label: '地址', },
 ]
 
+//编辑与创建用户 用于v-for创建编辑/新增表单
+const formFields = [
+    { prop: 'date', label: '日期', type: 'date' },
+    { prop: 'name', label: '姓名', type: 'input' },
+    { prop: 'address', label: '地址', type: 'input' }
+]
 
-const formInline = reactive({
-  keyWord: ''
-})
-const config = reactive({
-  name: '',
-  totle: 0,
-  page: 1,
-})
-
-const handleSearch = () => {
-  tableRef.value?.search()
-}
-
-const handleChange = (page) => {
-  config.page = page;
-  getTableData()
-}
-
-//对话框表单相关
-const dialogFormVisible = ref(false)
-const form = reactive({
-  date: '',
-  name: '',
-  address: '',
-})
+// 表单验证规则 用于el-form的rules属性
 const rules = reactive({
   date: [{ required: true, message: '请输入日期', trigger: 'blur' },
   {
@@ -105,39 +85,26 @@ const rules = reactive({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
 })
-const objectForm = ref({})
-const handleClose = (done) => {
-  ElMessageBox.confirm('确定要关闭对话框吗?')
-    .then(() => {
-      objectForm.value.resetFields()
-      dialogFormVisible.value = false
-      done()
-    })
-    .catch(() => {
-      // catch error
-    })
+
+//搜索相关
+const formInline = reactive({
+  keyWord: ''
+})
+const handleSearch = () => {
+  tableRef.value?.search()
 }
-const handleSubmit = async () => {
-  await objectForm.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        await proxy?.$api.createObject(form)
-        ElMessage({
-          showClose: true,
-          message: '创建成功',
-          type: 'success',
-        });
-        dialogFormVisible.value = false
-        objectForm.value.resetFields()
-        await getTableData() // 添加这行来刷新表格数据
-      } catch (error) {
-        console.error('创建失败', error)
-      }
-    }else {
-      console.log('表单验证失败')
-    }
-  })
-}
+
+
+//对话框表单相关
+const dialogVisible = ref(false);
+const dialogAction = ref('add');
+const currentRow = ref(null);
+const openDialog = (action, row = null) => {
+  dialogAction.value = action;
+  currentRow.value = row;
+  dialogVisible.value = true;
+};
+
 
 onMounted(() => {
   

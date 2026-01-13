@@ -40,6 +40,13 @@ export default {
             data,
         });
     },
+    updateObject(data) {
+        return request({
+            url: "/table/updateObject",
+            method: "post",
+            data,
+        });
+    },
     //user management
     getUserList(data) {
         return request({

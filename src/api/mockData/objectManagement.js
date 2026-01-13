@@ -85,5 +85,32 @@ export default {
             data: {success: true},
             msg: "添加成功",
         };
+    },
+    //更新用户
+    updateObject: (config) => {
+    const { id, name, address, date } = JSON.parse(config.body);
+    const index = List.findIndex(item => item.id === id);
+
+    if (index === -1) {
+        return {
+            code: 500,
+            data: {success: false},
+            msg: "对象不存在",
+        };
     }
+
+    List[index] = {
+        ...List[index],
+        name: name || List[index].name,
+        address: address || List[index].address,
+        date: date || List[index].date,
+    };
+
+    return {
+        code: 200,
+        data: {success: true},
+        msg: "更新成功",
+    };
+}
+
 };

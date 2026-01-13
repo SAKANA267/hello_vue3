@@ -10,6 +10,7 @@ Mock.mock('/api/user/getLoginInfo', 'get', userInfoApi.getLoginInfo);
 Mock.mock(RegExp('/api/table/getTableData(\\?.*)?$'), 'get', objectApi.getObjectList);
 Mock.mock(RegExp('/api/table/deleteObject(\\?.*)?$'), 'get', objectApi.deleteObject);
 Mock.mock('/api/table/createObject', 'post', objectApi.createObject);
+Mock.mock('/api/table/updateObject', 'post', objectApi.updateObject);
 // User Management.vue
 Mock.mock(RegExp('/api/user/getUserList(\\?.*)?$'), 'get', userApi.getUserList);
 Mock.mock(RegExp('/api/user/deleteUser(\\?.*)?$'), 'get', userApi.deleteUser);
