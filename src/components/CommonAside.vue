@@ -6,8 +6,8 @@
 -->
 <template>
     <el-aside :width="width">
-        <el-menu default-active="2" class="el-menu-vertical-demo" :collapse="isCollapse" @open="handleOpen"
-            @close="handleClose">
+        <el-menu :default-active="activeMenu" class="el-menu-vertical-demo" :collapse="isCollapse" @open="handleOpen"
+            @close="handleClose" >
             <h3 class="mb-2" v-show="!isCollapse" role="heading" aria-level="3">公共卫生平台</h3>
             <h3 class="mb-2" v-show="isCollapse" role="heading" aria-level="3">后台</h3>
 
@@ -24,7 +24,7 @@
                     </template>
                     <!-- 渲染子菜单 -->
                     <el-menu-item v-for="child in item.children" :key="child.index" :index="child.index"
-                        @click="$router.push(child.route)">
+                        @click=handleMenu(child)>
                         {{ child.title }}
                     </el-menu-item>
                 </el-sub-menu>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, markRaw} from 'vue'
+import { computed, ref, markRaw } from 'vue'
 import { useAllDataStore } from '@/stores/index.js';
 import {
     Document,
@@ -42,6 +42,7 @@ import {
     Location,
     MoreFilled,
 } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router';
 
 // 定义菜单数据，确保每个子菜单项都有 route 属性
 const menuItems = ref([
@@ -95,6 +96,14 @@ const handleOpen = (key: string, keyPath: string[]) => {
 }
 const handleClose = (key: string, keyPath: string[]) => {
     console.log(key, keyPath)
+}
+
+const router = useRouter();
+const route = useRoute();
+const activeMenu = computed(() => route.path);
+const handleMenu= (item: any) =>{
+    router.push(item.route);
+    store.selectMenu(item);
 }
 </script>
 
