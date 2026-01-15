@@ -13,16 +13,18 @@ function initState() {
             },
         ],
         currentMenu: null,
+        menuList: [],
+        token: '',
     }
 }
 export const useAllDataStore = defineStore('allData', () => {
     const state = ref(initState());
 
-    // stores/index.js
-    function selectMenu(val) {
-        if (val.route !== '/home') {  // 使用 route 而不是 name
+    // CommonAside.vue tags 标签栏操作
+    function selectMenu(val) {//传入值为对象 eg：index: '1-1', title: '对象管理', route: '/objectManagement'
+        if (val.route !== '/home') { 
             // 检查标签是否已存在
-            const index = state.value.tags.findIndex(item => item.route === val.route)
+            const index = state.value.tags.findIndex(item => item.path === val.route)
             if (index === -1) {
                 // 不存在则添加新标签，转换数据格式
                 state.value.tags.push({
@@ -41,9 +43,14 @@ export const useAllDataStore = defineStore('allData', () => {
             }
         }
     }
-
+    
+    // login.vue 根据用户更新菜单列表
+    function updateMenuList(newMenuList) {
+        state.value.menuList = newMenuList;
+    }
     return {
         state,
         selectMenu,
+        updateMenuList,
     }
 });

@@ -54,9 +54,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, getCurrentInstance } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
+import { useAllDataStore } from '@/stores/index.js'
+import { useRouter } from 'vue-router'
 
 const loginFormRef = ref<FormInstance>()
 const loading = ref(false)
@@ -73,17 +75,26 @@ const rules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' }
   ]
 }
+
+const { proxy } = getCurrentInstance() as any;
+const store = useAllDataStore()
+const router = useRouter()
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
   
-  await loginFormRef.value.validate((valid) => {
+  await loginFormRef.value.validate( async (valid) => {
     if (valid) {
       loading.value = true
-      // TODO: 实现登录逻辑
+      const res = await proxy.$api.getMenu(loginForm)
+      console.log('登录成功:', res)
+      // 根据res使用store更新侧边栏
+      store.updateMenuList(res.menuList)
+      store.state.token = res.token
+      router.push('/home')
       setTimeout(() => {
         loading.value = false
       }, 1500)

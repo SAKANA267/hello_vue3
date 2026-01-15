@@ -45,7 +45,7 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 
 // 定义菜单数据，确保每个子菜单项都有 route 属性
-const menuItems = ref([
+const allMenuItems = [
     {
         index: '1',
         title: '导航',
@@ -83,9 +83,15 @@ const menuItems = ref([
             { index: '4-3', title: '测试页面', route: '/test' },
         ],
     },
-]);
-
+];
 const store = useAllDataStore();
+const menuItems = computed(() => {
+    const menuList = store.state.menuList;
+    return allMenuItems.map(menu => ({
+        ...menu,
+        children: menu.children.filter(child => menuList.includes(child.index))
+    })).filter(menu => menu.children.length > 0);
+});
 const isCollapse = computed(() => store.state.isCollapse);
 const width = computed(() => {
     return store.state.isCollapse ? '64px' : '180px';

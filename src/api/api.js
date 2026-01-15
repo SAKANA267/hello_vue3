@@ -75,6 +75,13 @@ export default {
             method: "post",
             data,
         });
+    },
+    //login
+    getMenu(params) {
+        return request({
+            url: "/permission/getMenu",
+            method: "post",
+            data: params,
+        });
     }
-
 };

@@ -4,6 +4,9 @@
 
 import axios from "axios";
 import config from "@/config";
+import { useRouter } from "vue-router";
+const router = useRouter()
+
 const service = axios.create({
     baseURL: config.baseApi,
 })
@@ -41,7 +44,22 @@ service.interceptors.response.use(
         const { code, data, msg } = res.data
         if (code === 200) {
             return data;
-        } else {
+        } else if (code === 401) {
+            // 鉴权失败处理
+            console.warn('[Authentication Error]', {
+                url: res.config.url,
+                method: res.config.method,
+                requestData: res.config.data,
+                requestParams: res.config.params,
+                responseStatus: res.status,
+                responseData: res.data
+            });
+            // 这里可以添加跳转到登录页的逻辑
+            return Promise.reject(new Error(msg || '登录已过期'))
+        }
+        
+        
+        else {
             // 业务错误处理
             console.error('[Business Error]', {
                 url: res.config.url,
@@ -55,7 +73,6 @@ service.interceptors.response.use(
             });
 
             const errorMsg = msg || `Business Error: Code ${code}`;
-            ElMessage.error(errorMsg);
             return Promise.reject(new Error(errorMsg));
         }
 
