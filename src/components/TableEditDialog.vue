@@ -10,10 +10,24 @@
     <el-form :model="form" :rules="rules" ref="objectForm">
       <el-form-item v-for="field in formFields" :key="field.prop" :label="field.label" :prop="field.prop">
         <el-input v-if="field.type === 'input'" v-model="form[field.prop]" />
-        <el-select v-else-if="field.type === 'select'" v-model="form[field.prop]">
-          <el-option v-for="option in field.options" :key="option" :label="option" :value="option" />
+        <el-select v-else-if="field.type === 'select'" v-model="form[field.prop]" placeholder="请选择">
+          <el-option
+            v-for="option in field.options"
+            :key="typeof option === 'object' ? option.value : option"
+            :label="typeof option === 'object' ? option.label : option"
+            :value="typeof option === 'object' ? option.value : option"
+          />
         </el-select>
-        <el-date-picker v-else-if="field.type === 'date'" v-model="form[field.prop]" type="date" />
+        <el-radio-group v-else-if="field.type === 'radio'" v-model="form[field.prop]">
+          <el-radio
+            v-for="option in field.options"
+            :key="typeof option === 'object' ? option.value : option"
+            :label="typeof option === 'object' ? option.value : option"
+          >
+            {{ typeof option === 'object' ? option.label : option }}
+          </el-radio>
+        </el-radio-group>
+        <el-date-picker v-else-if="field.type === 'date'" v-model="form[field.prop]" type="date" value-format="YYYY-MM-DD" placeholder="请选择日期" />
       </el-form-item>
     </el-form>
     <template #footer>

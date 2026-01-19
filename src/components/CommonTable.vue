@@ -100,7 +100,7 @@ const props = defineProps({
 const tableData = ref([])
 
 const config = reactive({
-    name: '',
+    keyWord: '',
     totle: 0,
     page: 1,
 })
@@ -113,7 +113,7 @@ const getTableData = async () => {
 }
 //暴露搜索方法
 const search = () => {
-    config.name = props.queryParams || ''
+    config.keyWord = props.queryParams || ''
     getTableData()
 }
 

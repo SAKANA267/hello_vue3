@@ -34,14 +34,22 @@ for (let i = 0; i < count; i++) {
 }
 
 export default {
+    // 可搜索字段: username(用户名), name(姓名), email(邮箱), phone(电话), role(角色), status(状态)
     getUserList: (config) => {
-        const { username, name, role, status, page = 1, limit = 15 } = param2Obj(config.url);
+        const { keyWord, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
-            if (username && item.username.indexOf(username) === -1) return false;
-            if (name && item.name.indexOf(name) === -1) return false;
-            if (role && item.role !== role) return false;
-            if (status && item.status !== status) return false;
+            if (keyWord) {
+                const keyword = keyWord.toLowerCase();
+                return (
+                    item.username?.toLowerCase().includes(keyword) ||
+                    item.name?.toLowerCase().includes(keyword) ||
+                    item.email?.toLowerCase().includes(keyword) ||
+                    item.phone?.includes(keyword) ||
+                    item.role?.toLowerCase().includes(keyword) ||
+                    item.status?.toLowerCase().includes(keyword)
+                );
+            }
             return true;
         });
 

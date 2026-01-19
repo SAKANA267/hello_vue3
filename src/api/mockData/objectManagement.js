@@ -20,20 +20,43 @@ const count = 200; // 模拟数据条数
 for (let i = 0; i < count; i++) {
     List.push(
         Mock.mock({
-            id : Mock.Random.guid(),
-            name : Mock.Random.cname(),
-            address: Mock.Random.county(true),
-            date: Mock.Random.date(),
+            id: Mock.Random.guid(),
+            hospitalArea: Mock.Random.pick(['总院', '分院', '东院区', '西院区']),
+            department: Mock.Random.pick(['内科', '外科', '儿科', '妇产科', '骨科', '心内科', '神经科']),
+            diagnosisName: Mock.Random.pick(['高血压', '糖尿病', '冠心病', '肺炎', '胃炎', '骨折']),
+            inpatientNo: Mock.Random.string('number', 8),
+            outpatientNo: Mock.Random.string('number', 8),
+            name: Mock.Random.cname(),
+            gender: Mock.Random.pick(['男', '女']),
+            age: Mock.Random.integer(1, 100),
+            phone: /^1[3-9]\d{9}$/,
+            reportDoctor: Mock.Random.cname(),
+            fillDate: Mock.Random.date('yyyy-MM-dd'),
+            auditDate: Mock.Random.date('yyyy-MM-dd'),
+            auditor: Mock.Random.cname(),
+            status: Mock.Random.pick(['待审核', '已审核']),
         })
     );
 }
 
 export default {
+    // 可搜索字段: name(姓名), hospitalArea(院区), department(科室), diagnosisName(诊断名称), inpatientNo(住院号), outpatientNo(门诊号), phone(联系电话)
     getObjectList:(config) => {
-        const{ name, page = 1, limit = 15 } = param2Obj(config.url);
+        const{ keyWord, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
-            if (name && item.name.indexOf(name) === -1) return false;
+            if (keyWord) {
+                const keyword = keyWord.toLowerCase();
+                return (
+                    item.name?.toLowerCase().includes(keyword) ||
+                    item.hospitalArea?.toLowerCase().includes(keyword) ||
+                    item.department?.toLowerCase().includes(keyword) ||
+                    item.diagnosisName?.toLowerCase().includes(keyword) ||
+                    item.inpatientNo?.includes(keyword) ||
+                    item.outpatientNo?.includes(keyword) ||
+                    item.phone?.includes(keyword)
+                );
+            }
             return true;
         });
 
@@ -73,12 +96,15 @@ export default {
 
     //添加对象
     createObject:(config) => {
-        const { name, address, date } = JSON.parse(config.body);
+        const body = JSON.parse(config.body);
+        const {
+            hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
+            name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
+        } = body;
         List.unshift({
             id: Mock.Random.guid(),
-            name: name,
-            address: address,
-            date: date,
+            hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
+            name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
         });
         return {
             code: 200,
@@ -88,29 +114,44 @@ export default {
     },
     //更新用户
     updateObject: (config) => {
-    const { id, name, address, date } = JSON.parse(config.body);
-    const index = List.findIndex(item => item.id === id);
+        const body = JSON.parse(config.body);
+        const {
+            id, hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
+            name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
+        } = body;
+        const index = List.findIndex(item => item.id === id);
 
-    if (index === -1) {
-        return {
-            code: 500,
-            data: {success: false},
-            msg: "对象不存在",
+        if (index === -1) {
+            return {
+                code: 500,
+                data: {success: false},
+                msg: "对象不存在",
+            };
+        }
+
+        List[index] = {
+            ...List[index],
+            hospitalArea: hospitalArea ?? List[index].hospitalArea,
+            department: department ?? List[index].department,
+            diagnosisName: diagnosisName ?? List[index].diagnosisName,
+            inpatientNo: inpatientNo ?? List[index].inpatientNo,
+            outpatientNo: outpatientNo ?? List[index].outpatientNo,
+            name: name ?? List[index].name,
+            gender: gender ?? List[index].gender,
+            age: age ?? List[index].age,
+            phone: phone ?? List[index].phone,
+            reportDoctor: reportDoctor ?? List[index].reportDoctor,
+            fillDate: fillDate ?? List[index].fillDate,
+            auditDate: auditDate ?? List[index].auditDate,
+            auditor: auditor ?? List[index].auditor,
+            status: status ?? List[index].status,
         };
-    }
 
-    List[index] = {
-        ...List[index],
-        name: name || List[index].name,
-        address: address || List[index].address,
-        date: date || List[index].date,
-    };
-
-    return {
-        code: 200,
-        data: {success: true},
-        msg: "更新成功",
-    };
+        return {
+            code: 200,
+            data: {success: true},
+            msg: "更新成功",
+        };
 }
 
 };
