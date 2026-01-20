@@ -1,9 +1,10 @@
 import Mock from 'mockjs';
+import type { MockConfig, MockResponse, UserItem, ParsedParams, TableDataResponse } from "../types";
 
-function param2Obj(url) {
-    const search = url.split('?')[1]
+function param2Obj(url: string): ParsedParams {
+    const search = url.split('?')[1];
     if (!search) {
-        return {}
+        return {};
     }
     return JSON.parse(
         '{"' +
@@ -12,10 +13,10 @@ function param2Obj(url) {
             .replace(/&/g, '","')
             .replace(/=/g, '":"') +
         '"}'
-    )
+    );
 }
 
-let List = [];
+let List: UserItem[] = [];
 const count = 200; // 模拟数据条数
 for (let i = 0; i < count; i++) {
     List.push(
@@ -29,13 +30,13 @@ for (let i = 0; i < count; i++) {
             status: Mock.Random.pick(['active', 'inactive']),
             createTime: Mock.Random.datetime(),
             lastLogin: Mock.Random.datetime(),
-        })
+        }) as UserItem
     );
 }
 
 export default {
     // 可搜索字段: username(用户名), name(姓名), email(邮箱), phone(电话), role(角色), status(状态)
-    getUserList: (config) => {
+    getUserList: (config: MockConfig): MockResponse<TableDataResponse<UserItem>> => {
         const { keyWord, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
@@ -63,11 +64,11 @@ export default {
                 count: mockList.length,
             },
             msg: "获取成功",
-        }
+        };
     },
 
-    //删除用户
-    deleteUser: (config) => {
+    // 删除用户
+    deleteUser: (config: MockConfig): MockResponse<{ success: boolean } | null> => {
         const { id } = param2Obj(config.url);
 
         if (!id) {
@@ -80,15 +81,15 @@ export default {
             List = List.filter((item) => item.id !== id);
             return {
                 code: 200,
-                data: { success: true }, 
+                data: { success: true },
                 msg: "删除成功",
             };
         }
     },
 
-    //添加用户
-    createUser: (config) => {
-        const { username, name, email, phone, role } = JSON.parse(config.body);
+    // 添加用户
+    createUser: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const { username, name, email, phone, role } = JSON.parse(config.body || '{}');
         List.unshift({
             id: Mock.Random.guid(),
             username: username,
@@ -99,17 +100,17 @@ export default {
             status: 'active',
             createTime: Mock.Random.datetime(),
             lastLogin: Mock.Random.datetime(),
-        });
+        } as UserItem);
         return {
             code: 200,
-            data: {success:true},
+            data: { success: true },
             msg: "添加成功",
         };
     },
 
-    //更新用户
-    updateUser: (config) => {
-        const { id, username, name, email, phone, role, status } = JSON.parse(config.body);
+    // 更新用户
+    updateUser: (config: MockConfig): MockResponse<{ success: boolean } | null> => {
+        const { id, username, name, email, phone, role, status } = JSON.parse(config.body || '{}');
         const index = List.findIndex(item => item.id === id);
 
         if (index === -1) {
@@ -133,7 +134,7 @@ export default {
 
         return {
             code: 200,
-            data: {success:true},
+            data: { success: true },
             msg: "更新成功",
         };
     }

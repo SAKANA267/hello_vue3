@@ -1,9 +1,10 @@
 import Mock from "mockjs";
+import type { MockConfig, MockResponse, ObjectItem, ParsedParams, TableDataResponse } from "../types";
 
-function param2Obj(url){
-    const search = url.split('?')[1]
+function param2Obj(url: string): ParsedParams {
+    const search = url.split('?')[1];
     if (!search) {
-        return {}
+        return {};
     }
     return JSON.parse(
         '{"' +
@@ -12,10 +13,10 @@ function param2Obj(url){
             .replace(/&/g, '","')
             .replace(/=/g, '":"') +
         '"}'
-    )
+    );
 }
 
-let List = [];
+let List: ObjectItem[] = [];
 const count = 200; // 模拟数据条数
 for (let i = 0; i < count; i++) {
     List.push(
@@ -35,14 +36,14 @@ for (let i = 0; i < count; i++) {
             auditDate: Mock.Random.date('yyyy-MM-dd'),
             auditor: Mock.Random.cname(),
             status: Mock.Random.pick(['待审核', '已审核']),
-        })
+        }) as ObjectItem
     );
 }
 
 export default {
     // 可搜索字段: name(姓名), hospitalArea(院区), department(科室), diagnosisName(诊断名称), inpatientNo(住院号), outpatientNo(门诊号), phone(联系电话)
-    getObjectList:(config) => {
-        const{ keyWord, page = 1, limit = 15 } = param2Obj(config.url);
+    getObjectList: (config: MockConfig): MockResponse<TableDataResponse<ObjectItem>> => {
+        const { keyWord, page = 1, limit = 15 } = param2Obj(config.url);
 
         const mockList = List.filter((item) => {
             if (keyWord) {
@@ -61,7 +62,7 @@ export default {
         });
 
         const pageList = mockList.filter(
-            (item,index) => index < limit * page && index >= limit * (page - 1)
+            (item, index) => index < limit * page && index >= limit * (page - 1)
         );
         return {
             code: 200,
@@ -71,32 +72,32 @@ export default {
                 count: mockList.length,
             },
             msg: "获取成功",
-        }
+        };
     },
 
-    //删除对象
-    deleteObject:(config) => {
-        const{id} = param2Obj(config.url);
+    // 删除对象
+    deleteObject: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const { id } = param2Obj(config.url);
 
-        if(!id){
+        if (!id) {
             return {
                 code: 500,
-                data: {success: false},
+                data: { success: false },
                 msg: "参数错误",
             };
-        } else{
+        } else {
             List = List.filter((item) => item.id !== id);
             return {
                 code: 200,
-                data: {success: true},
+                data: { success: true },
                 msg: "删除成功",
             };
         }
     },
 
-    //添加对象
-    createObject:(config) => {
-        const body = JSON.parse(config.body);
+    // 添加对象
+    createObject: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const body = JSON.parse(config.body || '{}');
         const {
             hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
             name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
@@ -105,16 +106,17 @@ export default {
             id: Mock.Random.guid(),
             hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
             name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
-        });
+        } as ObjectItem);
         return {
             code: 200,
-            data: {success: true},
+            data: { success: true },
             msg: "添加成功",
         };
     },
-    //更新用户
-    updateObject: (config) => {
-        const body = JSON.parse(config.body);
+
+    // 更新对象
+    updateObject: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const body = JSON.parse(config.body || '{}');
         const {
             id, hospitalArea, department, diagnosisName, inpatientNo, outpatientNo,
             name, gender, age, phone, reportDoctor, fillDate, auditDate, auditor, status
@@ -124,7 +126,7 @@ export default {
         if (index === -1) {
             return {
                 code: 500,
-                data: {success: false},
+                data: { success: false },
                 msg: "对象不存在",
             };
         }
@@ -149,9 +151,8 @@ export default {
 
         return {
             code: 200,
-            data: {success: true},
+            data: { success: true },
             msg: "更新成功",
         };
-}
-
+    }
 };

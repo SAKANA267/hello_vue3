@@ -1,10 +1,13 @@
 import Mock from 'mockjs';
+import type { MockConfig, MockResponse, LoginRequest, LoginResponseData } from "../types";
+
 export default {
-    getMenu: config => {
-        const { username, password } = JSON.parse(config.body);
+    getMenu: (config: MockConfig): MockResponse<LoginResponseData> => {
+        const { username, password } = JSON.parse(config.body || '{}') as LoginRequest;
+
         // 先判断用户是否存在
         // 判断账号和密码是否正确
-        if (username === 'admin' && password === 'admin'){
+        if (username === 'admin' && password === 'admin') {
             return {
                 code: 200,
                 data: {
@@ -21,8 +24,8 @@ export default {
                     ],
                     token: 'mock-admin-token-' + Date.now()
                 }
-            }
-        }else if (username === 'user' && password === 'user'){
+            };
+        } else if (username === 'user' && password === 'user') {
             return {
                 code: 200,
                 data: {
@@ -34,12 +37,13 @@ export default {
                     ],
                     token: 'mock-user-token-' + Date.now()
                 }
-            }
-        }else {
+            };
+        } else {
             return {
                 code: 401,
+                data: undefined,
                 message: '账号或密码错误'
-            }
+            };
         }
     }
-}
+};
