@@ -1,11 +1,9 @@
-/* 
+/*
 把所有与 HTTP 请求相关的通用逻辑（如错误处理、认证）都集中到了此处，当需要修改请求逻辑时，只需修改此处即可，无需逐个修改每个请求
 */
 
 import axios from "axios";
 import config from "@/config";
-import { useRouter } from "vue-router";
-const router = useRouter()
 
 const service = axios.create({
     baseURL: config.baseApi,
@@ -14,6 +12,10 @@ const service = axios.create({
 service.interceptors.request.use(
     function (config) {
         // 在发送请求之前做些什么
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
 
         // 记录请求开始时间
         config.metadata = { startTime: Date.now() };
@@ -54,7 +56,9 @@ service.interceptors.response.use(
                 responseStatus: res.status,
                 responseData: res.data
             });
-            // 这里可以添加跳转到登录页的逻辑
+            // 清除 token 并跳转到登录页
+            localStorage.removeItem('auth_token');
+            window.location.href = '#/login';
             return Promise.reject(new Error(msg || '登录已过期'))
         }
         

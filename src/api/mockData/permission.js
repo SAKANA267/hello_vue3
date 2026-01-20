@@ -18,7 +18,8 @@ export default {
                         '4-1',
                         '4-2',
                         '4-3'
-                    ]
+                    ],
+                    token: 'mock-admin-token-' + Date.now()
                 }
             }
         }else if (username === 'user' && password === 'user'){
@@ -30,7 +31,8 @@ export default {
                         '1-2',
                         '3-1',
                         '3-2'
-                    ]
+                    ],
+                    token: 'mock-user-token-' + Date.now()
                 }
             }
         }else {

@@ -10,7 +10,8 @@
         <el-table :data="tableData" border style="width: 100%"
             :header-cell-style="{ background: '#f5f7fa', color: '#606266' }">
             <el-table-column v-for="item in tableLabel" :label="item.label" :key="item.prop"
-                :width="item.width ? item.width : ''" :prop="item.prop">
+                :width="item.width ? item.width : ''" :prop="item.prop"
+                :sortable="/date/i.test(item.prop) || item.label.includes('日期') ? true : false">
             </el-table-column>
             <el-table-column fixed="right" label="操作" width="150">
                 <template #default="scope">

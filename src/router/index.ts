@@ -51,4 +51,23 @@ const router = createRouter({
     routes,
 });
 
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('auth_token');
+
+    // 已登录状态下访问登录页，重定向到首页
+    if (to.path === '/login' && token) {
+        next('/home');
+        return;
+    }
+
+    // 未登录状态下访问受保护页面，重定向到登录页
+    if (to.path !== '/login' && !token) {
+        next('/login');
+        return;
+    }
+
+    next();
+});
+
 export default router;

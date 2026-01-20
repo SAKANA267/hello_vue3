@@ -85,7 +85,7 @@ const router = useRouter()
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   await loginFormRef.value.validate( async (valid) => {
     if (valid) {
       loading.value = true
@@ -93,7 +93,8 @@ const handleLogin = async () => {
       console.log('登录成功:', res)
       // 根据res使用store更新侧边栏
       store.updateMenuList(res.menuList)
-      store.state.token = res.token
+      // 使用 setToken 方法持久化 token 到 localStorage
+      store.setToken(res.token)
       router.push('/home')
       setTimeout(() => {
         loading.value = false
