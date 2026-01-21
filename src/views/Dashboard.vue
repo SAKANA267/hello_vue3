@@ -1,8 +1,8 @@
 <!--
- * new page
+ * Dashboard Page - 传染病报卡审核系统
  * @author: SAKANA267
  * @since: 2026-01-16
- * Dashboard.vue
+ * @updated: 2026-01-21 - 改造为传染病报卡审核系统专用仪表盘
 -->
 <template>
   <div class="dashboard-container">
@@ -21,19 +21,29 @@
 
     <!-- 图表区域 -->
     <el-row :gutter="20" class="chart-section">
-      <el-col :xs="24" :lg="16">
+      <el-col :span="24">
         <TrendChart
-          title="访问趋势"
+          title="报卡趋势"
           :data="trendChartData"
           :period="chartPeriod"
-          unit="访问"
+          unit="报卡"
           @period-change="handlePeriodChange"
         />
       </el-col>
-      <el-col :xs="24" :lg="8">
+    </el-row>
+
+    <!-- 分布列表区域 -->
+    <el-row :gutter="20" class="distribution-section">
+      <el-col :xs="24" :md="12">
         <DistributionList
-          title="用户分布"
-          :data="userDistribution"
+          title="传染病种类分布"
+          :data="diseaseDistribution"
+        />
+      </el-col>
+      <el-col :xs="24" :md="12">
+        <DistributionList
+          title="院区分布"
+          :data="areaDistribution"
         />
       </el-col>
     </el-row>
@@ -49,21 +59,9 @@
       </el-col>
       <el-col :xs="24" :lg="16">
         <RecentActivities
-          title="最近活动"
+          title="最近报卡"
           :data="recentActivities"
           @view-all="handleViewAllActivities"
-        />
-      </el-col>
-    </el-row>
-
-    <!-- 待办事项 -->
-    <el-row :gutter="20" class="todo-section">
-      <el-col :span="24">
-        <TodoList
-          title="待办事项"
-          :data="todoList"
-          @add="handleAddTodo"
-          @toggle="handleToggleTodo"
         />
       </el-col>
     </el-row>
@@ -74,14 +72,12 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
-  User,
-  ShoppingCart,
-  Money,
-  TrendCharts,
+  Document,
+  Clock,
+  Check,
   Plus,
   Download,
-  Setting,
-  Document
+  DocumentAdd
 } from '@element-plus/icons-vue'
 
 // 导入组件
@@ -90,67 +86,37 @@ import TrendChart from '@/components/dashboard/TrendChart.vue'
 import DistributionList from '@/components/dashboard/DistributionList.vue'
 import QuickActions from '@/components/dashboard/QuickActions.vue'
 import RecentActivities from '@/components/dashboard/RecentActivities.vue'
-import TodoList from '@/components/dashboard/TodoList.vue'
+
+// 导入模拟数据
+import { diseaseDistribution, areaDistribution, trendData, recentAudits } from '@/api/mockData/dashboard'
 
 // 统计卡片数据
 const statCards = reactive([
-  { label: '用户总数', value: '12,846', icon: User, color: '#409EFF', trend: 12.5 },
-  { label: '订单总数', value: '8,562', icon: ShoppingCart, color: '#67C23A', trend: 8.2 },
-  { label: '销售额', value: '¥128,450', icon: Money, color: '#E6A23C', trend: -3.1 },
-  { label: '访问量', value: '56,842', icon: TrendCharts, color: '#F56C6C', trend: 15.8 }
+  { label: '报卡总数', value: '1,248', icon: Document, color: '#409EFF', trend: 12.5 },
+  { label: '待审核', value: '156', icon: Clock, color: '#E6A23C', trend: -8.3 },
+  { label: '已审核', value: '1,092', icon: Check, color: '#67C23A', trend: 15.2 },
+  { label: '今日新增', value: '28', icon: Plus, color: '#F56C6C', trend: 5.8 }
 ])
 
 // 图表周期
 const chartPeriod = ref('week')
 
-// 周访问数据
-const weeklyData = reactive([
-  { label: '周一', value: 1200, percentage: 60, color: '#409EFF' },
-  { label: '周二', value: 1500, percentage: 75, color: '#67C23A' },
-  { label: '周三', value: 1800, percentage: 90, color: '#E6A23C' },
-  { label: '周四', value: 1400, percentage: 70, color: '#F56C6C' },
-  { label: '周五', value: 2000, percentage: 100, color: '#909399' },
-  { label: '周六', value: 800, percentage: 40, color: '#409EFF' },
-  { label: '周日', value: 600, percentage: 30, color: '#67C23A' }
-])
-
 // 图表数据（根据周期切换）
 const trendChartData = computed(() => {
-  return weeklyData
+  if (chartPeriod.value === 'week') return trendData.week
+  if (chartPeriod.value === 'month') return trendData.month
+  return trendData.year
 })
-
-// 用户分布数据
-const userDistribution = reactive([
-  { label: '直接访问', value: 35, color: '#409EFF' },
-  { label: '搜索引擎', value: 28, color: '#67C23A' },
-  { label: '社交媒体', value: 22, color: '#E6A23C' },
-  { label: '外部链接', value: 15, color: '#F56C6C' }
-])
 
 // 快捷操作配置
 const quickActions = reactive([
-  { key: 'add', label: '新增用户', type: 'primary' as const, icon: Plus },
-  { key: 'export', label: '导出报表', type: 'success' as const, icon: Download },
-  { key: 'setting', label: '系统设置', type: 'warning' as const, icon: Setting },
-  { key: 'doc', label: '查看文档', type: 'info' as const, icon: Document }
+  { key: 'create', label: '新建报卡', type: 'primary' as const, icon: DocumentAdd },
+  { key: 'batch-audit', label: '批量审核', type: 'success' as const, icon: Check },
+  { key: 'export', label: '数据导出', type: 'warning' as const, icon: Download }
 ])
 
 // 最近活动数据
-const recentActivities = reactive([
-  { user: '张三', action: '创建用户', target: '李四', time: '2026-01-16 10:30', status: 'success' as const },
-  { user: '王五', action: '修改订单', target: '订单#1234', time: '2026-01-16 10:15', status: 'success' as const },
-  { user: '赵六', action: '删除商品', target: '商品A', time: '2026-01-16 09:50', status: 'pending' as const },
-  { user: '孙七', action: '导出报表', target: '月度报表', time: '2026-01-16 09:30', status: 'success' as const },
-  { user: '周八', action: '系统设置', target: '权限配置', time: '2026-01-16 09:00', status: 'success' as const }
-])
-
-// 待办事项
-const todoList = reactive([
-  { text: '完成用户模块开发', done: false, priority: 'high' as const, dueDate: '2026-01-18' },
-  { text: '审核新订单', done: false, priority: 'medium' as const, dueDate: '2026-01-17' },
-  { text: '更新系统文档', done: true, priority: 'low' as const, dueDate: '2026-01-20' },
-  { text: '优化数据库查询', done: false, priority: 'high' as const, dueDate: '2026-01-19' }
-])
+const recentActivities = reactive(recentAudits)
 
 // 事件处理函数
 const handlePeriodChange = (period: string) => {
@@ -160,24 +126,17 @@ const handlePeriodChange = (period: string) => {
 
 const handleQuickAction = (key: string) => {
   const actions: Record<string, string> = {
-    add: '新增用户',
-    export: '导出报表',
-    setting: '系统设置',
-    doc: '查看文档'
+    create: '新建报卡',
+    'batch-audit': '批量审核',
+    export: '数据导出'
   }
   ElMessage.success(`执行操作: ${actions[key]}`)
+  // TODO: 后续可添加实际路由跳转或功能实现
+  // if (key === 'create') router.push('/object-management')
 }
 
 const handleViewAllActivities = () => {
-  ElMessage.info('查看全部活动')
-}
-
-const handleAddTodo = () => {
-  ElMessage.info('添加待办功能')
-}
-
-const handleToggleTodo = (index: number, item: { text: string; done: boolean }) => {
-  ElMessage.success(item.done ? `已完成: ${item.text}` : `取消完成: ${item.text}`)
+  ElMessage.info('查看全部报卡')
 }
 </script>
 
@@ -194,11 +153,11 @@ const handleToggleTodo = (index: number, item: { text: string; done: boolean }) 
   margin-bottom: 20px;
 }
 
-.bottom-section {
+.distribution-section {
   margin-bottom: 20px;
 }
 
-.todo-section {
+.bottom-section {
   margin-bottom: 20px;
 }
 </style>

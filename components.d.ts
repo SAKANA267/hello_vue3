@@ -8,13 +8,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    CarAndGames: typeof import('./src/components/CarAndGames.vue')['default']
-    Comment: typeof import('./src/components/Comment.vue')['default']
     CommonAside: typeof import('./src/components/CommonAside.vue')['default']
     CommonHeader: typeof import('./src/components/CommonHeader.vue')['default']
     CommonTab: typeof import('./src/components/CommonTab.vue')['default']
     CommonTable: typeof import('./src/components/CommonTable.vue')['default']
-    ComputeFullName: typeof import('./src/components/ComputeFullName.vue')['default']
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
@@ -22,7 +19,6 @@ declare module 'vue' {
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
-    ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
@@ -30,7 +26,6 @@ declare module 'vue' {
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
-    ElFooter: typeof import('element-plus/es')['ElFooter']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElHeader: typeof import('element-plus/es')['ElHeader']
@@ -39,7 +34,6 @@ declare module 'vue' {
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
-    ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElProgress: typeof import('element-plus/es')['ElProgress']
@@ -53,7 +47,6 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
-    Person: typeof import('./src/components/Person.vue')['default']
     QuickActions: typeof import('./src/components/dashboard/QuickActions.vue')['default']
     RecentActivities: typeof import('./src/components/dashboard/RecentActivities.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
@@ -63,6 +56,5 @@ declare module 'vue' {
     TodoList: typeof import('./src/components/dashboard/TodoList.vue')['default']
     TrendChart: typeof import('./src/components/dashboard/TrendChart.vue')['default']
     UserInfo: typeof import('./src/components/UserInfo.vue')['default']
-    WatchPerson: typeof import('./src/components/WatchPerson.vue')['default']
   }
 }
