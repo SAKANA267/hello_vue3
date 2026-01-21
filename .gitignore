@@ -32,3 +32,8 @@ coverage
 
 # Documentation
 docs/
+
+# Environment variables
+.env*.local
+.env.development
+.env.production
