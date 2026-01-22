@@ -11,30 +11,87 @@
         <span>{{ title }}</span>
       </div>
     </template>
-    <div class="distribution-list">
-      <div v-for="(item, index) in data" :key="index" class="distribution-item">
-        <div class="distribution-info">
-          <span class="distribution-label">{{ item.label }}</span>
-          <span class="distribution-value">{{ item.value }}%</span>
-        </div>
-        <el-progress :percentage="item.value" :color="item.color" :show-text="false" />
-      </div>
-    </div>
+    <div ref="chartRef" class="echarts-container"></div>
   </el-card>
 </template>
 
 <script setup lang="ts">
+import * as echarts from 'echarts'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+
 interface DistributionItem {
   label: string
   value: number
   color: string
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   title?: string
   data: DistributionItem[]
 }>(), {
   title: '用户分布'
+})
+
+const chartRef = ref<HTMLDivElement>()
+let chartInstance: echarts.ECharts | null = null
+
+const initChart = () => {
+  if (!chartRef.value) return
+  if (chartInstance) {
+    chartInstance.dispose()
+  }
+  chartInstance = echarts.init(chartRef.value)
+  updateChart()
+}
+
+const updateChart = () => {
+  if (!chartInstance) return
+
+  const option: echarts.EChartsOption = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'vertical',
+      right: 10,
+      top: 'center'
+    },
+    series: [{
+      type: 'pie',
+      roseType: 'area',
+      data: props.data.map(item => ({
+        name: item.label,
+        value: item.value,
+        itemStyle: { color: item.color }
+      })),
+      radius: ['30%', '70%']
+    }]
+  }
+
+  chartInstance.setOption(option)
+}
+
+const handleResize = () => {
+  chartInstance?.resize()
+}
+
+watch(() => props.data, () => {
+  nextTick(() => {
+    updateChart()
+  })
+}, { deep: true })
+
+onMounted(() => {
+  nextTick(() => {
+    initChart()
+    window.addEventListener('resize', handleResize)
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  chartInstance?.dispose()
 })
 </script>
 
@@ -48,30 +105,10 @@ withDefaults(defineProps<{
     align-items: center;
     gap: 16px;
   }
-}
 
-.distribution-list {
-  .distribution-item {
-    margin-bottom: 20px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    .distribution-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-
-      .distribution-label {
-        color: #606266;
-      }
-
-      .distribution-value {
-        color: #303133;
-        font-weight: 500;
-      }
-    }
+  .echarts-container {
+    width: 100%;
+    height: 300px;
   }
 }
 </style>
