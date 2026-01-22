@@ -12,7 +12,9 @@ import type {
     UserFormData,
     UserInfo,
     ObjectItem,
-    UserItem
+    UserItem,
+    AuditPassParams,
+    AuditRejectParams
 } from "./types";
 
 /** API 接口对象 */
@@ -32,6 +34,9 @@ interface ApiInterface {
     updateUser(data: UserFormData): Promise<{ success: boolean }>;
     // login
     getMenu(params: LoginRequest): Promise<LoginResponseData>;
+    // audit
+    auditPass(data: AuditPassParams): Promise<{ success: boolean; msg?: string }>;
+    auditReject(data: AuditRejectParams): Promise<{ success: boolean; msg?: string }>;
 }
 
 const api: ApiInterface = {
@@ -122,6 +127,23 @@ const api: ApiInterface = {
             url: "/permission/getMenu",
             method: "post",
             data: params,
+        });
+    },
+
+    // ========== audit ==========
+    auditPass(data: AuditPassParams) {
+        return request({
+            url: "/table/auditPass",
+            method: "post",
+            data,
+        });
+    },
+
+    auditReject(data: AuditRejectParams) {
+        return request({
+            url: "/table/auditReject",
+            method: "post",
+            data,
         });
     }
 };

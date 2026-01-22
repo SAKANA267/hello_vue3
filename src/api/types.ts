@@ -148,3 +148,28 @@ export interface MockResponse<T = any> {
 export interface ParsedParams extends PageParams {
     [key: string]: any;
 }
+
+// ============== 审核相关 ==============
+
+/** 审核通过参数 */
+export interface AuditPassParams {
+    id: string;
+    auditor: string;
+    auditDate: string;
+    status: '已审核';
+}
+
+/** 审核不通过参数 */
+export interface AuditRejectParams {
+    id: string;
+    auditor: string;
+    auditDate: string;
+    status: '审核不通过';
+    remark?: string;
+}
+
+/** 审核响应 */
+export interface AuditResponse {
+    success: boolean;
+    msg?: string;
+}

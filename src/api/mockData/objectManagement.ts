@@ -154,5 +154,77 @@ export default {
             data: { success: true },
             msg: "更新成功",
         };
+    },
+
+    // 审核通过
+    auditPass: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const body = JSON.parse(config.body || '{}');
+        const { id, auditor, auditDate, status } = body;
+
+        if (!id) {
+            return {
+                code: 500,
+                data: { success: false },
+                msg: "参数错误",
+            };
+        }
+
+        const index = List.findIndex(item => item.id === id);
+        if (index === -1) {
+            return {
+                code: 500,
+                data: { success: false },
+                msg: "对象不存在",
+            };
+        }
+
+        List[index] = {
+            ...List[index],
+            status: status || '已审核',
+            auditor: auditor || List[index].auditor,
+            auditDate: auditDate || List[index].auditDate,
+        };
+
+        return {
+            code: 200,
+            data: { success: true },
+            msg: "审核通过",
+        };
+    },
+
+    // 审核不通过
+    auditReject: (config: MockConfig): MockResponse<{ success: boolean }> => {
+        const body = JSON.parse(config.body || '{}');
+        const { id, auditor, auditDate, status } = body;
+
+        if (!id) {
+            return {
+                code: 500,
+                data: { success: false },
+                msg: "参数错误",
+            };
+        }
+
+        const index = List.findIndex(item => item.id === id);
+        if (index === -1) {
+            return {
+                code: 500,
+                data: { success: false },
+                msg: "对象不存在",
+            };
+        }
+
+        List[index] = {
+            ...List[index],
+            status: status || '审核不通过',
+            auditor: auditor || List[index].auditor,
+            auditDate: auditDate || List[index].auditDate,
+        };
+
+        return {
+            code: 200,
+            data: { success: true },
+            msg: "审核不通过",
+        };
     }
 };

@@ -1,0 +1,161 @@
+<!--
+ * ObjectAudit.vue
+ * @description 对象审核页面，使用 CommonTable 组件的审核功能
+ * @author: SAKANA267
+ * @since: 2025-01-22
+-->
+<template>
+  <div class="container">
+    <div class="header">
+      <el-form :inline="true" :model="formInline">
+        <el-form-item>
+          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch()">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <div class="object-table">
+      <CommonTable
+        ref="tableRef"
+        :tableLabel="tableLabel"
+        :queryParams="formInline.keyWord"
+        :getApi="proxy?.$api.getTableData"
+        operationMode="audit"
+        :statusColumn="{ prop: 'status', label: '状态', width: '120' }"
+        :statusTagTypes="statusTagTypes"
+        @audit="handleAuditClick"
+      />
+    </div>
+
+    <!-- 审核对话框 -->
+    <AuditDialog
+      v-model="auditDialogVisible"
+      :rowData="currentAuditRow"
+      :tableLabel="tableLabel"
+      :auditDetailFields="auditDetailFields"
+      @audit="performAudit"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, getCurrentInstance, reactive, computed } from 'vue'
+import { Search } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import CommonTable from '@/components/CommonTable.vue'
+import AuditDialog from '@/components/AuditDialog.vue'
+
+const { proxy } = getCurrentInstance()
+const tableRef = ref(null)
+
+// 表格列配置
+const tableLabel = [
+    { prop: 'hospitalArea', label: '院区', width: "100" },
+    { prop: 'department', label: '科室', width: "120" },
+    { prop: 'diagnosisName', label: '诊断名称', width: "150" },
+    { prop: 'inpatientNo', label: '住院号', width: "120" },
+    { prop: 'outpatientNo', label: '门诊号', width: "120" },
+    { prop: 'name', label: '姓名', width: "80" },
+    { prop: 'gender', label: '性别', width: "60" },
+    { prop: 'age', label: '年龄', width: "60" },
+    { prop: 'phone', label: '联系电话', width: "120" },
+    { prop: 'reportDoctor', label: '报告医生', width: "100" },
+    { prop: 'fillDate', label: '填卡日期', width: "" },
+]
+
+// 状态标签类型映射
+const statusTagTypes = {
+    '待审核': 'warning',
+    '已审核': 'success',
+    '审核不通过': 'danger'
+}
+
+// 审核对话框展示的字段列表
+const auditDetailFields = [
+    'name',
+    'department',
+    'diagnosisName',
+    'fillDate'
+]
+
+// 当前审核人（可以从用户信息中获取）
+const currentAuditor = ref('管理员')
+
+// 审核对话框状态
+const auditDialogVisible = ref(false)
+const currentAuditRow = ref(null)
+
+// 搜索相关
+const formInline = reactive({
+  keyWord: ''
+})
+const handleSearch = () => {
+  tableRef.value?.search()
+}
+
+// 处理审核按钮点击
+const handleAuditClick = (row) => {
+  console.log('handleAuditClick()审核对象:', row)
+  currentAuditRow.value = row
+  auditDialogVisible.value = true
+}
+
+// 执行审核操作
+const performAudit = async ({ action, rowData, remark }) => {
+  try {
+    const auditDate = new Date().toISOString().split('T')[0]
+    const auditData = {
+      id: rowData.id,
+      auditor: currentAuditor.value,
+      auditDate: auditDate,
+      status: action === 'pass' ? '已审核' : '审核不通过',
+      ...(action === 'reject' && remark ? { remark } : {})
+    }
+
+    let res
+    if (action === 'pass') {
+      res = await proxy.$api.auditPass(auditData)
+    } else {
+      res = await proxy.$api.auditReject(auditData)
+    }
+
+    if (res && res.success) {
+      ElMessage({
+        showClose: true,
+        message: action === 'pass' ? '审核通过' : '审核不通过',
+        type: 'success',
+      })
+      auditDialogVisible.value = false
+      await tableRef.value?.search()
+    } else {
+      throw new Error(res?.msg || '审核失败')
+    }
+  } catch (error) {
+    console.error('审核操作失败:', error)
+    ElMessage({
+      showClose: true,
+      message: error.message || '审核操作失败，请重试',
+      type: 'error',
+    })
+  }
+}
+
+// 响应式布局检测
+const isMobile = ref(window.innerWidth <= 768)
+const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
+window.addEventListener('resize', () => {
+  isMobile.value = window.innerWidth <= 768
+})
+</script>
+
+<style scoped>
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+</style>

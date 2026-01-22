@@ -13,11 +13,26 @@
                 :width="item.width ? item.width : ''" :prop="item.prop"
                 :sortable="/date/i.test(item.prop) || item.label.includes('日期') ? true : false">
             </el-table-column>
+            <!-- 状态标签列 -->
+            <el-table-column v-if="statusColumn" :label="statusColumn.label" :width="statusColumn.width || '140'">
+                <template #default="scope">
+                    <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
+                        {{ scope.row[statusColumn.prop] }}
+                    </el-tag>
+                </template>
+            </el-table-column>
             <el-table-column fixed="right" label="操作" width="150">
                 <template #default="scope">
-                    <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-                    <el-button @click="handleDelete(scope.row)" type="text" size="small"
-                        style="color: #f56c6c">删除</el-button>
+                    <!-- 编辑删除模式（默认） -->
+                    <template v-if="showEditDeleteButtons">
+                        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
+                        <el-button @click="handleDelete(scope.row)" type="text" size="small"
+                            style="color: #f56c6c">删除</el-button>
+                    </template>
+                    <!-- 审核模式 -->
+                    <template v-if="showAuditButton">
+                        <el-button @click="emit('audit', scope.row)" type="primary" size="small">审核</el-button>
+                    </template>
                 </template>
             </el-table-column>
         </el-table>
@@ -32,14 +47,33 @@
                             {{ item.label }}: {{ props.row[item.prop] }}
                         </p>
                     </div>
+                    <!-- 状态信息（移动端展开时显示） -->
+                    <p v-if="statusColumn" class="mobile-card-content">
+                        {{ statusColumn.label }}: {{ props.row[statusColumn.prop] }}
+                    </p>
                 </template>
             </el-table-column>
             <el-table-column label="姓名" prop="name" />
+            <!-- 状态标签列（移动端） -->
+            <el-table-column v-if="statusColumn" :label="statusColumn.label" :width="statusColumn.width || '100'">
+                <template #default="scope">
+                    <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
+                        {{ scope.row[statusColumn.prop] }}
+                    </el-tag>
+                </template>
+            </el-table-column>
             <el-table-column fixed="right" label="操作" width="150">
                 <template #default="scope">
-                    <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-                    <el-button @click="handleDelete(scope.row)" type="text" size="small"
-                        style="color: #f56c6c">删除</el-button>
+                    <!-- 审核模式 -->
+                    <template v-if="showAuditButton">
+                        <el-button @click="emit('audit', scope.row)" type="primary" size="small">审核</el-button>
+                    </template>
+                    <!-- 编辑删除模式（默认） -->
+                    <template v-if="showEditDeleteButtons">
+                        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
+                        <el-button @click="handleDelete(scope.row)" type="text" size="small"
+                            style="color: #f56c6c">删除</el-button>
+                    </template>
                 </template>
             </el-table-column>
         </el-table>
@@ -54,13 +88,23 @@
 <script setup>
 /**
  * @component CommonTable
- * @description 通用表格组件，支持响应式布局，包含表格展示、分页、增删改查功能
+ * @description 通用表格组件，支持响应式布局，包含表格展示、分页、增删改查、审核功能
+ *
  * @props {Array} tableLabel - 表格列配置数组，每个元素包含 prop(字段名)、label(显示名)、width(宽度)属性
  * @props {String} queryParams - 查询参数，用于表格数据筛选
  * @props {Function} getApi - 获取表格数据的API方法
  * @props {Function} deleteApi - 删除表格数据的API方法
- * @example
- * <CommonTable 
+ * @props {String} operationMode - 操作模式：'edit-delete'（默认，编辑删除）或 'audit'（审核）
+ * @props {Object} statusColumn - 状态列配置 { prop: 'status', label: '状态', width: '100' }
+ * @props {Object} statusTagTypes - 状态标签类型映射 { '待审核': 'warning', '已审核': 'success', ... }
+ *
+ * @emits edit - 编辑事件，传递当前行数据
+ * @emits audit - 审核事件，传递当前行数据
+ *
+ * @expose search - 刷新表格数据方法
+ *
+ * @example 编辑删除模式（默认）
+ * <CommonTable
  *   :tableLabel="[
  *     { prop: 'date', label: '日期', width: '110' },
  *     { prop: 'name', label: '姓名', width: '80' }
@@ -68,6 +112,17 @@
  *   :queryParams="searchKeyword"
  *   :getApi="getTableData"
  *   :deleteApi="deleteData"
+ *   @edit="handleEdit"
+ * />
+ *
+ * @example 审核模式
+ * <CommonTable
+ *   :tableLabel="tableLabel"
+ *   :getApi="getTableData"
+ *   operationMode="audit"
+ *   :statusColumn="{ prop: 'status', label: '状态', width: '100' }"
+ *   :statusTagTypes="{ '待审核': 'warning', '已审核': 'success' }"
+ *   @audit="handleAudit"
  * />
  */
 
@@ -94,6 +149,25 @@ const props = defineProps({
         type: Function,
         required: false,
         default: () => ({})
+    },
+    // 审核模式：'edit-delete' 或 'audit'
+    operationMode: {
+        type: String,
+        default: 'edit-delete'
+    },
+    // 状态列配置
+    statusColumn: {
+        type: Object,
+        default: null
+    },
+    // 状态标签类型映射
+    statusTagTypes: {
+        type: Object,
+        default: () => ({
+            '待审核': 'warning',
+            '已审核': 'success',
+            '审核不通过': 'danger'
+        })
     }
 })
 
@@ -105,6 +179,10 @@ const config = reactive({
     totle: 0,
     page: 1,
 })
+
+// 计算属性：显示哪些操作按钮
+const showAuditButton = computed(() => props.operationMode === 'audit')
+const showEditDeleteButtons = computed(() => props.operationMode === 'edit-delete')
 const getTableData = async () => {
     const table = await props.getApi(config);
     tableData.value = table.list;
@@ -164,10 +242,15 @@ const handleDelete = (val) => {
         })
 }
 
-const emit = defineEmits(['edit'])
+const emit = defineEmits(['edit', 'audit'])
 const handleEdit = (row) => {
     console.log('handleEdit()编辑对象:', row);
     emit('edit', row);
+}
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+    return props.statusTagTypes[status] || 'info'
 }
 
 

@@ -150,63 +150,13 @@ onMounted(() => {
   
 })
 
-//响应式布局检测
-const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
-window.addEventListener('resize', () => {
-  isMobile.value = window.innerWidth <= 768
-})
-
 </script>
 
 <style scoped>
-.mobile-cards {
-  display: none;
-}
-
-.mobile-card-content {
-  margin: 10px;
-}
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
-
-#table {
-  background: #fff;
-  padding: 20px;
-  border-radius: 2px;
-  width: 90%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-@media screen and (max-width: 768px) {
-
-  /* 隐藏桌面端表格 */
-  .table {
-    display: none;
-  }
-
-  /* 显示移动端卡片布局 */
-  .mobile-cards {
-    display: block;
-    width: 100%;
-  }
-
-  /* 调整分页宽度 */
-  .pagination {
-    width: 100%;
-    padding: 10px;
-  }
-}
-
-.pagination {
-  display: flex;
-  margin-top: 20px;
-  justify-content: center;
 }
 </style>
