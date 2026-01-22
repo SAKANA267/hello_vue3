@@ -133,7 +133,7 @@ export interface UserFormData {
 /** Mock 配置类型 */
 export interface MockConfig extends MockjsRequestOptions {
     url: string;
-    body?: string;
+    body: string;
 }
 
 /** Mock 响应结构 */

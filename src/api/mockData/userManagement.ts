@@ -61,6 +61,7 @@ export default {
             code: 200,
             data: {
                 list: pageList,
+                success: true,
                 count: mockList.length,
             },
             msg: "获取成功",

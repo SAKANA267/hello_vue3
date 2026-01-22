@@ -56,8 +56,17 @@ export const trendData = {
     { label: '1月', value: 980, percentage: 65, color: '#409EFF' },
     { label: '2月', value: 650, percentage: 43, color: '#67C23A' },
     { label: '3月', value: 1200, percentage: 80, color: '#E6A23C' },
-    { label: '4月', value: 1500, percentage: 100, color: '#F56C6C' }
+    { label: '4月', value: 1500, percentage: 100, color: '#F56C6C' },
+    { label: '5月', value: 1100, percentage: 73, color: '#409EFF' },
+    { label: '6月', value: 850, percentage: 57, color: '#67C23A' },
+    { label: '7月', value: 1350, percentage: 90, color: '#E6A23C' },
+    { label: '8月', value: 1450, percentage: 97, color: '#F56C6C' },
+    { label: '9月', value: 950, percentage: 63, color: '#409EFF' },
+    { label: '10月', value: 1050, percentage: 70, color: '#67C23A' },
+    { label: '11月', value: 1250, percentage: 83, color: '#E6A23C' },
+    { label: '12月', value: 1400, percentage: 93, color: '#F56C6C' }
   ]
+
 }
 
 // 院区分布数据
