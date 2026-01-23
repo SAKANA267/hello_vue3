@@ -8,11 +8,17 @@
   <el-card shadow="hover" class="stat-card" :style="{ borderTop: `3px solid ${color}` }">
     <div class="stat-card-content">
       <div class="stat-info">
-        <div class="stat-value">{{ value }}</div>
-        <div class="stat-label">{{ label }}</div>
+        <div class="stat-value">
+          {{ value }}
+        </div>
+        <div class="stat-label">
+          {{ label }}
+        </div>
       </div>
       <div class="stat-icon" :style="{ backgroundColor: color }">
-        <el-icon :size="28"><component :is="icon" /></el-icon>
+        <el-icon :size="28">
+          <component :is="icon" />
+        </el-icon>
       </div>
     </div>
     <div class="stat-footer">
@@ -79,11 +85,11 @@ defineProps<{
     font-size: 13px;
 
     .trend-up {
-      color: #67C23A;
+      color: #67c23a;
     }
 
     .trend-down {
-      color: #F56C6C;
+      color: #f56c6c;
     }
 
     .trend-text {

@@ -5,84 +5,119 @@
  * CommonTable.vue
 -->
 <template>
-    <!-- 桌面端表格布局 -->
-    <div id="table" v-show="!isMobile">
-        <el-table :data="tableData" border style="width: 100%"
-            :header-cell-style="{ background: '#f5f7fa', color: '#606266' }">
-            <el-table-column v-for="item in tableLabel" :label="item.label" :key="item.prop"
-                :width="item.width ? item.width : ''" :prop="item.prop"
-                :sortable="/date/i.test(item.prop) || item.label.includes('日期') ? true : false">
-            </el-table-column>
-            <!-- 状态标签列 -->
-            <el-table-column v-if="statusColumn" :label="statusColumn.label" :width="statusColumn.width || '140'">
-                <template #default="scope">
-                    <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
-                        {{ scope.row[statusColumn.prop] }}
-                    </el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column fixed="right" label="操作" width="150">
-                <template #default="scope">
-                    <!-- 编辑删除模式（默认） -->
-                    <template v-if="showEditDeleteButtons">
-                        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-                        <el-button @click="handleDelete(scope.row)" type="text" size="small"
-                            style="color: #f56c6c">删除</el-button>
-                    </template>
-                    <!-- 审核模式 -->
-                    <template v-if="showAuditButton">
-                        <el-button @click="emit('audit', scope.row)" type="primary" size="small">审核</el-button>
-                    </template>
-                </template>
-            </el-table-column>
-        </el-table>
-    </div>
-    <!-- 移动端卡片布局 -->
-    <div class="mobile-cards" v-show="isMobile">
-        <el-table :data="tableData" style="width: 100%">
-            <el-table-column type="expand">
-                <template #default="props">
-                    <div v-for="item in tableLabel" :key="item.prop" class="mobile-card-content">
-                        <p v-if="item.prop !== 'name'">
-                            {{ item.label }}: {{ props.row[item.prop] }}
-                        </p>
-                    </div>
-                    <!-- 状态信息（移动端展开时显示） -->
-                    <p v-if="statusColumn" class="mobile-card-content">
-                        {{ statusColumn.label }}: {{ props.row[statusColumn.prop] }}
-                    </p>
-                </template>
-            </el-table-column>
-            <el-table-column label="姓名" prop="name" />
-            <!-- 状态标签列（移动端） -->
-            <el-table-column v-if="statusColumn" :label="statusColumn.label" :width="statusColumn.width || '100'">
-                <template #default="scope">
-                    <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
-                        {{ scope.row[statusColumn.prop] }}
-                    </el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column fixed="right" label="操作" width="150">
-                <template #default="scope">
-                    <!-- 审核模式 -->
-                    <template v-if="showAuditButton">
-                        <el-button @click="emit('audit', scope.row)" type="primary" size="small">审核</el-button>
-                    </template>
-                    <!-- 编辑删除模式（默认） -->
-                    <template v-if="showEditDeleteButtons">
-                        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-                        <el-button @click="handleDelete(scope.row)" type="text" size="small"
-                            style="color: #f56c6c">删除</el-button>
-                    </template>
-                </template>
-            </el-table-column>
-        </el-table>
-    </div>
-    <!--分页-->
-    <div class="pagination">
-        <el-pagination :background=!isMobile layout="prev, pager, next" :total="config.totle"
-            :size="isMobile ? 'small' : 'large'" @current-change="handleChange" />
-    </div>
+  <!-- 桌面端表格布局 -->
+  <div v-show="!isMobile" id="table">
+    <el-table
+      :data="tableData"
+      border
+      style="width: 100%"
+      :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
+    >
+      <el-table-column
+        v-for="item in tableLabel"
+        :key="item.prop"
+        :label="item.label"
+        :width="item.width ? item.width : ''"
+        :prop="item.prop"
+        :sortable="/date/i.test(item.prop) || item.label.includes('日期') ? true : false"
+      />
+      <!-- 状态标签列 -->
+      <el-table-column
+        v-if="statusColumn"
+        :label="statusColumn.label"
+        :width="statusColumn.width || '140'"
+      >
+        <template #default="scope">
+          <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
+            {{ scope.row[statusColumn.prop] }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="150">
+        <template #default="scope">
+          <!-- 编辑删除模式（默认） -->
+          <template v-if="showEditDeleteButtons">
+            <el-button type="text" @click="handleEdit(scope.row)" size="small"> 编辑 </el-button>
+            <el-button
+              type="text"
+              size="small"
+              style="color: #f56c6c"
+              @click="handleDelete(scope.row)"
+            >
+              删除
+            </el-button>
+          </template>
+          <!-- 审核模式 -->
+          <template v-if="showAuditButton">
+            <el-button type="primary" @click="emit('audit', scope.row)" size="small">
+              审核
+            </el-button>
+          </template>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+  <!-- 移动端卡片布局 -->
+  <div v-show="isMobile" class="mobile-cards">
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column type="expand">
+        <template #default="scope">
+          <div v-for="item in tableLabel" :key="item.prop" class="mobile-card-content">
+            <p v-if="item.prop !== 'name'">{{ item.label }}: {{ scope.row[item.prop] }}</p>
+          </div>
+          <!-- 状态信息（移动端展开时显示） -->
+          <p v-if="statusColumn" class="mobile-card-content">
+            {{ statusColumn.label }}: {{ scope.row[statusColumn.prop] }}
+          </p>
+        </template>
+      </el-table-column>
+      <el-table-column label="姓名" prop="name" />
+      <!-- 状态标签列（移动端） -->
+      <el-table-column
+        v-if="statusColumn"
+        :label="statusColumn.label"
+        :width="statusColumn.width || '100'"
+      >
+        <template #default="scope">
+          <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
+            {{ scope.row[statusColumn.prop] }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="150">
+        <template #default="scope">
+          <!-- 审核模式 -->
+          <template v-if="showAuditButton">
+            <el-button type="primary" @click="emit('audit', scope.row)" size="small">
+              审核
+            </el-button>
+          </template>
+          <!-- 编辑删除模式（默认） -->
+          <template v-if="showEditDeleteButtons">
+            <el-button type="text" @click="handleEdit(scope.row)" size="small"> 编辑 </el-button>
+            <el-button
+              type="text"
+              size="small"
+              style="color: #f56c6c"
+              @click="handleDelete(scope.row)"
+            >
+              删除
+            </el-button>
+          </template>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+  <!--分页-->
+  <div class="pagination">
+    <el-pagination
+      :background="!isMobile"
+      layout="prev, pager, next"
+      :total="config.totle"
+      :size="isMobile ? 'small' : 'large'"
+      @current-change="handleChange"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -130,188 +165,185 @@ import { ref, onMounted, reactive, computed } from 'vue'
 
 //组件属性定义
 const props = defineProps({
-    tableLabel: {
-        type: Array,
-        required: true,
-        default: () => []
-    },
-    queryParams: {
-        type: String,
-        required: false,
-        default: ''
-    },
-    getApi: {
-        type: Function,
-        required: false,
-        default: () => ({})
-    },
-    deleteApi: {
-        type: Function,
-        required: false,
-        default: () => ({})
-    },
-    // 审核模式：'edit-delete' 或 'audit'
-    operationMode: {
-        type: String,
-        default: 'edit-delete'
-    },
-    // 状态列配置
-    statusColumn: {
-        type: Object,
-        default: null
-    },
-    // 状态标签类型映射
-    statusTagTypes: {
-        type: Object,
-        default: () => ({
-            '待审核': 'warning',
-            '已审核': 'success',
-            '审核不通过': 'danger'
-        })
-    }
+  tableLabel: {
+    type: Array,
+    default: () => []
+  },
+  queryParams: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  getApi: {
+    type: Function,
+    required: false,
+    default: () => ({})
+  },
+  deleteApi: {
+    type: Function,
+    required: false,
+    default: () => ({})
+  },
+  // 审核模式：'edit-delete' 或 'audit'
+  operationMode: {
+    type: String,
+    default: 'edit-delete'
+  },
+  // 状态列配置
+  statusColumn: {
+    type: Object,
+    default: null
+  },
+  // 状态标签类型映射
+  statusTagTypes: {
+    type: Object,
+    default: () => ({
+      待审核: 'warning',
+      已审核: 'success',
+      审核不通过: 'danger'
+    })
+  }
 })
 
 //表格数据
 const tableData = ref([])
 
 const config = reactive({
-    keyWord: '',
-    totle: 0,
-    page: 1,
+  keyWord: '',
+  totle: 0,
+  page: 1
 })
 
 // 计算属性：显示哪些操作按钮
 const showAuditButton = computed(() => props.operationMode === 'audit')
 const showEditDeleteButtons = computed(() => props.operationMode === 'edit-delete')
 const getTableData = async () => {
-    const table = await props.getApi(config);
-    tableData.value = table.list;
-    console.log('tableData', table.list);
-    config.totle = table.count;
-    console.log('totle', config.totle);
+  const table = await props.getApi(config)
+  tableData.value = table.list
+  console.log('tableData', table.list)
+  config.totle = table.count
+  console.log('totle', config.totle)
 }
 //暴露搜索方法
 const search = () => {
-    config.keyWord = props.queryParams || ''
-    getTableData()
+  config.keyWord = props.queryParams || ''
+  getTableData()
 }
 
 //分页
-const handleChange = (page) => {
-    config.page = page;
-    getTableData()
+const handleChange = page => {
+  config.page = page
+  getTableData()
 }
 //删除对象
-const handleDelete = (val) => {
-    ElMessageBox.confirm("是否确认删除该对象?", '提示',
-        {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }).then(async () => {
-            try {
-                console.log('要删除的对象id:', val.id);
-                const res = await props.deleteApi({ id: val.id });
-                console.log('res:', res);
+const handleDelete = val => {
+  ElMessageBox.confirm('是否确认删除该对象?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      try {
+        console.log('要删除的对象id:', val.id)
+        const res = await props.deleteApi({ id: val.id })
+        console.log('res:', res)
 
-                // 修改响应检查逻辑
-                if (res && res.success) {
-                    ElMessage({
-                        showClose: true,
-                        message: '删除成功',
-                        type: 'success',
-                    });
-                    await getTableData();
-                    console.log('删除了', val);
-                } else {
-                    throw new Error(res?.msg || '删除失败');
-                }
-            } catch (error) {
-                console.error('删除操作失败:', error);
-                ElMessage({
-                    showClose: true,
-                    message: error.message || '删除操作失败，请重试',
-                    type: 'error',
-                });
-            }
-        }).catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '已取消删除',
-            });
+        // 修改响应检查逻辑
+        if (res && res.success) {
+          ElMessage({
+            showClose: true,
+            message: '删除成功',
+            type: 'success'
+          })
+          await getTableData()
+          console.log('删除了', val)
+        } else {
+          throw new Error(res?.msg || '删除失败')
+        }
+      } catch (error) {
+        console.error('删除操作失败:', error)
+        ElMessage({
+          showClose: true,
+          message: error.message || '删除操作失败，请重试',
+          type: 'error'
         })
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '已取消删除'
+      })
+    })
 }
 
 const emit = defineEmits(['edit', 'audit'])
-const handleEdit = (row) => {
-    console.log('handleEdit()编辑对象:', row);
-    emit('edit', row);
+const handleEdit = row => {
+  console.log('handleEdit()编辑对象:', row)
+  emit('edit', row)
 }
 
 // 获取状态标签类型
-const getStatusTagType = (status) => {
-    return props.statusTagTypes[status] || 'info'
+const getStatusTagType = status => {
+  return props.statusTagTypes[status] || 'info'
 }
 
-
 onMounted(() => {
-    getTableData()
+  getTableData()
 })
 
 //响应式布局检测
 const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
 window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth <= 768
+  isMobile.value = window.innerWidth <= 768
 })
 
 // 使用defineExpose暴露方法
 defineExpose({
-    search
+  search
 })
 </script>
 
 <style scoped>
 .mobile-cards {
-    display: none;
+  display: none;
 }
 
 .mobile-card-content {
-    margin-left: 20px;
+  margin-left: 20px;
 }
 
 #table {
-    background: #fff;
-    padding: 20px;
-    border-radius: 2px;
-    width: 90%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  background: #fff;
+  padding: 20px;
+  border-radius: 2px;
+  width: 90%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media screen and (max-width: 768px) {
+  /* 隐藏桌面端表格 */
+  .table {
+    display: none;
+  }
 
-    /* 隐藏桌面端表格 */
-    .table {
-        display: none;
-    }
+  /* 显示移动端卡片布局 */
+  .mobile-cards {
+    display: block;
+    width: 100%;
+  }
 
-    /* 显示移动端卡片布局 */
-    .mobile-cards {
-        display: block;
-        width: 100%;
-    }
-
-    /* 调整分页宽度 */
-    .pagination {
-        width: 100%;
-        padding: 10px;
-    }
+  /* 调整分页宽度 */
+  .pagination {
+    width: 100%;
+    padding: 10px;
+  }
 }
 
 .pagination {
-    display: flex;
-    margin-top: 20px;
-    justify-content: center;
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
 }
 </style>

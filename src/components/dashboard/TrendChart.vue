@@ -10,14 +10,18 @@
       <div class="card-header">
         <span>{{ title }}</span>
         <el-radio-group v-model="currentPeriod" size="small" @change="handlePeriodChange">
-          <el-radio-button v-for="option in periodOptions" :key="option.value" :label="option.value">
+          <el-radio-button
+            v-for="option in periodOptions"
+            :key="option.value"
+            :label="option.value"
+          >
             {{ option.label }}
           </el-radio-button>
         </el-radio-group>
       </div>
     </template>
     <div class="chart-content">
-      <div ref="chartRef" class="echarts-container"></div>
+      <div ref="chartRef" class="echarts-container" />
     </div>
   </el-card>
 </template>
@@ -38,22 +42,25 @@ interface PeriodOption {
   value: string
 }
 
-const props = withDefaults(defineProps<{
-  title?: string
-  data: ChartDataItem[]
-  unit?: string
-  period?: string
-  periodOptions?: PeriodOption[]
-}>(), {
-  title: '访问趋势',
-  unit: '访问',
-  period: 'week',
-  periodOptions: () => [
-    { label: '本周', value: 'week' },
-    { label: '本月', value: 'month' },
-    { label: '本年', value: 'year' }
-  ]
-})
+const props = withDefaults(
+  defineProps<{
+    title?: string
+    data: ChartDataItem[]
+    unit?: string
+    period?: string
+    periodOptions?: PeriodOption[]
+  }>(),
+  {
+    title: '访问趋势',
+    unit: '访问',
+    period: 'week',
+    periodOptions: () => [
+      { label: '本周', value: 'week' },
+      { label: '本月', value: 'month' },
+      { label: '本年', value: 'year' }
+    ]
+  }
+)
 
 const emit = defineEmits<{
   (e: 'period-change', value: string): void
@@ -63,9 +70,12 @@ const currentPeriod = ref(props.period)
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: echarts.ECharts | null = null
 
-watch(() => props.period, (newVal) => {
-  currentPeriod.value = newVal
-})
+watch(
+  () => props.period,
+  newVal => {
+    currentPeriod.value = newVal
+  }
+)
 
 // Get color from data or use default
 const chartColor = computed(() => {
@@ -114,29 +124,31 @@ const updateChart = () => {
     yAxis: {
       type: 'value'
     },
-    series: [{
-      type: 'line',
-      data: props.data.map(item => item.value),
-      smooth: true,
-      showSymbol: true,
-      symbolSize: 8,
-      areaStyle: {
-        opacity: 0.3,
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: `${color}80` },
-          { offset: 1, color: `${color}1A` }
-        ])
-      },
-      itemStyle: {
-        color: color,
-        borderColor: '#fff',
-        borderWidth: 2
-      },
-      lineStyle: {
-        width: 3,
-        color: color
+    series: [
+      {
+        type: 'line',
+        data: props.data.map(item => item.value),
+        smooth: true,
+        showSymbol: true,
+        symbolSize: 8,
+        areaStyle: {
+          opacity: 0.3,
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: `${color}80` },
+            { offset: 1, color: `${color}1A` }
+          ])
+        },
+        itemStyle: {
+          color: color,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        lineStyle: {
+          width: 3,
+          color: color
+        }
       }
-    }]
+    ]
   }
 
   chartInstance.setOption(option)
@@ -152,11 +164,15 @@ const handlePeriodChange = (value: string) => {
 }
 
 // Watch data changes
-watch(() => props.data, () => {
-  nextTick(() => {
-    updateChart()
-  })
-}, { deep: true })
+watch(
+  () => props.data,
+  () => {
+    nextTick(() => {
+      updateChart()
+    })
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   nextTick(() => {

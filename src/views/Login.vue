@@ -12,24 +12,14 @@
           <h2>公共卫生平台管理系统</h2>
         </div>
       </template>
-      
-      <el-form 
-        ref="loginFormRef"
-        :model="loginForm" 
-        :rules="rules"
-        label-width="0"
-        size="large"
-      >
+
+      <el-form ref="loginFormRef" :model="loginForm" :rules="rules" label-width="0" size="large">
         <el-form-item prop="username">
-          <el-input 
-            v-model="loginForm.username"
-            placeholder="用户名"
-            :prefix-icon="User"
-          />
+          <el-input v-model="loginForm.username" placeholder="用户名" :prefix-icon="User" />
         </el-form-item>
-        
+
         <el-form-item prop="password">
-          <el-input 
+          <el-input
             v-model="loginForm.password"
             type="password"
             placeholder="密码"
@@ -37,14 +27,9 @@
             show-password
           />
         </el-form-item>
-        
+
         <el-form-item>
-          <el-button 
-            type="primary" 
-            class="login-button"
-            :loading="loading"
-            @click="handleLogin"
-          >
+          <el-button type="primary" class="login-button" :loading="loading" @click="handleLogin">
             登录
           </el-button>
         </el-form-item>
@@ -79,14 +64,14 @@ const rules = {
   ]
 }
 
-const { proxy } = getCurrentInstance() as any;
+const { proxy } = getCurrentInstance() as any
 const store = useAllDataStore()
 const router = useRouter()
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
 
-  await loginFormRef.value.validate( async (valid) => {
+  await loginFormRef.value.validate(async valid => {
     if (valid) {
       loading.value = true
       const res = await proxy.$api.getMenu(loginForm)
@@ -147,7 +132,7 @@ const handleLogin = async () => {
     width: 95%;
     margin: 0 10px;
   }
-  
+
   .card-header h2 {
     font-size: 20px;
   }

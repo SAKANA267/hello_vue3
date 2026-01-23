@@ -9,7 +9,7 @@
     <template #header>
       <div class="card-header">
         <span>{{ title }}</span>
-        <el-button type="primary" link @click="handleViewAll">查看全部</el-button>
+        <el-button type="primary" link @click="handleViewAll"> 查看全部 </el-button>
       </div>
     </template>
     <el-table :data="data" style="width: 100%" :max-height="maxHeight">
@@ -37,14 +37,17 @@ interface ActivityItem {
   status: 'success' | 'pending'
 }
 
-withDefaults(defineProps<{
-  title?: string
-  data: ActivityItem[]
-  maxHeight?: number
-}>(), {
-  title: '最近活动',
-  maxHeight: 280
-})
+withDefaults(
+  defineProps<{
+    title?: string
+    data: ActivityItem[]
+    maxHeight?: number
+  }>(),
+  {
+    title: '最近活动',
+    maxHeight: 280
+  }
+)
 
 const emit = defineEmits<{
   (e: 'view-all'): void

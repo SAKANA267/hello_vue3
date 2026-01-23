@@ -9,7 +9,7 @@
     <template #header>
       <div class="card-header">
         <span>{{ title }}</span>
-        <el-button type="primary" :icon="Plus" size="small" @click="handleAdd">添加</el-button>
+        <el-button type="primary" :icon="Plus" size="small" @click="handleAdd"> 添加 </el-button>
       </div>
     </template>
     <div class="todo-list">
@@ -18,10 +18,7 @@
           <span :class="{ 'todo-done': todo.done }">{{ todo.text }}</span>
         </el-checkbox>
         <div class="todo-meta">
-          <el-tag
-            size="small"
-            :type="getPriorityType(todo.priority)"
-          >
+          <el-tag size="small" :type="getPriorityType(todo.priority)">
             {{ getPriorityLabel(todo.priority) }}
           </el-tag>
           <span class="todo-date">{{ todo.dueDate }}</span>
@@ -41,12 +38,15 @@ interface TodoItem {
   dueDate: string
 }
 
-withDefaults(defineProps<{
-  title?: string
-  data: TodoItem[]
-}>(), {
-  title: '待办事项'
-})
+withDefaults(
+  defineProps<{
+    title?: string
+    data: TodoItem[]
+  }>(),
+  {
+    title: '待办事项'
+  }
+)
 
 const emit = defineEmits<{
   (e: 'add'): void

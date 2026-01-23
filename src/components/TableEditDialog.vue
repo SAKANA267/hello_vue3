@@ -5,12 +5,25 @@
  * TableEditDialog.vue
 -->
 <template>
-  <el-dialog :model-value="dialogVisible" :title="dialogTitle" :width="isMobile ? '90%' : '50%'"
-    :before-close="handleClose">
+  <el-dialog
+    :model-value="dialogVisible"
+    :title="dialogTitle"
+    :width="isMobile ? '90%' : '50%'"
+    :before-close="handleClose"
+  >
     <el-form :model="form" :rules="rules" ref="objectForm">
-      <el-form-item v-for="field in formFields" :key="field.prop" :label="field.label" :prop="field.prop">
+      <el-form-item
+        v-for="field in formFields"
+        :key="field.prop"
+        :label="field.label"
+        :prop="field.prop"
+      >
         <el-input v-if="field.type === 'input'" v-model="form[field.prop]" />
-        <el-select v-else-if="field.type === 'select'" v-model="form[field.prop]" placeholder="请选择">
+        <el-select
+          v-else-if="field.type === 'select'"
+          v-model="form[field.prop]"
+          placeholder="请选择"
+        >
           <el-option
             v-for="option in field.options"
             :key="typeof option === 'object' ? option.value : option"
@@ -27,11 +40,17 @@
             {{ typeof option === 'object' ? option.label : option }}
           </el-radio>
         </el-radio-group>
-        <el-date-picker v-else-if="field.type === 'date'" v-model="form[field.prop]" type="date" value-format="YYYY-MM-DD" placeholder="请选择日期" />
+        <el-date-picker
+          v-else-if="field.type === 'date'"
+          v-model="form[field.prop]"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="请选择日期"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button type="primary" @click="handleSubmit">提交</el-button>
+      <el-button type="primary" @click="handleSubmit"> 提交 </el-button>
     </template>
   </el-dialog>
 </template>
@@ -48,8 +67,8 @@
  * @props {Function} editApi - 编辑数据的API方法
  * @emits {String} refresh - 表单提交成功后触发，用于刷新列表数据
  * @example
- * <TableEditDialog 
- *   v-model="dialogVisible" 
+ * <TableEditDialog
+ *   v-model="dialogVisible"
  *   :formFields="[
  *     { prop: 'username', label: '用户名', type: 'input' },
  *     { prop: 'role', label: '角色', type: 'select', options: ['admin', 'user'] }
@@ -73,14 +92,14 @@ const props = defineProps({
   action: String,
   rowData: Object,
   addApi: Function,
-  editApi: Function,
+  editApi: Function
 })
 
 const emit = defineEmits(['update:dialogVisible', 'refresh'])
 
 // 初始化表单数据
-const initForm = (fields) => {
-  fields.forEach((field) => {
+const initForm = fields => {
+  fields.forEach(field => {
     form[field.prop] = ''
   })
 }
@@ -89,7 +108,7 @@ const initForm = (fields) => {
 const form = reactive({})
 initForm(props.formFields)
 
-const dialogTitle = computed(() => (props.action === 'edit' ? '编辑对象' : '新增对象'));
+const dialogTitle = computed(() => (props.action === 'edit' ? '编辑对象' : '新增对象'))
 
 //编辑与创建用户 用于v-for创建编辑/新增表单
 const formFields = props.formFields
@@ -100,68 +119,66 @@ const rules = reactive(props.rules)
 const initializeForm = () => {
   if (props.action === 'edit' && props.rowData) {
     // 编辑时填充数据
-    props.formFields.forEach((field) => {
-      form[field.prop] = props.rowData[field.prop] || '';
-    });
+    props.formFields.forEach(field => {
+      form[field.prop] = props.rowData[field.prop] || ''
+    })
   } else if (props.action === 'add') {
     // 新增时重置表单
-    initForm(props.formFields);
+    initForm(props.formFields)
   }
-};
+}
 // 每次打开对话框时初始化表单
-const dialogVisible = computed(() => props.dialogVisible);
+const dialogVisible = computed(() => props.dialogVisible)
 watch(
   dialogVisible,
-  (visible) => {
+  visible => {
     if (visible) {
-      initializeForm(); // 根据 action 初始化表单
+      initializeForm() // 根据 action 初始化表单
     }
   },
   { immediate: true }
-);
+)
 
 const handleClose = () => {
-  initForm(props.formFields);
-  emit('update:dialogVisible', false);
+  initForm(props.formFields)
+  emit('update:dialogVisible', false)
 }
 
 const handleSubmit = async () => {
   try {
     if (props.action === 'add') {
-      const res = await props.addApi(form);
+      const res = await props.addApi(form)
       if (res.success) {
-        ElMessage.success('新增成功');
-        emit('update:dialogVisible', false);
-        initForm(props.formFields);
-        emit('refresh');
+        ElMessage.success('新增成功')
+        emit('update:dialogVisible', false)
+        initForm(props.formFields)
+        emit('refresh')
       } else {
-        ElMessage.error('新增失败');
+        ElMessage.error('新增失败')
       }
     } else {
       const updateData = {
         id: props.rowData.id,
         ...form
-      };
-      const res = await props.editApi(updateData);
+      }
+      const res = await props.editApi(updateData)
       if (res.success) {
-        ElMessage.success('编辑成功');
-        emit('update:dialogVisible', false);
-        initForm(props.formFields);
-        emit('refresh');
+        ElMessage.success('编辑成功')
+        emit('update:dialogVisible', false)
+        initForm(props.formFields)
+        emit('refresh')
       } else {
-        ElMessage.error('编辑失败');
+        ElMessage.error('编辑失败')
       }
     }
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
-};
-
-
+}
 
 //响应式布局检测
 const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
+const labelWidth = computed(() => (isMobile.value ? '60px' : '100px'))
 window.addEventListener('resize', () => {
   isMobile.value = window.innerWidth <= 768
 })

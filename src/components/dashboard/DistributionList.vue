@@ -11,7 +11,7 @@
         <span>{{ title }}</span>
       </div>
     </template>
-    <div ref="chartRef" class="echarts-container"></div>
+    <div ref="chartRef" class="echarts-container" />
   </el-card>
 </template>
 
@@ -25,12 +25,15 @@ interface DistributionItem {
   color: string
 }
 
-const props = withDefaults(defineProps<{
-  title?: string
-  data: DistributionItem[]
-}>(), {
-  title: '用户分布'
-})
+const props = withDefaults(
+  defineProps<{
+    title?: string
+    data: DistributionItem[]
+  }>(),
+  {
+    title: '用户分布'
+  }
+)
 
 const chartRef = ref<HTMLDivElement>()
 let chartInstance: echarts.ECharts | null = null
@@ -57,16 +60,18 @@ const updateChart = () => {
       right: 10,
       top: 'center'
     },
-    series: [{
-      type: 'pie',
-      roseType: 'area',
-      data: props.data.map(item => ({
-        name: item.label,
-        value: item.value,
-        itemStyle: { color: item.color }
-      })),
-      radius: ['30%', '70%']
-    }]
+    series: [
+      {
+        type: 'pie',
+        roseType: 'area',
+        data: props.data.map(item => ({
+          name: item.label,
+          value: item.value,
+          itemStyle: { color: item.color }
+        })),
+        radius: ['30%', '70%']
+      }
+    ]
   }
 
   chartInstance.setOption(option)
@@ -76,11 +81,15 @@ const handleResize = () => {
   chartInstance?.resize()
 }
 
-watch(() => props.data, () => {
-  nextTick(() => {
-    updateChart()
-  })
-}, { deep: true })
+watch(
+  () => props.data,
+  () => {
+    nextTick(() => {
+      updateChart()
+    })
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   nextTick(() => {

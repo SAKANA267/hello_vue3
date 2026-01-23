@@ -7,8 +7,16 @@
 
 // 传染病种类（模拟数据）
 export const infectiousDiseases = [
-  '新冠肺炎', '流感', '结核病', '病毒性肝炎', '手足口病',
-  '猩红热', '麻疹', '水痘', '流行性腮腺炎', '细菌性痢疾'
+  '新冠肺炎',
+  '流感',
+  '结核病',
+  '病毒性肝炎',
+  '手足口病',
+  '猩红热',
+  '麻疹',
+  '水痘',
+  '流行性腮腺炎',
+  '细菌性痢疾'
 ]
 
 // 院区数据
@@ -19,10 +27,10 @@ export const departments = ['感染科', '呼吸内科', '儿科', '急诊科', 
 
 // 报卡统计数据
 export const cardStatsData = {
-  totalCards: 1248,      // 报卡总数
-  pendingCards: 156,     // 待审核数量
-  auditedCards: 1092,    // 已审核数量
-  todayCards: 28         // 今日新增
+  totalCards: 1248, // 报卡总数
+  pendingCards: 156, // 待审核数量
+  auditedCards: 1092, // 已审核数量
+  todayCards: 28 // 今日新增
 }
 
 // 传染病种类分布数据
@@ -66,7 +74,6 @@ export const trendData = {
     { label: '11月', value: 1250, percentage: 83, color: '#E6A23C' },
     { label: '12月', value: 1400, percentage: 93, color: '#F56C6C' }
   ]
-
 }
 
 // 院区分布数据
@@ -79,9 +86,39 @@ export const areaDistribution = [
 
 // 最近审核活动数据
 export const recentAudits = [
-  { user: '张医生', action: '提交报卡', target: '新冠肺炎-李某某', time: '2026-01-21 10:30', status: 'pending' as const },
-  { user: '李审核员', action: '审核通过', target: '流感-王某某', time: '2026-01-21 10:15', status: 'success' as const },
-  { user: '王医生', action: '提交报卡', target: '结核病-赵某某', time: '2026-01-21 09:50', status: 'pending' as const },
-  { user: '赵审核员', action: '审核驳回', target: '手足口病-孙某某', time: '2026-01-21 09:30', status: 'success' as const },
-  { user: '刘医生', action: '提交报卡', target: '病毒性肝炎-周某某', time: '2026-01-21 09:00', status: 'pending' as const }
+  {
+    user: '张医生',
+    action: '提交报卡',
+    target: '新冠肺炎-李某某',
+    time: '2026-01-21 10:30',
+    status: 'pending' as const
+  },
+  {
+    user: '李审核员',
+    action: '审核通过',
+    target: '流感-王某某',
+    time: '2026-01-21 10:15',
+    status: 'success' as const
+  },
+  {
+    user: '王医生',
+    action: '提交报卡',
+    target: '结核病-赵某某',
+    time: '2026-01-21 09:50',
+    status: 'pending' as const
+  },
+  {
+    user: '赵审核员',
+    action: '审核驳回',
+    target: '手足口病-孙某某',
+    time: '2026-01-21 09:30',
+    status: 'success' as const
+  },
+  {
+    user: '刘医生',
+    action: '提交报卡',
+    target: '病毒性肝炎-周某某',
+    time: '2026-01-21 09:00',
+    status: 'pending' as const
+  }
 ]

@@ -15,17 +15,18 @@ export default defineConfig({
     vueDevTools(),
     vueSetupExtend(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [ElementPlusResolver()]
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
-    }),
+      resolvers: [ElementPlusResolver()]
+    })
   ],
   resolve: {
-    alias: [{
-      find: '@',
-      replacement: '/src'
-    }
+    alias: [
+      {
+        find: '@',
+        replacement: '/src'
+      }
     ]
-  },
+  }
 })

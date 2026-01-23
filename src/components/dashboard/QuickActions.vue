@@ -33,12 +33,15 @@ interface ActionItem {
   icon?: object
 }
 
-withDefaults(defineProps<{
-  title?: string
-  actions: ActionItem[]
-}>(), {
-  title: '快捷操作'
-})
+withDefaults(
+  defineProps<{
+    title?: string
+    actions: ActionItem[]
+  }>(),
+  {
+    title: '快捷操作'
+  }
+)
 
 const emit = defineEmits<{
   (e: 'action', key: string): void

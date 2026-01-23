@@ -8,7 +8,7 @@
   <div class="dashboard-container">
     <!-- 统计卡片区域 -->
     <el-row :gutter="20" class="stat-cards">
-      <el-col :xs="24" :sm="12" :md="6" v-for="(card, index) in statCards" :key="index">
+      <el-col :xs="24" :sm="12" v-for="(card, index) in statCards" :key="index" :md="6">
         <StatCard
           :label="card.label"
           :value="card.value"
@@ -35,27 +35,17 @@
     <!-- 分布列表区域 -->
     <el-row :gutter="20" class="distribution-section">
       <el-col :xs="24" :md="12">
-        <DistributionList
-          title="传染病种类分布"
-          :data="diseaseDistribution"
-        />
+        <DistributionList title="传染病种类分布" :data="diseaseDistribution" />
       </el-col>
       <el-col :xs="24" :md="12">
-        <DistributionList
-          title="院区分布"
-          :data="areaDistribution"
-        />
+        <DistributionList title="院区分布" :data="areaDistribution" />
       </el-col>
     </el-row>
 
     <!-- 快捷操作和最近活动 -->
     <el-row :gutter="20" class="bottom-section">
       <el-col :xs="24" :lg="8">
-        <QuickActions
-          title="快捷操作"
-          :actions="quickActions"
-          @action="handleQuickAction"
-        />
+        <QuickActions title="快捷操作" :actions="quickActions" @action="handleQuickAction" />
       </el-col>
       <el-col :xs="24" :lg="16">
         <RecentActivities
@@ -71,14 +61,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  Document,
-  Clock,
-  Check,
-  Plus,
-  Download,
-  DocumentAdd
-} from '@element-plus/icons-vue'
+import { Document, Clock, Check, Plus, Download, DocumentAdd } from '@element-plus/icons-vue'
 
 // 导入组件
 import StatCard from '@/components/dashboard/StatCard.vue'
@@ -88,7 +71,12 @@ import QuickActions from '@/components/dashboard/QuickActions.vue'
 import RecentActivities from '@/components/dashboard/RecentActivities.vue'
 
 // 导入模拟数据
-import { diseaseDistribution, areaDistribution, trendData, recentAudits } from '@/api/mockData/dashboard'
+import {
+  diseaseDistribution,
+  areaDistribution,
+  trendData,
+  recentAudits
+} from '@/api/mockData/dashboard'
 
 // 统计卡片数据
 const statCards = reactive([

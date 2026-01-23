@@ -22,13 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import CommonAside from '@/components/CommonAside.vue';
-import CommonHeader from '@/components/CommonHeader.vue';
-import CommonTab from '@/components/CommonTab.vue';
+import CommonAside from '@/components/CommonAside.vue'
+import CommonHeader from '@/components/CommonHeader.vue'
+import CommonTab from '@/components/CommonTab.vue'
 </script>
 
 <style scoped lang="less">
-.common-layout, .lay-container {
+.common-layout,
+.lay-container {
   height: 100%;
 }
 

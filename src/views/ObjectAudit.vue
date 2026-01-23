@@ -9,10 +9,14 @@
     <div class="header">
       <el-form :inline="true" :model="formInline">
         <el-form-item>
-          <el-input placeholder="请输入查询内容" v-model="formInline.keyWord" :prefix-icon="Search"></el-input>
+          <el-input
+            v-model="formInline.keyWord"
+            placeholder="请输入查询内容"
+            :prefix-icon="Search"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch()">查询</el-button>
+          <el-button type="primary" @click="handleSearch()"> 查询 </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -20,12 +24,12 @@
     <div class="object-table">
       <CommonTable
         ref="tableRef"
-        :tableLabel="tableLabel"
-        :queryParams="formInline.keyWord"
-        :getApi="proxy?.$api.getTableData"
-        operationMode="audit"
-        :statusColumn="{ prop: 'status', label: '状态', width: '120' }"
-        :statusTagTypes="statusTagTypes"
+        :table-label="tableLabel"
+        :query-params="formInline.keyWord"
+        :get-api="proxy?.$api.getTableData"
+        operation-mode="audit"
+        :status-column="{ prop: 'status', label: '状态', width: '120' }"
+        :status-tag-types="statusTagTypes"
         @audit="handleAuditClick"
       />
     </div>
@@ -33,9 +37,9 @@
     <!-- 审核对话框 -->
     <AuditDialog
       v-model="auditDialogVisible"
-      :rowData="currentAuditRow"
-      :tableLabel="tableLabel"
-      :auditDetailFields="auditDetailFields"
+      :row-data="currentAuditRow"
+      :table-label="tableLabel"
+      :audit-detail-fields="auditDetailFields"
       @audit="performAudit"
     />
   </div>
@@ -53,33 +57,28 @@ const tableRef = ref(null)
 
 // 表格列配置
 const tableLabel = [
-    { prop: 'hospitalArea', label: '院区', width: "100" },
-    { prop: 'department', label: '科室', width: "120" },
-    { prop: 'diagnosisName', label: '诊断名称', width: "150" },
-    { prop: 'inpatientNo', label: '住院号', width: "120" },
-    { prop: 'outpatientNo', label: '门诊号', width: "120" },
-    { prop: 'name', label: '姓名', width: "80" },
-    { prop: 'gender', label: '性别', width: "60" },
-    { prop: 'age', label: '年龄', width: "60" },
-    { prop: 'phone', label: '联系电话', width: "120" },
-    { prop: 'reportDoctor', label: '报告医生', width: "100" },
-    { prop: 'fillDate', label: '填卡日期', width: "" },
+  { prop: 'hospitalArea', label: '院区', width: '100' },
+  { prop: 'department', label: '科室', width: '120' },
+  { prop: 'diagnosisName', label: '诊断名称', width: '150' },
+  { prop: 'inpatientNo', label: '住院号', width: '120' },
+  { prop: 'outpatientNo', label: '门诊号', width: '120' },
+  { prop: 'name', label: '姓名', width: '80' },
+  { prop: 'gender', label: '性别', width: '60' },
+  { prop: 'age', label: '年龄', width: '60' },
+  { prop: 'phone', label: '联系电话', width: '120' },
+  { prop: 'reportDoctor', label: '报告医生', width: '100' },
+  { prop: 'fillDate', label: '填卡日期', width: '' }
 ]
 
 // 状态标签类型映射
 const statusTagTypes = {
-    '待审核': 'warning',
-    '已审核': 'success',
-    '审核不通过': 'danger'
+  待审核: 'warning',
+  已审核: 'success',
+  审核不通过: 'danger'
 }
 
 // 审核对话框展示的字段列表
-const auditDetailFields = [
-    'name',
-    'department',
-    'diagnosisName',
-    'fillDate'
-]
+const auditDetailFields = ['name', 'department', 'diagnosisName', 'fillDate']
 
 // 当前审核人（可以从用户信息中获取）
 const currentAuditor = ref('管理员')
@@ -97,7 +96,7 @@ const handleSearch = () => {
 }
 
 // 处理审核按钮点击
-const handleAuditClick = (row) => {
+const handleAuditClick = row => {
   console.log('handleAuditClick()审核对象:', row)
   currentAuditRow.value = row
   auditDialogVisible.value = true
@@ -126,7 +125,7 @@ const performAudit = async ({ action, rowData, remark }) => {
       ElMessage({
         showClose: true,
         message: action === 'pass' ? '审核通过' : '审核不通过',
-        type: 'success',
+        type: 'success'
       })
       auditDialogVisible.value = false
       await tableRef.value?.search()
@@ -138,14 +137,14 @@ const performAudit = async ({ action, rowData, remark }) => {
     ElMessage({
       showClose: true,
       message: error.message || '审核操作失败，请重试',
-      type: 'error',
+      type: 'error'
     })
   }
 }
 
 // 响应式布局检测
 const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => isMobile.value ? '60px' : '100px')
+const labelWidth = computed(() => (isMobile.value ? '60px' : '100px'))
 window.addEventListener('resize', () => {
   isMobile.value = window.innerWidth <= 768
 })
