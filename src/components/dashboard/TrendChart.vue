@@ -105,8 +105,8 @@ const updateChart = () => {
   const option: echarts.EChartsOption = {
     tooltip: {
       trigger: 'axis',
-      formatter: (params: any) => {
-        const param = params[0]
+      formatter: (params: echarts.TooltipComponentFormatterCallbackParams) => {
+        const param = Array.isArray(params) ? params[0] : params
         return `${param.name}: ${param.value} ${props.unit}`
       }
     },

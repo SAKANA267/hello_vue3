@@ -91,7 +91,7 @@ service.interceptors.response.use(res => {
   }
 })
 
-function request(options: RequestConfig): Promise<any> {
+function request<T = unknown>(options: RequestConfig): Promise<T> {
   options.method = options.method || 'get'
   // 修复GET请求参数处理
   if (options.method.toLowerCase() === 'get') {

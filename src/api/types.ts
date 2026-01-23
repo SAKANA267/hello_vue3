@@ -8,7 +8,7 @@ import type { MockjsRequestOptions } from 'mockjs'
 // ============== 基础类型 ==============
 
 /** 统一 API 响应结构 */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   data: T
   msg: string
@@ -27,7 +27,7 @@ export interface PageParams {
 }
 
 /** 分页响应数据 */
-export interface TableDataResponse<T = any> {
+export interface TableDataResponse<T = unknown> {
   success: boolean
   list: T[]
   count: number
@@ -135,7 +135,7 @@ export interface MockConfig extends MockjsRequestOptions {
 }
 
 /** Mock 响应结构 */
-export interface MockResponse<T = any> {
+export interface MockResponse<T = unknown> {
   code: number
   data?: T
   msg?: string
@@ -144,7 +144,7 @@ export interface MockResponse<T = any> {
 
 /** 参数解析结果 */
 export interface ParsedParams extends PageParams {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // ============== 审核相关 ==============
