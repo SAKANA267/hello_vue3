@@ -80,6 +80,8 @@ const handleLogin = async () => {
       store.updateMenuList(res.menuList)
       // 使用 setToken 方法持久化 token 到 localStorage
       store.setToken(res.token)
+      // 存储用户信息
+      store.setUser(res.user)
       router.push('/home')
       setTimeout(() => {
         loading.value = false

@@ -9,7 +9,13 @@
     <div class="header">
       <el-form :inline="true" :model="formInline">
         <el-form-item>
-          <el-button type="primary" @click="openDialog('add', null)"> 新增用户 </el-button>
+          <permission-button
+            permission="user:manage"
+            type="primary"
+            @click="openDialog('add', null)"
+          >
+            新增用户
+          </permission-button>
         </el-form-item>
         <el-form-item>
           <el-input
@@ -30,6 +36,10 @@
       :query-params="formInline.keyWord"
       :get-api="proxy?.$api.getUserList"
       :delete-api="proxy?.$api.deleteUser"
+      :permissions="{
+        canEdit: hasPermission('user:manage'),
+        canDelete: hasPermission('user:manage')
+      }"
       @edit="openDialog('edit', $event)"
     />
 
@@ -55,6 +65,10 @@ import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
+import PermissionButton from '@/components/PermissionButton.vue'
+import { usePermissions } from '@/composables/usePermissions'
+
+const { hasPermission } = usePermissions()
 
 const { proxy } = getCurrentInstance()
 const tableRef = ref(null)

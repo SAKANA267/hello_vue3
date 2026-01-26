@@ -30,6 +30,9 @@
         operation-mode="audit"
         :status-column="{ prop: 'status', label: '状态', width: '120' }"
         :status-tag-types="statusTagTypes"
+        :permissions="{
+          canAudit: hasPermission('audit:approve')
+        }"
         @audit="handleAuditClick"
       />
     </div>
@@ -51,6 +54,9 @@ import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CommonTable from '@/components/CommonTable.vue'
 import AuditDialog from '@/components/AuditDialog.vue'
+import { usePermissions } from '@/composables/usePermissions'
+
+const { hasPermission } = usePermissions()
 
 const { proxy } = getCurrentInstance()
 const tableRef = ref(null)

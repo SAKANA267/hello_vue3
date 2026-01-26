@@ -35,6 +35,12 @@ export interface TableDataResponse<T = unknown> {
 
 // ============== 用户/认证相关 ==============
 
+/** 角色类型 */
+export type UserRole = 'super_admin' | 'admin' | 'auditor' | 'user' | 'guest'
+
+/** 权限类型 - 资源:操作 格式 */
+export type Permission = `${string}:${string}`
+
 /** 用户信息 */
 export interface UserInfo {
   username: string
@@ -51,10 +57,20 @@ export interface LoginRequest {
   password: string
 }
 
+/** 登录用户信息 */
+export interface LoginUser {
+  id: string
+  username: string
+  role: UserRole
+  permissions: Permission[]
+  dataScope?: 'all' | 'department' | 'self'
+}
+
 /** 登录响应数据 */
 export interface LoginResponseData {
-  menuList: string[]
+  menuList: string[] // 保留向后兼容
   token: string
+  user: LoginUser
 }
 
 /** 菜单响应 */

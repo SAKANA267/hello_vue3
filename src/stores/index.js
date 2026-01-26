@@ -4,6 +4,7 @@ import { ref } from 'vue'
 // localStorage keys
 const TOKEN_KEY = 'auth_token'
 const MENU_LIST_KEY = 'menu_list'
+const USER_INFO_KEY = 'user_info'
 
 function initState() {
   return {
@@ -18,7 +19,8 @@ function initState() {
     ],
     currentMenu: null,
     menuList: [],
-    token: ''
+    token: '',
+    user: null
   }
 }
 export const useAllDataStore = defineStore('allData', () => {
@@ -62,11 +64,19 @@ export const useAllDataStore = defineStore('allData', () => {
     localStorage.setItem(TOKEN_KEY, token)
   }
 
+  // 设置用户信息并持久化到 localStorage
+  function setUser(userInfo) {
+    state.value.user = userInfo
+    localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfo))
+  }
+
   // 清除 token 和 localStorage
   function clearToken() {
     state.value.token = ''
+    state.value.user = null
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(MENU_LIST_KEY)
+    localStorage.removeItem(USER_INFO_KEY)
     state.value.menuList = []
     state.value.tags = [{ name: 'home', path: '/home', label: '首页', icon: '' }]
     state.value.currentMenu = null
@@ -81,6 +91,8 @@ export const useAllDataStore = defineStore('allData', () => {
   function initAuth() {
     const savedToken = localStorage.getItem(TOKEN_KEY)
     const savedMenuList = localStorage.getItem(MENU_LIST_KEY)
+    const savedUser = localStorage.getItem(USER_INFO_KEY)
+
     if (savedToken) {
       state.value.token = savedToken
     }
@@ -92,6 +104,14 @@ export const useAllDataStore = defineStore('allData', () => {
         state.value.menuList = []
       }
     }
+    if (savedUser) {
+      try {
+        state.value.user = JSON.parse(savedUser)
+      } catch (e) {
+        console.error('Failed to parse saved user info:', e)
+        state.value.user = null
+      }
+    }
   }
 
   return {
@@ -99,6 +119,7 @@ export const useAllDataStore = defineStore('allData', () => {
     selectMenu,
     updateMenuList,
     setToken,
+    setUser,
     clearToken,
     isAuthenticated,
     initAuth

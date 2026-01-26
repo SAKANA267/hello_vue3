@@ -26,6 +26,18 @@ service.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
+    // 添加用户角色信息到请求头（后端权限验证用）
+    const userInfo = localStorage.getItem('user_info')
+    if (userInfo) {
+      try {
+        const user = JSON.parse(userInfo)
+        config.headers['X-User-Role'] = user.role || 'guest'
+        config.headers['X-User-Id'] = user.id || ''
+      } catch (e) {
+        console.error('Failed to parse user info for headers:', e)
+      }
+    }
+
     // 记录请求开始时间
     ;(config as ExtendedAxiosRequestConfig).metadata = { startTime: Date.now() }
 
@@ -73,6 +85,17 @@ service.interceptors.response.use(res => {
     localStorage.removeItem('auth_token')
     window.location.href = '#/login'
     return Promise.reject(new Error(msg || '登录已过期'))
+  } else if (code === 403) {
+    // 权限不足处理
+    console.warn('[Permission Error]', {
+      url: res.config.url,
+      method: res.config.method,
+      requestData: res.config.data,
+      requestParams: res.config.params,
+      responseStatus: res.status,
+      responseData: res.data
+    })
+    return Promise.reject(new Error(msg || '您没有执行此操作的权限'))
   } else {
     // 业务错误处理
     console.error('[Business Error]', {

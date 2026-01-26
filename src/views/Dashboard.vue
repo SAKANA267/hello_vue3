@@ -78,6 +78,10 @@ import {
   recentAudits
 } from '@/api/mockData/dashboard'
 
+// 导入权限
+import { usePermissions } from '@/composables/usePermissions'
+const { hasPermission } = usePermissions()
+
 // 统计卡片数据
 const statCards = reactive([
   { label: '报卡总数', value: '1,248', icon: Document, color: '#409EFF', trend: 12.5 },
@@ -96,12 +100,33 @@ const trendChartData = computed(() => {
   return trendData.year
 })
 
-// 快捷操作配置
-const quickActions = reactive([
-  { key: 'create', label: '新建报卡', type: 'primary' as const, icon: DocumentAdd },
-  { key: 'batch-audit', label: '批量审核', type: 'success' as const, icon: Check },
-  { key: 'export', label: '数据导出', type: 'warning' as const, icon: Download }
-])
+// 快捷操作配置（根据权限过滤）
+const quickActions = computed(() => {
+  const actions = [
+    {
+      key: 'create',
+      label: '新建报卡',
+      type: 'primary' as const,
+      icon: DocumentAdd,
+      permission: 'object:create' as const
+    },
+    {
+      key: 'batch-audit',
+      label: '批量审核',
+      type: 'success' as const,
+      icon: Check,
+      permission: 'audit:batch' as const
+    },
+    {
+      key: 'export',
+      label: '数据导出',
+      type: 'warning' as const,
+      icon: Download,
+      permission: 'data:export' as const
+    }
+  ]
+  return actions.filter(action => hasPermission(action.permission))
+})
 
 // 最近活动数据
 const recentActivities = reactive(recentAudits)

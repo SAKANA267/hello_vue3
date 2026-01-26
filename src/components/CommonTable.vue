@@ -37,8 +37,16 @@
         <template #default="scope">
           <!-- 编辑删除模式（默认） -->
           <template v-if="showEditDeleteButtons">
-            <el-button type="text" @click="handleEdit(scope.row)" size="small"> 编辑 </el-button>
             <el-button
+              v-if="permissions?.canEdit !== false"
+              type="text"
+              @click="handleEdit(scope.row)"
+              size="small"
+            >
+              编辑
+            </el-button>
+            <el-button
+              v-if="permissions?.canDelete !== false"
               type="text"
               size="small"
               style="color: #f56c6c"
@@ -49,7 +57,12 @@
           </template>
           <!-- 审核模式 -->
           <template v-if="showAuditButton">
-            <el-button type="primary" @click="emit('audit', scope.row)" size="small">
+            <el-button
+              v-if="permissions?.canAudit !== false"
+              type="primary"
+              @click="emit('audit', scope.row)"
+              size="small"
+            >
               审核
             </el-button>
           </template>
@@ -201,6 +214,15 @@ const props = defineProps({
       待审核: 'warning',
       已审核: 'success',
       审核不通过: 'danger'
+    })
+  },
+  // 权限配置
+  permissions: {
+    type: Object,
+    default: () => ({
+      canEdit: true,
+      canDelete: true,
+      canAudit: true
     })
   }
 })

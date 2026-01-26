@@ -2,7 +2,7 @@ import Mock from 'mockjs'
 import userInfoApi from './mockData/userInfo'
 import objectApi from './mockData/objectManagement'
 import userApi from './mockData/userManagement'
-import permissionApi from './mockData/permission'
+import './mockData/permission' // Mock 已在文件内部注册
 
 // Profile.vue
 Mock.mock('/api/user/getUserInfo', 'get', userInfoApi.getUserInfo)
@@ -21,6 +21,3 @@ Mock.mock(RegExp('/api/user/getUserList(\\?.*)?$'), 'get', userApi.getUserList)
 Mock.mock(RegExp('/api/user/deleteUser(\\?.*)?$'), 'get', userApi.deleteUser)
 Mock.mock('/api/user/createUser', 'post', userApi.createUser)
 Mock.mock('/api/user/updateUser', 'post', userApi.updateUser)
-
-// Login.vue
-Mock.mock('/api/permission/getMenu', 'post', permissionApi.getMenu)
