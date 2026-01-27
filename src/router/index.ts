@@ -61,12 +61,62 @@ const routes = [
         }
       },
       {
-        path: '/test',
-        name: 'test',
+        path: '/auditManagement',
+        name: 'auditManagement',
         component: () => import('@/views/ObjectAudit.vue'),
         meta: {
-          title: '审核页面',
+          title: '审核管理',
           permission: 'audit:view' as Permission,
+          menuIndex: '1-3'
+        }
+      },
+      {
+        path: '/quickStart',
+        name: 'quickStart',
+        component: () => import('@/views/ToDo.vue'),
+        meta: {
+          title: '快速开始',
+          permission: 'quickStart:view' as Permission,
+          menuIndex: '3-1'
+        }
+      },
+      {
+        path: '/apiDocs',
+        name: 'apiDocs',
+        component: () => import('@/views/ToDo.vue'),
+        meta: {
+          title: 'API 文档',
+          permission: 'apiDocs:view' as Permission,
+          menuIndex: '3-2'
+        }
+      },
+      {
+        path: '/settings',
+        name: 'settings',
+        component: () => import('@/views/ToDo.vue'),
+        meta: {
+          title: '设置',
+          permission: 'settings:view' as Permission,
+          menuIndex: '4-1'
+        }
+      },
+      {
+        path: '/help',
+        name: 'help',
+        component: () => import('@/views/ToDo.vue'),
+        meta: {
+          title: '帮助',
+          permission: 'help:view' as Permission,
+          menuIndex: '4-2'
+        }
+      },
+      {
+        path: '/test',
+        name: 'test',
+        component: () => import('@/views/Test.vue'),
+        meta: {
+          title: '测试页面',
+          permission: 'test:view' as Permission,
           menuIndex: '4-3'
         }
       }

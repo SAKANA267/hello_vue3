@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, reactive, computed } from 'vue'
+import { ref, getCurrentInstance, reactive } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CommonTable from '@/components/CommonTable.vue'
@@ -73,7 +73,7 @@ const tableLabel = [
   { prop: 'age', label: '年龄', width: '60' },
   { prop: 'phone', label: '联系电话', width: '120' },
   { prop: 'reportDoctor', label: '报告医生', width: '100' },
-  { prop: 'fillDate', label: '填卡日期', width: '' }
+  { prop: 'fillDate', label: '填卡日期', width: '120' }
 ]
 
 // 状态标签类型映射
@@ -147,13 +147,6 @@ const performAudit = async ({ action, rowData, remark }) => {
     })
   }
 }
-
-// 响应式布局检测
-const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => (isMobile.value ? '60px' : '100px'))
-window.addEventListener('resize', () => {
-  isMobile.value = window.innerWidth <= 768
-})
 </script>
 
 <style scoped>

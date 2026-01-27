@@ -11,17 +11,21 @@ export const PERMISSIONS = {
   DASHBOARD_VIEW: 'dashboard:view',
   PROFILE_VIEW: 'profile:view',
   OBJECT_VIEW: 'object:view',
-  OBJECT_CREATE: 'object:create',
-  OBJECT_EDIT: 'object:edit',
-  OBJECT_DELETE: 'object:delete',
   USER_VIEW: 'user:view',
-  USER_MANAGE: 'user:manage',
   AUDIT_VIEW: 'audit:view',
-  AUDIT_APPROVE: 'audit:approve',
-  AUDIT_REJECT: 'audit:reject',
+  QUICK_START_VIEW: 'quickStart:view',
+  API_DOCS_VIEW: 'apiDocs:view',
+  SETTINGS_VIEW: 'settings:view',
+  HELP_VIEW: 'help:view',
   TEST_VIEW: 'test:view',
 
   // 操作级权限
+  OBJECT_CREATE: 'object:create',
+  OBJECT_DELETE: 'object:delete',
+  OBJECT_EDIT: 'object:edit',
+  USER_MANAGE: 'user:manage',
+  AUDIT_APPROVE: 'audit:approve',
+  AUDIT_REJECT: 'audit:reject',
   DATA_EXPORT: 'data:export',
   DATA_IMPORT: 'data:import',
   AUDIT_BATCH: 'audit:batch',
@@ -46,6 +50,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, PermissionValue[]> = {
     PERMISSIONS.AUDIT_VIEW,
     PERMISSIONS.AUDIT_APPROVE,
     PERMISSIONS.AUDIT_REJECT,
+    PERMISSIONS.QUICK_START_VIEW,
+    PERMISSIONS.API_DOCS_VIEW,
+    PERMISSIONS.SETTINGS_VIEW,
+    PERMISSIONS.HELP_VIEW,
     PERMISSIONS.DATA_EXPORT,
     PERMISSIONS.TEST_VIEW
   ],
@@ -55,14 +63,20 @@ export const ROLE_PERMISSIONS: Record<UserRole, PermissionValue[]> = {
     PERMISSIONS.OBJECT_VIEW,
     PERMISSIONS.AUDIT_VIEW,
     PERMISSIONS.AUDIT_APPROVE,
-    PERMISSIONS.AUDIT_REJECT
+    PERMISSIONS.AUDIT_REJECT,
+    PERMISSIONS.QUICK_START_VIEW,
+    PERMISSIONS.API_DOCS_VIEW,
+    PERMISSIONS.SETTINGS_VIEW,
+    PERMISSIONS.HELP_VIEW
   ],
   user: [
     PERMISSIONS.DASHBOARD_VIEW,
     PERMISSIONS.PROFILE_VIEW,
-    PERMISSIONS.OBJECT_VIEW,
-    PERMISSIONS.OBJECT_EDIT,
-    PERMISSIONS.AUDIT_VIEW
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.QUICK_START_VIEW,
+    PERMISSIONS.API_DOCS_VIEW,
+    PERMISSIONS.SETTINGS_VIEW,
+    PERMISSIONS.HELP_VIEW
   ],
   guest: [PERMISSIONS.DASHBOARD_VIEW, PERMISSIONS.PROFILE_VIEW, PERMISSIONS.OBJECT_VIEW]
 }
