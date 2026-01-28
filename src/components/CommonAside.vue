@@ -69,7 +69,7 @@ const allMenuItems = [
     title: '菜单',
     icon: markRaw(IconMenu),
     children: [
-      { index: '2-1', title: '仪表盘', route: '/dashboard' },
+      { index: '2-1', title: '首页', route: '/dashboard' },
       { index: '2-2', title: '个人资料', route: '/profile' }
     ]
   },

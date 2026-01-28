@@ -9,7 +9,7 @@
     <el-tag
       v-for="(tag, index) in tags"
       :key="tag.name"
-      :closable="tag.path !== '/home'"
+      :closable="tag.path !== '/dashboard'"
       :effect="route.path == tag.path ? 'dark' : 'light'"
       @click="handleTag(tag)"
       @close="handleClose(tag, index)"

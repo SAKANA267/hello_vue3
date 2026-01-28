@@ -11,8 +11,8 @@ function initState() {
     isCollapse: true,
     tags: [
       {
-        name: 'home',
-        path: '/home',
+        name: 'dashboard',
+        path: '/dashboard',
         label: '首页',
         icon: ''
       }
@@ -29,7 +29,7 @@ export const useAllDataStore = defineStore('allData', () => {
   // CommonAside.vue tags 标签栏操作
   function selectMenu(val) {
     //传入值为对象 eg：index: '1-1', title: '对象管理', route: '/objectManagement'
-    if (val.route !== '/home') {
+    if (val.route !== '/dashboard') {
       // 检查标签是否已存在
       const index = state.value.tags.findIndex(item => item.path === val.route)
       if (index === -1) {
@@ -78,7 +78,7 @@ export const useAllDataStore = defineStore('allData', () => {
     localStorage.removeItem(MENU_LIST_KEY)
     localStorage.removeItem(USER_INFO_KEY)
     state.value.menuList = []
-    state.value.tags = [{ name: 'home', path: '/home', label: '首页', icon: '' }]
+    state.value.tags = [{ name: 'dashboard', path: '/dashboard', label: '主页', icon: '' }]
     state.value.currentMenu = null
   }
 

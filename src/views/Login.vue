@@ -82,7 +82,7 @@ const handleLogin = async () => {
       store.setToken(res.token)
       // 存储用户信息
       store.setUser(res.user)
-      router.push('/home')
+      router.push('/dashboard')
       setTimeout(() => {
         loading.value = false
       }, 1500)

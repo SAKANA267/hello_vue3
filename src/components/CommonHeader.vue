@@ -5,53 +5,50 @@
  * CommonHeader.vue
 -->
 <template>
-  <div class="header">
-    <!-- 左侧内容 -->
-    <div class="l-cont">
-      <el-button
-        role="button"
-        aria-label="toggleCollapse"
-        size="large"
-        type="primary"
-        text
-        @click="toggleCollapse"
-      >
+  <div class="header-wrapper">
+    <div class="header">
+      <!-- 左侧内容 -->
+      <div class="l-cont">
+        <el-button
+          role="button"
+          aria-label="toggleCollapse"
+          size="large"
+          type="primary"
+          text
+          @click="toggleCollapse"
         >
-        <el-icon>
-          <IconMenu />
-        </el-icon>
-      </el-button>
-
-      <!-- breadCrumb -->
-      <el-breadcrumb :separator-icon="ArrowRight">
-        <el-breadcrumb-item>首页</el-breadcrumb-item>
-        <el-breadcrumb-item>导航</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <!-- 右侧内容 -->
-    <div class="r-cont">
-      <el-dropdown>
-        <span class="el-dropdown-link">
-          <img :src="getImageUrl('user')" class="user" alt="用户头像" />
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="router.push('/profile')"> 个人中心 </el-dropdown-item>
-            <el-dropdown-item @click="handleLogout"> 退出 </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+          <el-icon>
+            <IconMenu />
+          </el-icon>
+        </el-button>
+      </div>
+      <common-tab />
+      <!-- 右侧内容 -->
+      <div class="r-cont">
+        <el-dropdown>
+          <span class="el-dropdown-link">
+            <img :src="getImageUrl('user')" class="user" alt="用户头像" />
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="router.push('/profile')"> 个人中心 </el-dropdown-item>
+              <el-dropdown-item @click="handleLogout"> 退出 </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAllDataStore } from '@/stores/index.js'
-import { ArrowRight, Menu as IconMenu } from '@element-plus/icons-vue'
+import { Menu as IconMenu } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import CommonTab from '@/components/CommonTab.vue'
 
 const getImageUrl = (user: string) => {
-  return new URL(`../assets/images/${user}.png`, import.meta.url).href
+  return new URL(`../assets/images/${user}.svg`, import.meta.url).href
 }
 
 const store = useAllDataStore()
@@ -62,27 +59,50 @@ const toggleCollapse = () => {
 }
 
 const handleLogout = () => {
-  // 清除 store 中的数据和 localStorage
   store.clearToken()
-  // 跳转到登录页
   router.push('/login')
 }
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0px;
-  height: 100%;
+.header-wrapper {
   width: 100%;
 }
 
-.l-cont,
-.r-cont {
+.header {
   display: flex;
   align-items: center;
+  padding: 0;
+  height: calc(100% - 42px);
+  width: 100%;
+}
+
+.l-cont {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: 10px;
+  background-color: aliceblue;
+  border-radius: 10%;
+}
+
+:deep(.tags) {
+  flex: 1;
+  display: flex;
+}
+
+:deep(.tags .el-tag) {
+  flex-shrink: 0;
+}
+
+.r-cont {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: 10px;
+  background-color: aliceblue;
+  border: 1px;
+  border-radius: 50%;
 }
 
 .user {
@@ -92,27 +112,10 @@ const handleLogout = () => {
   object-fit: cover;
 }
 
-.el-breadcrumb {
-  margin-left: 10px;
-  font-size: 14px;
-}
-
 .example-showcase .el-dropdown-link {
   cursor: pointer;
   color: var(--el-color-primary);
   display: flex;
   align-items: center;
-}
-
-:deep(.el-breadcrumb i) {
-  color: #fff !important;
-}
-:deep(.el-breadcrumb span) {
-  color: #fff !important;
-  cursor: pointer !important;
-  transition: color 0.2s;
-}
-:deep(.el-breadcrumb span:hover) {
-  color: #000000 !important;
 }
 </style>
