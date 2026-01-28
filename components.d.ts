@@ -16,8 +16,6 @@ declare module 'vue' {
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
-    ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
-    ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCol: typeof import('element-plus/es')['ElCol']

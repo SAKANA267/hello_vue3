@@ -51,16 +51,17 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, reactive } from 'vue'
+import { ref, computed, getCurrentInstance, reactive } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CommonTable from '@/components/CommonTable.vue'
 import AuditDialog from '@/components/AuditDialog.vue'
 import { usePermissions } from '@/composables/usePermissions'
+import { useAllDataStore } from '@/stores/index.js'
 
 const { hasPermission } = usePermissions()
-
 const { proxy } = getCurrentInstance()
+const store = useAllDataStore()
 const tableRef = ref(null)
 
 // 表格列配置
@@ -88,8 +89,8 @@ const statusTagTypes = {
 // 审核对话框展示的字段列表
 const auditDetailFields = ['name', 'department', 'diagnosisName', 'fillDate']
 
-// 当前审核人（可以从用户信息中获取）
-const currentAuditor = ref('管理员')
+// 当前审核人（从 store 获取）
+const currentAuditor = computed(() => store.state.user?.username || '')
 
 // 审核对话框状态
 const auditDialogVisible = ref(false)

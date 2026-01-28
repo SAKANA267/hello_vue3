@@ -22,6 +22,7 @@ function param2Obj(url: string): ParsedParams {
 let List: ObjectItem[] = []
 const count = 200 // 模拟数据条数
 for (let i = 0; i < count; i++) {
+  const status = Mock.Random.pick(['待审核', '已审核', '审核不通过'])
   List.push(
     Mock.mock({
       id: Mock.Random.guid(),
@@ -36,9 +37,9 @@ for (let i = 0; i < count; i++) {
       phone: /^1[3-9]\d{9}$/,
       reportDoctor: Mock.Random.cname(),
       fillDate: Mock.Random.date('yyyy-MM-dd'),
-      auditDate: Mock.Random.date('yyyy-MM-dd'),
-      auditor: Mock.Random.cname(),
-      status: Mock.Random.pick(['待审核', '已审核'])
+      auditDate: status === '已审核' ? Mock.Random.date('yyyy-MM-dd') : '-',
+      auditor: status === '已审核' ? Mock.Random.cname() : '-',
+      status: status
     }) as ObjectItem
   )
 }
@@ -293,8 +294,8 @@ export default {
     List[index] = {
       ...List[index],
       status: status || '待审核',
-      auditor: '',
-      auditDate: ''
+      auditor: '-',
+      auditDate: '-'
     }
 
     return {
