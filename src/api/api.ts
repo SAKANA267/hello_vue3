@@ -14,7 +14,8 @@ import type {
   ObjectItem,
   UserItem,
   AuditPassParams,
-  AuditRejectParams
+  AuditRejectParams,
+  AuditRevokeParams
 } from './types'
 
 /** API 接口对象 */
@@ -119,6 +120,14 @@ interface ApiInterface {
    * @returns 操作结果和消息
    */
   auditReject(data: AuditRejectParams): Promise<{ success: boolean; msg?: string }>
+  /**
+   * 撤回审核
+   * @param data - 撤回审核参数
+   * @param data.id - 要撤回的对象ID
+   * @param data.status - 固定值 '待审核'
+   * @returns 操作结果和消息
+   */
+  auditRevoke(data: AuditRevokeParams): Promise<{ success: boolean; msg?: string }>
 }
 
 const api: ApiInterface = {
@@ -242,6 +251,15 @@ const api: ApiInterface = {
   auditReject(data: AuditRejectParams) {
     return request({
       url: '/table/auditReject',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 撤回审核 */
+  auditRevoke(data: AuditRevokeParams) {
+    return request({
+      url: '/table/auditRevoke',
       method: 'post',
       data
     })

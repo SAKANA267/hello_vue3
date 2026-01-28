@@ -28,12 +28,14 @@
         :query-params="formInline.keyWord"
         :get-api="proxy?.$api.getTableData"
         operation-mode="audit"
-        :status-column="{ prop: 'status', label: '状态', width: '120' }"
+        :status-column="{ prop: 'status', label: '状态' }"
         :status-tag-types="statusTagTypes"
         :permissions="{
-          canAudit: hasPermission('audit:approve')
+          canAudit: hasPermission('audit:approve'),
+          canRevoke: hasPermission('audit:revoke')
         }"
         @audit="handleAuditClick"
+        @revoke="handleRevoke"
       />
     </div>
 
@@ -143,6 +145,34 @@ const performAudit = async ({ action, rowData, remark }) => {
     ElMessage({
       showClose: true,
       message: error.message || '审核操作失败，请重试',
+      type: 'error'
+    })
+  }
+}
+
+// 处理撤回操作
+const handleRevoke = async row => {
+  try {
+    const res = await proxy.$api.auditRevoke({
+      id: row.id,
+      status: '待审核'
+    })
+
+    if (res && res.success) {
+      ElMessage({
+        showClose: true,
+        message: '撤回成功',
+        type: 'success'
+      })
+      await tableRef.value?.search()
+    } else {
+      throw new Error(res?.msg || '撤回失败')
+    }
+  } catch (error) {
+    console.error('撤回操作失败:', error)
+    ElMessage({
+      showClose: true,
+      message: error.message || '撤回操作失败，请重试',
       type: 'error'
     })
   }

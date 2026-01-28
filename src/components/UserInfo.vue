@@ -37,7 +37,7 @@ import type { UserInfo, LoginInfo } from '@/assets/types/user'
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance
 const getImageUrl = (user: string) => {
-  return new URL(`../assets/images/${user}.png`, import.meta.url).href
+  return new URL(`../assets/images/${user}.svg`, import.meta.url).href
 }
 
 const userData = ref<UserInfo>({

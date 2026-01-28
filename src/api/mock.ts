@@ -15,6 +15,7 @@ Mock.mock('/api/table/createObject', 'post', objectApi.createObject)
 Mock.mock('/api/table/updateObject', 'post', objectApi.updateObject)
 Mock.mock('/api/table/auditPass', 'post', objectApi.auditPass)
 Mock.mock('/api/table/auditReject', 'post', objectApi.auditReject)
+Mock.mock('/api/table/auditRevoke', 'post', objectApi.auditRevoke)
 
 // User Management.vue
 Mock.mock(RegExp('/api/user/getUserList(\\?.*)?$'), 'get', userApi.getUserList)

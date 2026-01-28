@@ -187,3 +187,9 @@ export interface AuditResponse {
   success: boolean
   msg?: string
 }
+
+/** 审核撤回参数 */
+export interface AuditRevokeParams {
+  id: string
+  status: '待审核'
+}

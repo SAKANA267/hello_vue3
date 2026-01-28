@@ -25,7 +25,7 @@
       <el-table-column
         v-if="statusColumn"
         :label="statusColumn.label"
-        :width="statusColumn.width || '140'"
+        :width="statusColumn.width || ''"
       >
         <template #default="scope">
           <el-tag :type="getStatusTagType(scope.row[statusColumn.prop])" size="small">
@@ -58,12 +58,24 @@
           <!-- 审核模式 -->
           <template v-if="showAuditButton">
             <el-button
-              v-if="permissions?.canAudit !== false"
-              type="primary"
+              :disabled="
+                permissions?.canAudit !== true || scope.row[statusColumn?.prop] !== '待审核'
+              "
+              type="text"
               @click="emit('audit', scope.row)"
               size="small"
             >
               审核
+            </el-button>
+            <el-button
+              :disabled="
+                permissions?.canRevoke !== true || scope.row[statusColumn?.prop] === '待审核'
+              "
+              type="text"
+              size="small"
+              @click="handleRevoke(scope.row)"
+            >
+              撤回
             </el-button>
           </template>
         </template>
@@ -101,8 +113,25 @@
         <template #default="scope">
           <!-- 审核模式 -->
           <template v-if="showAuditButton">
-            <el-button type="primary" @click="emit('audit', scope.row)" size="small">
+            <el-button
+              :disabled="
+                permissions?.canAudit !== true || scope.row[statusColumn?.prop] !== '待审核'
+              "
+              type="text"
+              @click="emit('audit', scope.row)"
+              size="small"
+            >
               审核
+            </el-button>
+            <el-button
+              :disabled="
+                permissions?.canRevoke !== true || scope.row[statusColumn?.prop] === '待审核'
+              "
+              type="text"
+              @click="handleRevoke(scope.row)"
+              size="small"
+            >
+              撤回
             </el-button>
           </template>
           <!-- 编辑删除模式（默认） -->
@@ -148,6 +177,7 @@
  *
  * @emits edit - 编辑事件，传递当前行数据
  * @emits audit - 审核事件，传递当前行数据
+ * @emits revoke - 撤回事件，传递当前行数据
  *
  * @expose search - 刷新表格数据方法
  *
@@ -222,7 +252,8 @@ const props = defineProps({
     default: () => ({
       canEdit: true,
       canDelete: true,
-      canAudit: true
+      canAudit: true,
+      canRevoke: true
     })
   }
 })
@@ -299,10 +330,28 @@ const handleDelete = val => {
     })
 }
 
-const emit = defineEmits(['edit', 'audit'])
+const emit = defineEmits(['edit', 'audit', 'revoke'])
 const handleEdit = row => {
   console.log('handleEdit()编辑对象:', row)
   emit('edit', row)
+}
+
+// 撤回审核
+const handleRevoke = row => {
+  ElMessageBox.confirm('是否确认撤回该审核记录？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      emit('revoke', row)
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '已取消撤回'
+      })
+    })
 }
 
 // 获取状态标签类型
