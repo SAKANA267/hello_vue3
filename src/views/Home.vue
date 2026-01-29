@@ -13,7 +13,11 @@
           <common-header />
         </el-header>
         <el-main class="right-main">
-          <router-view />
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -39,5 +43,16 @@ import CommonHeader from '@/components/CommonHeader.vue'
 
 .el-main {
   background-color: #f5f5f5;
+}
+
+// 路由过渡动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

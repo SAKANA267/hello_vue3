@@ -37,8 +37,8 @@ for (let i = 0; i < count; i++) {
       phone: /^1[3-9]\d{9}$/,
       reportDoctor: Mock.Random.cname(),
       fillDate: Mock.Random.date('yyyy-MM-dd'),
-      auditDate: status === '已审核' ? Mock.Random.date('yyyy-MM-dd') : '-',
-      auditor: status === '已审核' ? Mock.Random.cname() : '-',
+      auditDate: status !== '待审核' ? Mock.Random.date('yyyy-MM-dd') : '-',
+      auditor: status !== '待审核' ? Mock.Random.cname() : '-',
       status: status
     }) as ObjectItem
   )
