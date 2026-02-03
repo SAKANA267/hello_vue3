@@ -261,7 +261,7 @@ const props = defineProps({
 const tableData = ref([])
 
 const config = reactive({
-  keyWord: '',
+  keyword: '',
   totle: 0,
   page: 1
 })
@@ -270,15 +270,19 @@ const config = reactive({
 const showAuditButton = computed(() => props.operationMode === 'audit')
 const showEditDeleteButtons = computed(() => props.operationMode === 'edit-delete')
 const getTableData = async () => {
-  const table = await props.getApi(config)
-  tableData.value = table.list
-  console.log('tableData', table.list)
-  config.totle = table.count
-  console.log('totle', config.totle)
+  try {
+    const res = await props.getApi(config)
+    tableData.value = res.records
+    console.log('tableData', res.records)
+    config.totle = res.total
+    console.log('totle', config.totle)
+  } catch (error) {
+    console.error('获取表格数据失败:', error)
+  }
 }
 //暴露搜索方法
 const search = () => {
-  config.keyWord = props.queryParams || ''
+  config.keyword = props.queryParams || ''
   getTableData()
 }
 
@@ -297,28 +301,15 @@ const handleDelete = val => {
     .then(async () => {
       try {
         console.log('要删除的对象id:', val.id)
-        const res = await props.deleteApi({ id: val.id })
-        console.log('res:', res)
+        await props.deleteApi(val.id)
 
-        // 修改响应检查逻辑
-        if (res && res.success) {
-          ElMessage({
-            showClose: true,
-            message: '删除成功',
-            type: 'success'
-          })
-          await getTableData()
-          console.log('删除了', val)
-        } else {
-          throw new Error(res?.msg || '删除失败')
-        }
+        // 能执行到这里说明 code=200，删除成功
+        ElMessage.success('删除成功')
+        await getTableData()
+        console.log('删除了', val)
       } catch (error) {
         console.error('删除操作失败:', error)
-        ElMessage({
-          showClose: true,
-          message: error.message || '删除操作失败，请重试',
-          type: 'error'
-        })
+        ElMessage.error(error.message || '删除操作失败，请重试')
       }
     })
     .catch(() => {

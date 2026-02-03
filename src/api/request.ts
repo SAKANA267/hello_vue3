@@ -116,12 +116,20 @@ service.interceptors.response.use(res => {
 
 function request<T = unknown>(options: RequestConfig): Promise<T> {
   options.method = options.method || 'get'
-  // 修复GET请求参数处理
+  // 修复GET请求参数处理：如果已有 params 则保留，否则使用 data
   if (options.method.toLowerCase() === 'get') {
-    options.params = options.data
+    if (!options.params) {
+      options.params = options.data
+    }
   }
 
   let isMock = config.mock
+
+  // 登录接口始终使用 Mock（混合模式）
+  if (options.url?.includes('/permission/getMenu')) {
+    isMock = true
+  }
+
   if (typeof options.mock !== 'undefined') {
     isMock = options.mock
   }

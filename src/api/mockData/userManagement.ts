@@ -1,7 +1,14 @@
 import Mock from 'mockjs'
-import type { MockConfig, MockResponse, UserItem, ParsedParams, TableDataResponse } from '../types'
+import type {
+  MockConfig,
+  MockResponse,
+  UserDTO,
+  RestfulPageResponse,
+  CreateUserRequest,
+  UpdateUserRequest
+} from '../types'
 
-function param2Obj(url: string): ParsedParams {
+function param2Obj(url: string): any {
   const search = url.split('?')[1]
   if (!search) {
     return {}
@@ -13,127 +20,346 @@ function param2Obj(url: string): ParsedParams {
   )
 }
 
-let List: UserItem[] = []
-const count = 200 // 模拟数据条数
+// Mock 用户数据存储
+let List: UserDTO[] = []
+const count = 200
+
 for (let i = 0; i < count; i++) {
-  List.push(
-    Mock.mock({
-      id: Mock.Random.guid(),
-      username: Mock.Random.word(5, 10),
-      name: Mock.Random.cname(),
-      email: Mock.Random.email(),
-      phone: Mock.mock(/^1[3-9]\d{9}$/),
-      role: Mock.Random.pick(['admin', 'user', 'editor']),
-      status: Mock.Random.pick(['active', 'inactive']),
-      createTime: Mock.Random.datetime(),
-      lastLogin: Mock.Random.datetime()
-    }) as UserItem
-  )
+  List.push({
+    id: Mock.Random.guid(),
+    username: Mock.Random.word(5, 10),
+    name: Mock.Random.cname(),
+    email: Mock.Random.email(),
+    phone: Mock.mock(/^1[3-9]\d{9}$/),
+    role: Mock.Random.pick(['ADMIN', 'USER', 'GUEST', 'AUDITOR']),
+    status: Mock.Random.pick(['ACTIVE', 'INACTIVE']),
+    createTime: Mock.Random.datetime(),
+    updateTime: Mock.Random.datetime(),
+    lastLogin: Mock.Random.datetime()
+  } as UserDTO)
+}
+
+// ========== RESTful API 处理函数 ==========
+
+/**
+ * GET /api/users - 分页查询用户列表
+ */
+const getUsers = (config: MockConfig): MockResponse<RestfulPageResponse<UserDTO>> => {
+  const urlParams = param2Obj(config.url)
+  const { keyword, page = 1, size = 10, role, status } = urlParams
+
+  // 搜索过滤
+  let mockList = List
+  if (keyword) {
+    const kw = keyword.toLowerCase()
+    mockList = List.filter(item => {
+      return (
+        item.username?.toLowerCase().includes(kw) ||
+        item.name?.toLowerCase().includes(kw) ||
+        item.email?.toLowerCase().includes(kw) ||
+        item.phone?.includes(kw)
+      )
+    })
+  }
+
+  // 角色过滤
+  if (role) {
+    mockList = mockList.filter(item => item.role === role)
+  }
+
+  // 状态过滤
+  if (status) {
+    mockList = mockList.filter(item => item.status === status)
+  }
+
+  // 分页
+  const start = (page - 1) * size
+  const end = start + size
+  const records = mockList.slice(start, end)
+
+  return {
+    code: 200,
+    message: 'success',
+    data: {
+      page: Number(page),
+      size: Number(size),
+      total: mockList.length,
+      records
+    }
+  }
+}
+
+/**
+ * GET /api/users/{id} - 根据ID获取用户
+ */
+const getUserById = (config: MockConfig): MockResponse<UserDTO> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 1]
+  const user = List.find(item => item.id === id)
+
+  if (!user) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  return {
+    code: 200,
+    message: 'success',
+    data: user
+  }
+}
+
+/**
+ * POST /api/users - 创建用户
+ */
+const createUser = (config: MockConfig): MockResponse<UserDTO> => {
+  const data: CreateUserRequest = JSON.parse(config.body || '{}')
+
+  // 验证必填字段
+  if (!data.username || !data.password || !data.name) {
+    return {
+      code: 400,
+      message: 'Username, password and name are required'
+    }
+  }
+
+  // 检查用户名是否已存在
+  if (List.some(item => item.username === data.username)) {
+    return {
+      code: 400,
+      message: 'Username already exists'
+    }
+  }
+
+  const newUser: UserDTO = {
+    id: Mock.Random.guid(),
+    username: data.username,
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    role: data.role || 'USER',
+    status: data.status || 'ACTIVE',
+    dataScope: data.dataScope,
+    createTime: new Date().toISOString(),
+    updateTime: new Date().toISOString()
+  }
+
+  List.unshift(newUser)
+
+  return {
+    code: 200,
+    message: 'User created successfully',
+    data: newUser
+  }
+}
+
+/**
+ * PUT /api/users/{id} - 更新用户
+ */
+const updateUser = (config: MockConfig): MockResponse<UserDTO> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 2]
+  const data: UpdateUserRequest = JSON.parse(config.body || '{}')
+
+  const index = List.findIndex(item => item.id === id)
+  if (index === -1) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  List[index] = {
+    ...List[index],
+    ...data,
+    updateTime: new Date().toISOString()
+  }
+
+  return {
+    code: 200,
+    message: 'User updated successfully',
+    data: List[index]
+  }
+}
+
+/**
+ * DELETE /api/users/{id} - 删除用户
+ */
+const deleteUser = (config: MockConfig): MockResponse<{ message: string }> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 1]
+  const index = List.findIndex(item => item.id === id)
+
+  if (index === -1) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  List.splice(index, 1)
+
+  return {
+    code: 200,
+    message: 'User deleted successfully',
+    data: { message: 'User deleted successfully' }
+  }
+}
+
+/**
+ * DELETE /api/users/batch - 批量删除用户
+ */
+const batchDeleteUsers = (config: MockConfig): MockResponse<{ message: string }> => {
+  const ids: string[] = JSON.parse(config.body || '[]')
+  let deletedCount = 0
+
+  ids.forEach(id => {
+    const index = List.findIndex(item => item.id === id)
+    if (index !== -1) {
+      List.splice(index, 1)
+      deletedCount++
+    }
+  })
+
+  return {
+    code: 200,
+    message: `Deleted ${deletedCount} users successfully`,
+    data: { message: `Deleted ${deletedCount} users successfully` }
+  }
+}
+
+/**
+ * GET /api/users/search - 搜索用户
+ */
+const searchUsers = (config: MockConfig): MockResponse<UserDTO[]> => {
+  const { keyword } = param2Obj(config.url)
+
+  if (!keyword) {
+    return {
+      code: 200,
+      message: 'success',
+      data: []
+    }
+  }
+
+  const kw = keyword.toLowerCase()
+  const results = List.filter(item => {
+    return (
+      item.username?.toLowerCase().includes(kw) ||
+      item.name?.toLowerCase().includes(kw) ||
+      item.email?.toLowerCase().includes(kw)
+    )
+  })
+
+  return {
+    code: 200,
+    message: 'success',
+    data: results
+  }
+}
+
+/**
+ * PUT /api/users/{id}/activate - 启用用户
+ */
+const activateUser = (config: MockConfig): MockResponse<{ message: string }> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 2]
+  const user = List.find(item => item.id === id)
+
+  if (!user) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  user.status = 'ACTIVE'
+  user.updateTime = new Date().toISOString()
+
+  return {
+    code: 200,
+    message: 'User activated successfully',
+    data: { message: 'User activated successfully' }
+  }
+}
+
+/**
+ * PUT /api/users/{id}/deactivate - 停用用户
+ */
+const deactivateUser = (config: MockConfig): MockResponse<{ message: string }> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 2]
+  const user = List.find(item => item.id === id)
+
+  if (!user) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  user.status = 'INACTIVE'
+  user.updateTime = new Date().toISOString()
+
+  return {
+    code: 200,
+    message: 'User deactivated successfully',
+    data: { message: 'User deactivated successfully' }
+  }
+}
+
+/**
+ * PUT /api/users/{id}/password - 修改密码
+ */
+const changePassword = (config: MockConfig): MockResponse<{ message: string }> => {
+  const urlParts = config.url.split('/')
+  const id = urlParts[urlParts.length - 2]
+  const user = List.find(item => item.id === id)
+
+  if (!user) {
+    return {
+      code: 404,
+      message: 'User not found'
+    }
+  }
+
+  user.updateTime = new Date().toISOString()
+
+  return {
+    code: 200,
+    message: 'Password changed successfully',
+    data: { message: 'Password changed successfully' }
+  }
+}
+
+/**
+ * GET /api/users/check/username - 检查用户名是否存在
+ */
+const checkUsername = (config: MockConfig): MockResponse<boolean> => {
+  const { username, excludeId } = param2Obj(config.url)
+
+  const exists = List.some(item => item.username === username && item.id !== excludeId)
+
+  return {
+    code: 200,
+    message: 'success',
+    data: exists
+  }
 }
 
 export default {
-  // 可搜索字段: username(用户名), name(姓名), email(邮箱), phone(电话), role(角色), status(状态)
-  getUserList: (config: MockConfig): MockResponse<TableDataResponse<UserItem>> => {
-    const { keyWord, page = 1, limit = 15 } = param2Obj(config.url)
-
-    const mockList = List.filter(item => {
-      if (keyWord) {
-        const keyword = keyWord.toLowerCase()
-        return (
-          item.username?.toLowerCase().includes(keyword) ||
-          item.name?.toLowerCase().includes(keyword) ||
-          item.email?.toLowerCase().includes(keyword) ||
-          item.phone?.includes(keyword) ||
-          item.role?.toLowerCase().includes(keyword) ||
-          item.status?.toLowerCase().includes(keyword)
-        )
-      }
-      return true
-    })
-
-    const pageList = mockList.filter(
-      (item, index) => index < limit * page && index >= limit * (page - 1)
-    )
-    return {
-      code: 200,
-      data: {
-        list: pageList,
-        success: true,
-        count: mockList.length
-      },
-      msg: '获取成功'
-    }
-  },
-
-  // 删除用户
-  deleteUser: (config: MockConfig): MockResponse<{ success: boolean } | null> => {
-    const { id } = param2Obj(config.url)
-
-    if (!id) {
-      return {
-        code: 500,
-        data: null,
-        msg: '参数错误'
-      }
-    } else {
-      List = List.filter(item => item.id !== id)
-      return {
-        code: 200,
-        data: { success: true },
-        msg: '删除成功'
-      }
-    }
-  },
-
-  // 添加用户
-  createUser: (config: MockConfig): MockResponse<{ success: boolean }> => {
-    const { username, name, email, phone, role } = JSON.parse(config.body || '{}')
-    List.unshift({
-      id: Mock.Random.guid(),
-      username: username,
-      name: name,
-      email: email,
-      phone: phone,
-      role: role,
-      status: 'active',
-      createTime: Mock.Random.datetime(),
-      lastLogin: Mock.Random.datetime()
-    } as UserItem)
-    return {
-      code: 200,
-      data: { success: true },
-      msg: '添加成功'
-    }
-  },
-
-  // 更新用户
-  updateUser: (config: MockConfig): MockResponse<{ success: boolean } | null> => {
-    const { id, username, name, email, phone, role, status } = JSON.parse(config.body || '{}')
-    const index = List.findIndex(item => item.id === id)
-
-    if (index === -1) {
-      return {
-        code: 500,
-        data: null,
-        msg: '用户不存在'
-      }
-    }
-
-    List[index] = {
-      ...List[index],
-      username: username || List[index].username,
-      name: name || List[index].name,
-      email: email || List[index].email,
-      phone: phone || List[index].phone,
-      role: role || List[index].role,
-      status: status || List[index].status,
-      lastLogin: Mock.Random.datetime()
-    }
-
-    return {
-      code: 200,
-      data: { success: true },
-      msg: '更新成功'
-    }
-  }
+  // RESTful API
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  batchDeleteUsers,
+  searchUsers,
+  activateUser,
+  deactivateUser,
+  changePassword,
+  checkUsername
 }

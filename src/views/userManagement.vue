@@ -34,8 +34,8 @@
       ref="tableRef"
       :table-label="tableLabel"
       :query-params="formInline.keyWord"
-      :get-api="proxy?.$api.getUserList"
-      :delete-api="proxy?.$api.deleteUser"
+      :get-api="proxy?.$api.getUsers"
+      :delete-api="proxy?.$api.deleteUserRestful"
       :permissions="{
         canEdit: hasPermission('user:manage'),
         canDelete: hasPermission('user:manage')
@@ -52,8 +52,8 @@
       :rules="rules"
       :action="dialogAction"
       :row-data="currentRow"
-      :add-api="proxy?.$api.createUser"
-      :edit-api="proxy?.$api.updateUser"
+      :add-api="proxy?.$api.createUserRestful"
+      :edit-api="proxy?.$api.updateUserRestful"
       @refresh="handleSearch()"
       @update:dialog-visible="dialogVisible = $event"
     />
@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
+import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
@@ -69,7 +69,6 @@ import PermissionButton from '@/components/PermissionButton.vue'
 import { usePermissions } from '@/composables/usePermissions'
 
 const { hasPermission } = usePermissions()
-
 const { proxy } = getCurrentInstance()
 const tableRef = ref(null)
 const tableEditDialogRef = ref(null)
@@ -85,20 +84,35 @@ const tableLabel = [
   { prop: 'createTime', label: '创建时间', width: '180' },
   { prop: 'lastLogin', label: '最后登录' }
 ]
-//编辑与创建用户 用于v-for创建编辑/新增表单
-const formFields = [
-  { prop: 'username', label: '用户名', type: 'input' },
-  { prop: 'name', label: '姓名', type: 'input' },
-  { prop: 'email', label: '邮箱', type: 'input' },
-  { prop: 'phone', label: '电话', type: 'input' },
-  { prop: 'role', label: '角色', type: 'select', options: ['admin', 'user', 'editor'] },
-  { prop: 'status', label: '状态', type: 'select', options: ['active', 'inactive'] },
-  { prop: 'createTime', label: '创建时间', type: 'date' },
-  { prop: 'lastLogin', label: '最后登录', type: 'date' }
-]
+
+// 密码字段（仅新增时使用）
+const passwordField = {
+  prop: 'password',
+  label: '密码',
+  type: 'input',
+  inputType: 'password'
+}
+
+// 根据操作类型动态计算表单字段
+const formFields = computed(() => {
+  const fields = [
+    {
+      prop: 'username',
+      label: '用户名',
+      type: 'input',
+      disabled: dialogAction.value === 'edit'
+    },
+    { prop: 'name', label: '姓名', type: 'input' },
+    { prop: 'email', label: '邮箱', type: 'input' },
+    { prop: 'phone', label: '电话', type: 'input' },
+    { prop: 'role', label: '角色', type: 'select', options: ['ADMIN', 'USER', 'AUDITOR', 'GUEST'] },
+    { prop: 'status', label: '状态', type: 'select', options: ['ACTIVE', 'INACTIVE'] }
+  ]
+  return dialogAction.value === 'add' ? [passwordField, ...fields] : fields
+})
 
 // 表单验证规则 用于el-form的rules属性
-const rules = reactive({
+const baseRules = reactive({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   email: [
@@ -110,9 +124,19 @@ const rules = reactive({
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
   ],
   role: [{ required: true, message: '请选择角色', trigger: 'change' }],
-  status: [{ required: true, message: '请选择状态', trigger: 'change' }],
-  createTime: [{ required: true, message: '请选择创建时间', trigger: 'change' }],
-  lastLogin: [{ required: true, message: '请选择最后登录时间', trigger: 'change' }]
+  status: [{ required: true, message: '请选择状态', trigger: 'change' }]
+})
+
+const passwordRules = {
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+  ]
+}
+
+// 根据操作类型动态计算验证规则
+const rules = computed(() => {
+  return dialogAction.value === 'add' ? { ...passwordRules, ...baseRules } : baseRules
 })
 
 //搜索相关

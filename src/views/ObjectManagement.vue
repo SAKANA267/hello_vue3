@@ -91,7 +91,7 @@ const tableLabel = [
   { prop: 'fillDate', label: '填卡日期', width: '110' },
   { prop: 'auditDate', label: '审核日期', width: '110' },
   { prop: 'auditor', label: '审核人', width: '80' },
-  { prop: 'status', label: '状态', width: '80' }
+  { prop: 'status', label: '状态', width: '100' }
 ]
 
 //编辑与创建用户 用于v-for创建编辑/新增表单

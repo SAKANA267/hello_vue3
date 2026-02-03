@@ -142,6 +142,78 @@ export interface UserFormData {
   status?: string
 }
 
+// ========== RESTful API 新增类型 ==========
+
+/** RESTful 分页参数 */
+export interface RestfulPageParams {
+  keyword?: string // 原 keyWord
+  page?: number
+  size?: number // 原 limit
+  role?: string
+  status?: string
+  includeDeleted?: boolean
+}
+
+/** RESTful 分页响应数据 */
+export interface RestfulPageResponse<T = unknown> {
+  page: number
+  size: number
+  total: number // 原 count
+  records: T[] // 原 list
+}
+
+/** 用户角色枚举 */
+export type UserRoleEnum = 'SUPER_ADMIN' | 'ADMIN' | 'AUDITOR' | 'USER' | 'GUEST'
+
+/** 用户状态枚举 */
+export type UserStatusEnum = 'ACTIVE' | 'INACTIVE'
+
+/** 创建用户请求 (RESTful) */
+export interface CreateUserRequest {
+  username: string
+  password: string // 新增必填字段
+  name: string
+  email?: string
+  phone?: string
+  role?: UserRoleEnum
+  status?: UserStatusEnum
+  dataScope?: string
+}
+
+/** 更新用户请求 (RESTful) */
+export interface UpdateUserRequest {
+  name?: string
+  email?: string
+  phone?: string
+  role?: UserRoleEnum
+  status?: UserStatusEnum
+  dataScope?: string
+}
+
+/** 用户DTO (RESTful response) */
+export interface UserDTO {
+  id: string
+  username: string
+  name: string
+  email?: string
+  phone?: string
+  role: UserRoleEnum
+  status: UserStatusEnum
+  dataScope?: string
+  createTime: string
+  updateTime?: string
+  lastLogin?: string
+}
+
+/** 修改密码请求 */
+export interface ChangePasswordRequest {
+  oldPassword: string
+  newPassword: string
+}
+
+/** 批量删除请求 */
+export type BatchDeleteRequest = string[]
+
 // ============== Mock 相关 ==============
 
 /** Mock 配置类型 */
@@ -153,9 +225,8 @@ export interface MockConfig extends MockjsRequestOptions {
 /** Mock 响应结构 */
 export interface MockResponse<T = unknown> {
   code: number
-  data?: T
-  msg?: string
   message?: string
+  data?: T
 }
 
 /** 参数解析结果 */

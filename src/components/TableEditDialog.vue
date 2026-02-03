@@ -18,11 +18,12 @@
         :label="field.label"
         :prop="field.prop"
       >
-        <el-input v-if="field.type === 'input'" v-model="form[field.prop]" />
+        <el-input v-if="field.type === 'input'" v-model="form[field.prop]" :disabled="field.disabled" />
         <el-select
           v-else-if="field.type === 'select'"
           v-model="form[field.prop]"
           placeholder="请选择"
+          :disabled="field.disabled"
         >
           <el-option
             v-for="option in field.options"
@@ -110,10 +111,10 @@ initForm(props.formFields)
 
 const dialogTitle = computed(() => (props.action === 'edit' ? '编辑对象' : '新增对象'))
 
-//编辑与创建用户 用于v-for创建编辑/新增表单
-const formFields = props.formFields
-// 表单验证规则 用于el-form的rules属性
-const rules = reactive(props.rules)
+// 表单字段 - 使用 computed 响应式更新
+const formFields = computed(() => props.formFields)
+// 表单验证规则 - 使用 computed 响应式更新
+const rules = computed(() => props.rules)
 
 // 根据 action 初始化表单
 const initializeForm = () => {
@@ -148,7 +149,7 @@ const handleSubmit = async () => {
   try {
     if (props.action === 'add') {
       const res = await props.addApi(form)
-      if (res.success) {
+      if (res) {
         ElMessage.success('新增成功')
         emit('update:dialogVisible', false)
         initForm(props.formFields)
@@ -157,22 +158,18 @@ const handleSubmit = async () => {
         ElMessage.error('新增失败')
       }
     } else {
-      const updateData = {
-        id: props.rowData.id,
-        ...form
-      }
-      const res = await props.editApi(updateData)
-      if (res.success) {
+      // 编辑：统一使用两参数 API editApi(id, data)
+      const res = await props.editApi(props.rowData.id, form)
+      if (res) {
         ElMessage.success('编辑成功')
         emit('update:dialogVisible', false)
         initForm(props.formFields)
         emit('refresh')
-      } else {
-        ElMessage.error('编辑失败')
       }
     }
   } catch (error) {
     console.error(error)
+    ElMessage.error(error.message || '操作失败')
   }
 }
 
