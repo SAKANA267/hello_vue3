@@ -116,32 +116,6 @@ export interface ObjectFormData {
   status: string
 }
 
-// ============== 用户管理相关 ==============
-
-/** 用户管理数据项 */
-export interface UserItem {
-  id: string
-  username: string
-  name: string
-  email: string
-  phone: string
-  role: string
-  status: string
-  createTime: string
-  lastLogin: string
-}
-
-/** 创建/更新用户参数 */
-export interface UserFormData {
-  id?: string
-  username: string
-  name: string
-  email: string
-  phone: string
-  role?: string
-  status?: string
-}
-
 // ========== RESTful API 新增类型 ==========
 
 /** RESTful 分页参数 */
