@@ -26,7 +26,7 @@
         ref="tableRef"
         :table-label="tableLabel"
         :query-params="formInline.keyWord"
-        :get-api="proxy?.$api.getTableData"
+        :get-api="getReportCardsWrapper"
         operation-mode="audit"
         :status-column="{ prop: 'status', label: '状态' }"
         :status-tag-types="statusTagTypes"
@@ -58,6 +58,7 @@ import CommonTable from '@/components/CommonTable.vue'
 import AuditDialog from '@/components/AuditDialog.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { useAllDataStore } from '@/stores/index.js'
+import { transformReportCardForDisplay } from '@/utils/reportCardUtils'
 
 const { hasPermission } = usePermissions()
 const { proxy } = getCurrentInstance()
@@ -89,12 +90,25 @@ const statusTagTypes = {
 // 审核对话框展示的字段列表
 const auditDetailFields = ['name', 'department', 'diagnosisName', 'fillDate']
 
-// 当前审核人（从 store 获取）
-const currentAuditor = computed(() => store.state.user?.username || '')
+// 当前审核人ID（从 store 获取）
+const currentAuditorId = computed(() => store.state.user?.id || '')
 
 // 审核对话框状态
 const auditDialogVisible = ref(false)
 const currentAuditRow = ref(null)
+
+// API 包装函数 - 适配新的 ReportCard API
+const getReportCardsWrapper = async (config) => {
+  const response = await proxy.$api.getReportCards({
+    keyword: config.keyword || config.keyWord,
+    page: config.page || 1,
+    size: 10
+  })
+  return {
+    records: response.records.map(transformReportCardForDisplay),
+    total: response.total
+  }
+}
 
 // 搜索相关
 const formInline = reactive({
@@ -114,33 +128,25 @@ const handleAuditClick = row => {
 // 执行审核操作
 const performAudit = async ({ action, rowData, remark }) => {
   try {
-    const auditDate = new Date().toISOString().split('T')[0]
     const auditData = {
-      id: rowData.id,
-      auditor: currentAuditor.value,
-      auditDate: auditDate,
-      status: action === 'pass' ? '已审核' : '审核不通过',
+      auditorId: currentAuditorId.value,
       ...(action === 'reject' && remark ? { remark } : {})
     }
 
     let res
     if (action === 'pass') {
-      res = await proxy.$api.auditPass(auditData)
+      res = await proxy.$api.approveReportCard(rowData.id, auditData)
     } else {
-      res = await proxy.$api.auditReject(auditData)
+      res = await proxy.$api.rejectReportCard(rowData.id, auditData)
     }
+    ElMessage({
+      showClose: true,
+      message: action === 'pass' ? '审核通过' : '审核不通过',
+      type: 'success'
+    })
+    auditDialogVisible.value = false
+    await tableRef.value?.search()
 
-    if (res && res.success) {
-      ElMessage({
-        showClose: true,
-        message: action === 'pass' ? '审核通过' : '审核不通过',
-        type: 'success'
-      })
-      auditDialogVisible.value = false
-      await tableRef.value?.search()
-    } else {
-      throw new Error(res?.msg || '审核失败')
-    }
   } catch (error) {
     console.error('审核操作失败:', error)
     ElMessage({
@@ -154,21 +160,13 @@ const performAudit = async ({ action, rowData, remark }) => {
 // 处理撤回操作
 const handleRevoke = async row => {
   try {
-    const res = await proxy.$api.auditRevoke({
-      id: row.id,
-      status: '待审核'
+    const res = await proxy.$api.withdrawReportCard(row.id)
+    ElMessage({
+      showClose: true,
+      message: '撤回成功',
+      type: 'success'
     })
-
-    if (res && res.success) {
-      ElMessage({
-        showClose: true,
-        message: '撤回成功',
-        type: 'success'
-      })
-      await tableRef.value?.search()
-    } else {
-      throw new Error(res?.msg || '撤回失败')
-    }
+    await tableRef.value?.search()
   } catch (error) {
     console.error('撤回操作失败:', error)
     ElMessage({

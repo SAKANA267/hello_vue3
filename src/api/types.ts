@@ -26,13 +26,6 @@ export interface PageParams {
   limit?: number
 }
 
-/** 分页响应数据 */
-export interface TableDataResponse<T = unknown> {
-  success: boolean
-  list: T[]
-  count: number
-}
-
 // ============== 用户/认证相关 ==============
 
 /** 角色类型 */
@@ -75,46 +68,6 @@ export interface LoginResponseData {
 
 /** 菜单响应 */
 export type MenuResponse = ApiResponse<LoginResponseData>
-
-// ============== 对象管理相关 ==============
-
-/** 对象管理数据项 */
-export interface ObjectItem {
-  id: string
-  hospitalArea: string
-  department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: string
-  age: number
-  phone: string
-  reportDoctor: string
-  fillDate: string
-  auditDate: string
-  auditor: string
-  status: string
-}
-
-/** 创建/更新对象参数 */
-export interface ObjectFormData {
-  id?: string
-  hospitalArea: string
-  department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: string
-  age: number
-  phone: string
-  reportDoctor: string
-  fillDate: string
-  auditDate?: string
-  auditor?: string
-  status: string
-}
 
 // ========== RESTful API 新增类型 ==========
 
@@ -237,4 +190,74 @@ export interface AuditResponse {
 export interface AuditRevokeParams {
   id: string
   status: '待审核'
+}
+
+// ============== 报告卡相关 (RESTful) ==============
+
+/** 报告卡性别枚举 (后端) */
+export type ReportCardGenderEnum = 'MALE' | 'FEMALE'
+
+/** 报告卡状态枚举 (后端) */
+export type ReportCardStatusEnum = 'PENDING' | 'APPROVED' | 'REJECTED'
+
+/** 报告卡DTO (RESTful) */
+export interface ReportCardDTO {
+  id: string
+  hospitalArea: string
+  department: string
+  diagnosisName: string
+  inpatientNo: string
+  outpatientNo: string
+  name: string
+  gender: ReportCardGenderEnum
+  age: number
+  phone: string
+  reportDoctor: string
+  fillDate: string
+  auditorId?: string
+  auditor?: string
+  remark?: string
+  status: ReportCardStatusEnum
+  createTime: string
+  updateTime?: string
+  auditDate?: string
+}
+
+/** 创建报告卡请求 */
+export interface CreateReportCardRequest {
+  hospitalArea: string
+  department: string
+  diagnosisName: string
+  inpatientNo: string
+  outpatientNo: string
+  name: string
+  gender: ReportCardGenderEnum
+  age: number
+  phone: string
+  reportDoctor: string
+  fillDate: string
+}
+
+/** 更新报告卡请求 (仅部分字段) */
+export interface UpdateReportCardRequest {
+  diagnosisName?: string
+  phone?: string
+  reportDoctor?: string
+}
+
+/** 审核请求 */
+export interface ReportCardAuditRequest {
+  auditorId: string
+  remark?: string
+}
+
+/** 报告卡分页参数 */
+export interface ReportCardPageParams {
+  page?: number
+  size?: number
+  keyword?: string
+  status?: ReportCardStatusEnum
+  department?: string
+  fillDateStart?: string
+  fillDateEnd?: string
 }

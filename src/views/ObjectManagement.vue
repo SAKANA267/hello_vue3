@@ -35,8 +35,9 @@
         ref="tableRef"
         :table-label="tableLabel"
         :query-params="formInline.keyWord"
-        :get-api="proxy?.$api.getTableData"
-        :delete-api="proxy?.$api.deleteObject"
+        :get-api="getReportCardsWrapper"
+        :delete-api="deleteReportCardWrapper"
+        :status-tag-types="statusTagTypes"
         :permissions="{
           canEdit: hasPermission('object:edit'),
           canDelete: hasPermission('object:delete')
@@ -54,8 +55,8 @@
       :rules="rules"
       :action="dialogAction"
       :row-data="currentRow"
-      :add-api="proxy?.$api.createObject"
-      :edit-api="proxy?.$api.updateObject"
+      :add-api="createReportCardWrapper"
+      :edit-api="updateReportCardWrapper"
       @refresh="handleSearch()"
       @update:dialog-visible="dialogVisible = $event"
     />
@@ -69,12 +70,51 @@ import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
 import PermissionButton from '@/components/PermissionButton.vue'
 import { usePermissions } from '@/composables/usePermissions'
+import {
+  transformReportCardForDisplay,
+  transformFormDataForCreate,
+  transformFormDataForUpdate
+} from '@/utils/reportCardUtils'
 
 const { hasPermission } = usePermissions()
 
 const { proxy } = getCurrentInstance()
 const tableRef = ref(null)
 const tableEditDialogRef = ref(null)
+
+// 状态标签类型映射
+const statusTagTypes = {
+  '待审核': 'warning',
+  '已审核': 'success',
+  '审核不通过': 'danger'
+}
+
+// API 包装函数 - 适配新的 ReportCard API
+const getReportCardsWrapper = async (config) => {
+  const response = await proxy.$api.getReportCards({
+    keyword: config.keyword || config.keyWord,
+    page: config.page || 1,
+    size: 10
+  })
+  return {
+    records: response.records.map(transformReportCardForDisplay),
+    total: response.total
+  }
+}
+
+const deleteReportCardWrapper = async (data) => {
+  return await proxy.$api.deleteReportCard(data)
+}
+
+const createReportCardWrapper = async (formData) => {
+  const transformedData = transformFormDataForCreate(formData)
+  return await proxy.$api.createReportCard(transformedData)
+}
+
+const updateReportCardWrapper = async (formData) => {
+  const transformedData = transformFormDataForUpdate(formData)
+  return await proxy.$api.updateReportCard(formData.id, transformedData)
+}
 
 //表格列配置
 const tableLabel = [
@@ -114,18 +154,8 @@ const formFields = [
   { prop: 'age', label: '年龄', type: 'input' },
   { prop: 'phone', label: '联系电话', type: 'input' },
   { prop: 'reportDoctor', label: '报告医生', type: 'input' },
-  { prop: 'fillDate', label: '填卡日期', type: 'date' },
-  { prop: 'auditDate', label: '审核日期', type: 'date' },
-  { prop: 'auditor', label: '审核人', type: 'input' },
-  {
-    prop: 'status',
-    label: '状态',
-    type: 'select',
-    options: [
-      { label: '待审核', value: '待审核' },
-      { label: '已审核', value: '已审核' }
-    ]
-  }
+  { prop: 'fillDate', label: '填卡日期', type: 'date' }
+  // 审核相关字段 (auditDate, auditor, status) 由审核流程管理，不在表单中编辑
 ]
 
 // 表单验证规则 用于el-form的rules属性
@@ -143,13 +173,8 @@ const rules = reactive({
   fillDate: [
     { required: true, message: '请选择填卡日期', trigger: 'blur' },
     { pattern: /^\d{4}-\d{2}-\d{2}$/, message: '日期格式必须为 yyyy-MM-dd', trigger: 'blur' }
-  ],
-  auditDate: [
-    { required: true, message: '请选择审核日期', trigger: 'blur' },
-    { pattern: /^\d{4}-\d{2}-\d{2}$/, message: '日期格式必须为 yyyy-MM-dd', trigger: 'blur' }
-  ],
-  auditor: [{ required: true, message: '请输入审核人', trigger: 'blur' }],
-  status: [{ required: true, message: '请选择状态', trigger: 'change' }]
+  ]
+  // 审核相关字段验证已移除，由审核流程管理
 })
 
 //搜索相关

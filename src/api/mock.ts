@@ -1,7 +1,7 @@
 import Mock from 'mockjs'
 import userInfoApi from './mockData/userInfo'
-import objectApi from './mockData/objectManagement'
 import userApi from './mockData/userManagement'
+import reportCardApi from './mockData/reportCard'
 import './mockData/permission' // Mock 已在文件内部注册
 
 // 登录接口始终使用 Mock（混合模式支持）
@@ -11,15 +11,6 @@ Mock.mock('/api/user/getLoginInfo', 'get', userInfoApi.getLoginInfo)
 
 // 只在 VITE_MOCK=true 时注册其他 Mock
 if (import.meta.env.VITE_MOCK !== 'false') {
-  // Object Management.vue
-  Mock.mock(RegExp('/api/table/getTableData(\\?.*)?$'), 'get', objectApi.getObjectList)
-  Mock.mock(RegExp('/api/table/deleteObject(\\?.*)?$'), 'get', objectApi.deleteObject)
-  Mock.mock('/api/table/createObject', 'post', objectApi.createObject)
-  Mock.mock('/api/table/updateObject', 'post', objectApi.updateObject)
-  Mock.mock('/api/table/auditPass', 'post', objectApi.auditPass)
-  Mock.mock('/api/table/auditReject', 'post', objectApi.auditReject)
-  Mock.mock('/api/table/auditRevoke', 'post', objectApi.auditRevoke)
-
   // User Management.vue
   // ========== RESTful API 端点 ==========
   Mock.mock(RegExp('/api/users(\\?.*)?$'), 'get', userApi.getUsers)
@@ -33,4 +24,17 @@ if (import.meta.env.VITE_MOCK !== 'false') {
   Mock.mock(RegExp('/api/users/[\\w-]+/deactivate'), 'put', userApi.deactivateUser)
   Mock.mock(RegExp('/api/users/[\\w-]+/password'), 'put', userApi.changePassword)
   Mock.mock(RegExp('/api/users/check/username(\\?.*)?$'), 'get', userApi.checkUsername)
+
+  // ReportCard Management.vue
+  // ========== RESTful API 端点 ==========
+  Mock.mock(RegExp('/api/report-cards(\\?.*)?$'), 'get', reportCardApi.getReportCards)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+[^/]$'), 'get', reportCardApi.getReportCardById)
+  Mock.mock('/api/report-cards', 'post', reportCardApi.createReportCard)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+[^/]$'), 'put', reportCardApi.updateReportCard)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+[^/]$'), 'delete', reportCardApi.deleteReportCard)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+/approve'), 'put', reportCardApi.approveReportCard)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+/reject'), 'put', reportCardApi.rejectReportCard)
+  Mock.mock(RegExp('/api/report-cards/[\\w-]+/withdraw'), 'put', reportCardApi.withdrawReportCard)
+  Mock.mock('/api/report-cards/pending', 'get', reportCardApi.getPendingReportCards)
+  Mock.mock('/api/report-cards/statistics', 'get', reportCardApi.getReportCardStatistics)
 }
