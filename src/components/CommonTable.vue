@@ -37,7 +37,7 @@
           <!-- 编辑删除模式（默认） -->
           <template v-if="showEditDeleteButtons">
             <el-button
-              v-if="permissions?.canEdit !== false"
+              :disabled="permissions?.canEdit === false"
               type="text"
               @click="handleEdit(scope.row)"
               size="small"
@@ -45,10 +45,10 @@
               编辑
             </el-button>
             <el-button
-              v-if="permissions?.canDelete !== false"
+              :disabled="permissions?.canDelete === false"
               type="text"
               size="small"
-              style="color: #f56c6c"
+              :style="{ color: permissions?.canDelete === false ? '#909399' : '#f56c6c' }"
               @click="handleDelete(scope.row)"
             >
               删除

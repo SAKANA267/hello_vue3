@@ -17,15 +17,15 @@ const STATUS_MAP: Record<string, string> = {
 
 /** 前端显示 → 后端性别枚举 */
 const GENDER_REVERSE: Record<string, string> = {
-  '男': 'MALE',
-  '女': 'FEMALE'
+  男: 'MALE',
+  女: 'FEMALE'
 }
 
 /** 前端显示 → 后端状态枚举 */
 const STATUS_REVERSE: Record<string, string> = {
-  '待审核': 'PENDING',
-  '已审核': 'APPROVED',
-  '审核不通过': 'REJECTED'
+  待审核: 'PENDING',
+  已审核: 'APPROVED',
+  审核不通过: 'REJECTED'
 }
 
 // ============== 枚举转换函数 ==============
@@ -115,12 +115,12 @@ export function transformFormDataForUpdate(formData: Record<string, any>) {
  */
 export function getStatusTagType(status: string): string {
   const map: Record<string, string> = {
-    '待审核': 'warning',
-    'PENDING': 'warning',
-    '已审核': 'success',
-    'APPROVED': 'success',
-    '审核不通过': 'danger',
-    'REJECTED': 'danger'
+    待审核: 'warning',
+    PENDING: 'warning',
+    已审核: 'success',
+    APPROVED: 'success',
+    审核不通过: 'danger',
+    REJECTED: 'danger'
   }
   return map[status] || 'info'
 }

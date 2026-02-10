@@ -18,7 +18,11 @@
         :label="field.label"
         :prop="field.prop"
       >
-        <el-input v-if="field.type === 'input'" v-model="form[field.prop]" :disabled="field.disabled" />
+        <el-input
+          v-if="field.type === 'input'"
+          v-model="form[field.prop]"
+          :disabled="field.disabled"
+        />
         <el-select
           v-else-if="field.type === 'select'"
           v-model="form[field.prop]"

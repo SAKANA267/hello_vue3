@@ -84,13 +84,13 @@ const tableEditDialogRef = ref(null)
 
 // 状态标签类型映射
 const statusTagTypes = {
-  '待审核': 'warning',
-  '已审核': 'success',
-  '审核不通过': 'danger'
+  待审核: 'warning',
+  已审核: 'success',
+  审核不通过: 'danger'
 }
 
 // API 包装函数 - 适配新的 ReportCard API
-const getReportCardsWrapper = async (config) => {
+const getReportCardsWrapper = async config => {
   const response = await proxy.$api.getReportCards({
     keyword: config.keyword || config.keyWord,
     page: config.page || 1,
@@ -102,16 +102,16 @@ const getReportCardsWrapper = async (config) => {
   }
 }
 
-const deleteReportCardWrapper = async (data) => {
+const deleteReportCardWrapper = async data => {
   return await proxy.$api.deleteReportCard(data)
 }
 
-const createReportCardWrapper = async (formData) => {
+const createReportCardWrapper = async formData => {
   const transformedData = transformFormDataForCreate(formData)
   return await proxy.$api.createReportCard(transformedData)
 }
 
-const updateReportCardWrapper = async (formData) => {
+const updateReportCardWrapper = async formData => {
   const transformedData = transformFormDataForUpdate(formData)
   return await proxy.$api.updateReportCard(formData.id, transformedData)
 }

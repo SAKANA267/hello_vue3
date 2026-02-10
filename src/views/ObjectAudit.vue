@@ -98,7 +98,7 @@ const auditDialogVisible = ref(false)
 const currentAuditRow = ref(null)
 
 // API 包装函数 - 适配新的 ReportCard API
-const getReportCardsWrapper = async (config) => {
+const getReportCardsWrapper = async config => {
   const response = await proxy.$api.getReportCards({
     keyword: config.keyword || config.keyWord,
     page: config.page || 1,
@@ -146,7 +146,6 @@ const performAudit = async ({ action, rowData, remark }) => {
     })
     auditDialogVisible.value = false
     await tableRef.value?.search()
-
   } catch (error) {
     console.error('审核操作失败:', error)
     ElMessage({

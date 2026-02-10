@@ -1,18 +1,10 @@
 /*
-统一 API 类型定义
+统一 API 类型定义 - 后端 API 对接版本
 */
 
 import type { AxiosRequestConfig } from 'axios'
-import type { MockjsRequestOptions } from 'mockjs'
 
 // ============== 基础类型 ==============
-
-/** 统一 API 响应结构 */
-export interface ApiResponse<T = unknown> {
-  code: number
-  data: T
-  msg: string
-}
 
 /** 请求配置扩展 */
 export interface RequestConfig extends AxiosRequestConfig {
@@ -26,56 +18,70 @@ export interface PageParams {
   limit?: number
 }
 
-// ============== 用户/认证相关 ==============
+// ============== 后端认证相关 ==============
 
-/** 角色类型 */
-export type UserRole = 'super_admin' | 'admin' | 'auditor' | 'user' | 'guest'
+/** 后端统一响应格式 */
+export interface ApiResponse<T = unknown> {
+  code: number
+  message: string
+  data: T
+  timestamp: string
+}
 
-/** 权限类型 - 资源:操作 格式 */
-export type Permission = `${string}:${string}`
+/** 用户角色枚举 */
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'AUDITOR' | 'USER' | 'GUEST'
 
 /** 用户信息 */
 export interface UserInfo {
+  id: string
   username: string
-  role: string
-  hobbies: string
-  registerDate: string
-  lastLoginDate: string
-  loginLocation: string
+  name: string
+  email: string
+  role: UserRole
 }
 
-/** 登录请求参数 */
+/** 登录请求 */
 export interface LoginRequest {
   username: string
   password: string
 }
 
-/** 登录用户信息 */
-export interface LoginUser {
-  id: string
+/** 登录/注册响应 */
+export interface AuthResponse {
+  accessToken: string
+  refreshToken: string
+  tokenType: string
+  expiresIn: number
+  userInfo: UserInfo
+}
+
+/** 注册请求 */
+export interface RegisterRequest {
   username: string
-  role: UserRole
-  permissions: Permission[]
-  dataScope?: 'all' | 'department' | 'self'
+  password: string
+  confirmPassword: string
+  name: string
+  email?: string
+  phone?: string
 }
 
-/** 登录响应数据 */
-export interface LoginResponseData {
-  menuList: string[] // 保留向后兼容
-  token: string
-  user: LoginUser
+/** 刷新令牌请求 */
+export interface RefreshTokenRequest {
+  refreshToken: string
 }
 
-/** 菜单响应 */
-export type MenuResponse = ApiResponse<LoginResponseData>
+/** 令牌验证响应 */
+export interface ValidateTokenResponse {
+  valid: boolean
+}
 
-// ========== RESTful API 新增类型 ==========
+// ============== RESTful 分页 ==============
 
 /** RESTful 分页参数 */
 export interface RestfulPageParams {
-  keyword?: string // 原 keyWord
+  keyword?: string
   page?: number
-  size?: number // 原 limit
+  size?: number
   role?: string
   status?: string
   includeDeleted?: boolean
@@ -85,12 +91,11 @@ export interface RestfulPageParams {
 export interface RestfulPageResponse<T = unknown> {
   page: number
   size: number
-  total: number // 原 count
-  records: T[] // 原 list
+  total: number
+  records: T[]
 }
 
-/** 用户角色枚举 */
-export type UserRoleEnum = 'SUPER_ADMIN' | 'ADMIN' | 'AUDITOR' | 'USER' | 'GUEST'
+// ============== 用户管理 (RESTful) ==============
 
 /** 用户状态枚举 */
 export type UserStatusEnum = 'ACTIVE' | 'INACTIVE'
@@ -98,11 +103,11 @@ export type UserStatusEnum = 'ACTIVE' | 'INACTIVE'
 /** 创建用户请求 (RESTful) */
 export interface CreateUserRequest {
   username: string
-  password: string // 新增必填字段
+  password: string
   name: string
   email?: string
   phone?: string
-  role?: UserRoleEnum
+  role?: UserRole
   status?: UserStatusEnum
   dataScope?: string
 }
@@ -112,7 +117,7 @@ export interface UpdateUserRequest {
   name?: string
   email?: string
   phone?: string
-  role?: UserRoleEnum
+  role?: UserRole
   status?: UserStatusEnum
   dataScope?: string
 }
@@ -124,7 +129,7 @@ export interface UserDTO {
   name: string
   email?: string
   phone?: string
-  role: UserRoleEnum
+  role: UserRole
   status: UserStatusEnum
   dataScope?: string
   createTime: string
@@ -140,57 +145,6 @@ export interface ChangePasswordRequest {
 
 /** 批量删除请求 */
 export type BatchDeleteRequest = string[]
-
-// ============== Mock 相关 ==============
-
-/** Mock 配置类型 */
-export interface MockConfig extends MockjsRequestOptions {
-  url: string
-  body: string
-}
-
-/** Mock 响应结构 */
-export interface MockResponse<T = unknown> {
-  code: number
-  message?: string
-  data?: T
-}
-
-/** 参数解析结果 */
-export interface ParsedParams extends PageParams {
-  [key: string]: unknown
-}
-
-// ============== 审核相关 ==============
-
-/** 审核通过参数 */
-export interface AuditPassParams {
-  id: string
-  auditor: string
-  auditDate: string
-  status: '已审核'
-}
-
-/** 审核不通过参数 */
-export interface AuditRejectParams {
-  id: string
-  auditor: string
-  auditDate: string
-  status: '审核不通过'
-  remark?: string
-}
-
-/** 审核响应 */
-export interface AuditResponse {
-  success: boolean
-  msg?: string
-}
-
-/** 审核撤回参数 */
-export interface AuditRevokeParams {
-  id: string
-  status: '待审核'
-}
 
 // ============== 报告卡相关 (RESTful) ==============
 
@@ -260,4 +214,72 @@ export interface ReportCardPageParams {
   department?: string
   fillDateStart?: string
   fillDateEnd?: string
+}
+
+// ============== 审核相关 ==============
+
+/** 审核通过参数 */
+export interface AuditPassParams {
+  id: string
+  auditor: string
+  auditDate: string
+  status: '已审核'
+}
+
+/** 审核不通过参数 */
+export interface AuditRejectParams {
+  id: string
+  auditor: string
+  auditDate: string
+  status: '审核不通过'
+  remark?: string
+}
+
+/** 审核响应 */
+export interface AuditResponse {
+  success: boolean
+  msg?: string
+}
+
+/** 审核撤回参数 */
+export interface AuditRevokeParams {
+  id: string
+  status: '待审核'
+}
+
+// ============== 权限类型 ==============
+
+/** 权限类型 - 资源:操作 格式 */
+export type Permission = `${string}:${string}`
+
+/** 用户信息（兼容旧代码） */
+export interface UserInfoLegacy {
+  username: string
+  role: string
+  hobbies: string
+  registerDate: string
+  lastLoginDate: string
+  loginLocation: string
+}
+
+// ============== Mock 相关 (保留以支持其他功能) ==============
+
+import type { MockjsRequestOptions } from 'mockjs'
+
+/** Mock 配置类型 */
+export interface MockConfig extends MockjsRequestOptions {
+  url: string
+  body: string
+}
+
+/** Mock 响应结构 */
+export interface MockResponse<T = unknown> {
+  code: number
+  message?: string
+  data?: T
+}
+
+/** 参数解析结果 */
+export interface ParsedParams extends PageParams {
+  [key: string]: unknown
 }

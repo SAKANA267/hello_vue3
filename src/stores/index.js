@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { authApi } from '@/api/api'
+import { ROLE_PERMISSIONS } from '@/constants/permissions'
 
 // localStorage keys
-const TOKEN_KEY = 'auth_token'
-const MENU_LIST_KEY = 'menu_list'
+const ACCESS_TOKEN_KEY = 'access_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
 const USER_INFO_KEY = 'user_info'
+const MENU_LIST_KEY = 'menu_list'
 
 function initState() {
   return {
@@ -19,10 +22,12 @@ function initState() {
     ],
     currentMenu: null,
     menuList: [],
-    token: '',
+    accessToken: '',
+    refreshToken: '',
     user: null
   }
 }
+
 export const useAllDataStore = defineStore('allData', () => {
   const state = ref(initState())
 
@@ -51,50 +56,88 @@ export const useAllDataStore = defineStore('allData', () => {
     }
   }
 
-  // login.vue 根据用户更新菜单列表
+  // 根据用户更新菜单列表
   function updateMenuList(newMenuList) {
     state.value.menuList = newMenuList
     // 持久化菜单列表到 localStorage
     localStorage.setItem(MENU_LIST_KEY, JSON.stringify(newMenuList))
   }
 
-  // 设置 token 并持久化到 localStorage
-  function setToken(token) {
-    state.value.token = token
-    localStorage.setItem(TOKEN_KEY, token)
+  // ========== 认证相关方法 (双令牌管理) ==========
+
+  /** 设置认证信息 */
+  function setAuth(accessToken, refreshToken, user) {
+    state.value.accessToken = accessToken
+    state.value.refreshToken = refreshToken
+
+    // 根据 role 映射 permissions（用于组件级权限控制）
+    const userWithPermissions = {
+      ...user,
+      permissions: ROLE_PERMISSIONS[user.role] || []
+    }
+    state.value.user = userWithPermissions
+
+    // 持久化
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+    localStorage.setItem(USER_INFO_KEY, JSON.stringify(userWithPermissions))
   }
 
-  // 设置用户信息并持久化到 localStorage
-  function setUser(userInfo) {
-    state.value.user = userInfo
-    localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfo))
-  }
-
-  // 清除 token 和 localStorage
-  function clearToken() {
-    state.value.token = ''
+  /** 清除认证信息 */
+  function clearAuth() {
+    state.value.accessToken = ''
+    state.value.refreshToken = ''
     state.value.user = null
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(MENU_LIST_KEY)
-    localStorage.removeItem(USER_INFO_KEY)
     state.value.menuList = []
     state.value.tags = [{ name: 'dashboard', path: '/dashboard', label: '主页', icon: '' }]
     state.value.currentMenu = null
+
+    localStorage.removeItem(ACCESS_TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    localStorage.removeItem(USER_INFO_KEY)
+    localStorage.removeItem(MENU_LIST_KEY)
   }
 
-  // 检查是否已登录
+  /** 检查是否已登录 */
   function isAuthenticated() {
-    return !!state.value.token
+    return !!state.value.accessToken
   }
 
-  // 从 localStorage 恢复认证状态（应用初始化时调用）
-  function initAuth() {
-    const savedToken = localStorage.getItem(TOKEN_KEY)
-    const savedMenuList = localStorage.getItem(MENU_LIST_KEY)
-    const savedUser = localStorage.getItem(USER_INFO_KEY)
+  /** 获取当前 access token */
+  function getAccessToken() {
+    return state.value.accessToken || localStorage.getItem(ACCESS_TOKEN_KEY) || ''
+  }
 
-    if (savedToken) {
-      state.value.token = savedToken
+  /** 获取当前用户信息 */
+  function getUser() {
+    return state.value.user
+  }
+
+  /** 初始化认证状态 - 从 localStorage 恢复 */
+  function initAuth() {
+    const savedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+    const savedUser = localStorage.getItem(USER_INFO_KEY)
+    const savedMenuList = localStorage.getItem(MENU_LIST_KEY)
+
+    if (savedAccessToken) {
+      state.value.accessToken = savedAccessToken
+    }
+    if (savedRefreshToken) {
+      state.value.refreshToken = savedRefreshToken
+    }
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser)
+        // 兼容旧数据：如果没有 permissions，根据 role 添加
+        if (!user.permissions || user.permissions.length === 0) {
+          user.permissions = ROLE_PERMISSIONS[user.role] || []
+        }
+        state.value.user = user
+      } catch (e) {
+        console.error('Failed to parse saved user info:', e)
+        state.value.user = null
+      }
     }
     if (savedMenuList) {
       try {
@@ -104,24 +147,57 @@ export const useAllDataStore = defineStore('allData', () => {
         state.value.menuList = []
       }
     }
-    if (savedUser) {
-      try {
-        state.value.user = JSON.parse(savedUser)
-      } catch (e) {
-        console.error('Failed to parse saved user info:', e)
-        state.value.user = null
-      }
+  }
+
+  /** 刷新令牌 */
+  async function refreshTokens() {
+    try {
+      const res = await authApi.refreshToken({
+        refreshToken: state.value.refreshToken || localStorage.getItem(REFRESH_TOKEN_KEY) || ''
+      })
+      setAuth(res.accessToken, res.refreshToken, res.userInfo)
+      return res.accessToken
+    } catch (error) {
+      console.error('Failed to refresh tokens:', error)
+      clearAuth()
+      throw error
     }
+  }
+
+  // ========== 兼容旧代码的方法 ==========
+
+  /** 设置 token (兼容旧代码) */
+  function setToken(token) {
+    state.value.accessToken = token
+    localStorage.setItem(ACCESS_TOKEN_KEY, token)
+  }
+
+  /** 设置用户信息 (兼容旧代码) */
+  function setUser(userInfo) {
+    state.value.user = userInfo
+    localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfo))
+  }
+
+  /** 清除 token (兼容旧代码) */
+  function clearToken() {
+    clearAuth()
   }
 
   return {
     state,
     selectMenu,
     updateMenuList,
+    // 新认证方法
+    setAuth,
+    clearAuth,
+    isAuthenticated,
+    getAccessToken,
+    getUser,
+    initAuth,
+    refreshTokens,
+    // 兼容旧代码
     setToken,
     setUser,
-    clearToken,
-    isAuthenticated,
-    initAuth
+    clearToken
   }
 })

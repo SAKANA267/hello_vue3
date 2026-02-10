@@ -36,10 +36,10 @@ export function usePermissions() {
   const isAuthenticated = computed(() => !!store.state.token)
 
   /** 是否是超级管理员 */
-  const isSuperAdmin = computed(() => userRole.value === 'super_admin')
+  const isSuperAdmin = computed(() => userRole.value === 'SUPER_ADMIN')
 
   /** 是否是管理员 */
-  const isAdmin = computed(() => userRole.value === 'admin' || isSuperAdmin.value)
+  const isAdmin = computed(() => userRole.value === 'ADMIN' || isSuperAdmin.value)
 
   return {
     userRole,

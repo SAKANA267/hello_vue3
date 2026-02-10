@@ -3,9 +3,9 @@ import { ROLE_PERMISSIONS } from '@/constants/permissions'
 
 // 用户角色映射
 const USER_ROLES: Record<string, keyof typeof ROLE_PERMISSIONS> = {
-  admin: 'admin',
-  user: 'user',
-  auditor: 'auditor'
+  admin: 'ADMIN',
+  user: 'USER',
+  auditor: 'AUDITOR'
 }
 
 Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
@@ -67,4 +67,31 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
   }
 
   return { code: 401, msg: '用户名或密码错误' }
+})
+
+// 模拟用户存储
+const registeredUsers: Record<string, { password: string; email: string }> = {}
+
+Mock.mock('/api/permission/register', 'post', (options: { body: string }) => {
+  const { username, password, email } = JSON.parse(options.body)
+
+  // 检查用户名是否已存在
+  if (
+    registeredUsers[username] ||
+    username === 'admin' ||
+    username === 'user' ||
+    username === 'auditor'
+  ) {
+    return { code: 400, msg: '用户名已存在' }
+  }
+
+  // 模拟注册成功
+  registeredUsers[username] = { password, email }
+
+  return {
+    code: 200,
+    data: {
+      message: '注册成功'
+    }
+  }
 })

@@ -1,5 +1,5 @@
 <!--
- * new page
+ * Login Page - Backend API Integration
  * @author: SAKANA267
  * @since: 2026-01-15
  * Login.vue
@@ -33,17 +33,27 @@
             登录
           </el-button>
         </el-form-item>
+
+        <div class="footer-link">
+          <span>还没有账号？</span>
+          <el-link type="primary" @click="goToRegister">去注册</el-link>
+        </div>
       </el-form>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { authApi } from '@/api/api'
 import { useAllDataStore } from '@/stores/index.js'
-import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const store = useAllDataStore()
 
 const loginFormRef = ref<FormInstance>()
 const loading = ref(false)
@@ -56,17 +66,13 @@ const loginForm = reactive({
 const rules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur' }
+    { min: 6, max: 50, message: '长度在 6 到 50 个字符', trigger: 'blur' }
   ]
 }
-
-const { proxy } = getCurrentInstance() as any
-const store = useAllDataStore()
-const router = useRouter()
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
@@ -74,20 +80,25 @@ const handleLogin = async () => {
   await loginFormRef.value.validate(async valid => {
     if (valid) {
       loading.value = true
-      const res = await proxy.$api.getMenu(loginForm)
-      console.log('登录成功:', res)
-      // 根据res使用store更新侧边栏
-      store.updateMenuList(res.menuList)
-      // 使用 setToken 方法持久化 token 到 localStorage
-      store.setToken(res.token)
-      // 存储用户信息
-      store.setUser(res.user)
-      router.push('/dashboard')
-      setTimeout(() => {
+      try {
+        const res = await authApi.login(loginForm)
+
+        // 存储认证信息 (使用新的 setAuth 方法)
+        store.setAuth(res.accessToken, res.refreshToken, res.userInfo)
+
+        ElMessage.success('登录成功')
+        router.push('/dashboard')
+      } catch (error: any) {
+        ElMessage.error(error.message || '登录失败')
+      } finally {
         loading.value = false
-      }, 1500)
+      }
     }
   })
+}
+
+const goToRegister = () => {
+  router.push('/register')
 }
 </script>
 
@@ -152,5 +163,11 @@ const handleLogin = async () => {
 :deep(.el-button--large) {
   height: 44px;
   font-size: 16px;
+}
+
+.footer-link {
+  text-align: center;
+  color: #606266;
+  font-size: 14px;
 }
 </style>

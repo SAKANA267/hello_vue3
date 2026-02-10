@@ -33,7 +33,8 @@ const auditorNames: Record<string, string> = {
 
 for (let i = 0; i < count; i++) {
   const status = Mock.Random.pick(['PENDING', 'APPROVED', 'REJECTED'])
-  const auditorId = status !== 'PENDING' ? Mock.Random.pick(['admin-001', 'auditor-002', 'auditor-003']) : undefined
+  const auditorId =
+    status !== 'PENDING' ? Mock.Random.pick(['admin-001', 'auditor-002', 'auditor-003']) : undefined
 
   List.push({
     id: Mock.Random.guid(),
@@ -148,7 +149,14 @@ const createReportCard = (config: MockConfig): MockResponse<ReportCardDTO> => {
   const data: CreateReportCardRequest = JSON.parse(config.body || '{}')
 
   // 验证必填字段
-  if (!data.hospitalArea || !data.department || !data.name || !data.gender || !data.phone || !data.reportDoctor) {
+  if (
+    !data.hospitalArea ||
+    !data.department ||
+    !data.name ||
+    !data.gender ||
+    !data.phone ||
+    !data.reportDoctor
+  ) {
     return {
       code: 400,
       message: 'Missing required fields'
@@ -354,7 +362,9 @@ const getPendingReportCards = (config: MockConfig): MockResponse<ReportCardDTO[]
 /**
  * GET /api/report-cards/statistics - 获取统计信息
  */
-const getReportCardStatistics = (config: MockConfig): MockResponse<{
+const getReportCardStatistics = (
+  config: MockConfig
+): MockResponse<{
   PENDING: number
   APPROVED: number
   REJECTED: number
