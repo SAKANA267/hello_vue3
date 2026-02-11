@@ -72,9 +72,11 @@ const getUsers = (config: MockConfig): MockResponse<RestfulPageResponse<UserDTO>
     mockList = mockList.filter(item => item.status === status)
   }
 
-  // 分页
-  const start = (page - 1) * size
-  const end = start + size
+  // 分页 - 确保参数是数字类型
+  const pageNum = Number(page) || 1
+  const pageSize = Number(size) || 10
+  const start = (pageNum - 1) * pageSize
+  const end = start + pageSize
   const records = mockList.slice(start, end)
 
   return {

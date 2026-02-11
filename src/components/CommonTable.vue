@@ -263,7 +263,8 @@ const tableData = ref([])
 const config = reactive({
   keyword: '',
   totle: 0,
-  page: 1
+  page: 1,
+  size: 10
 })
 
 // 计算属性：显示哪些操作按钮
@@ -271,7 +272,13 @@ const showAuditButton = computed(() => props.operationMode === 'audit')
 const showEditDeleteButtons = computed(() => props.operationMode === 'edit-delete')
 const getTableData = async () => {
   try {
-    const res = await props.getApi(config)
+    // 只传递 API 需要的参数，排除 totle（前端状态字段）
+    const params = {
+      keyword: config.keyword,
+      page: config.page,
+      size: config.size
+    }
+    const res = await props.getApi(params)
     tableData.value = res.records
     console.log('tableData', res.records)
     config.totle = res.total
