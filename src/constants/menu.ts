@@ -15,6 +15,7 @@ export const MENU_ROLES: Record<string, UserRole[]> = {
   // 菜单
   '2-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 首页
   '2-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 个人资料
+  '2-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 登录历史
 
   // 文档
   '3-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 快速开始

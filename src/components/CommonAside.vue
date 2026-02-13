@@ -73,7 +73,8 @@ const allMenuItems = [
     icon: markRaw(IconMenu),
     children: [
       { index: '2-1', title: '首页', route: '/dashboard', menuIndex: '2-1' },
-      { index: '2-2', title: '个人资料', route: '/profile', menuIndex: '2-2' }
+      { index: '2-2', title: '个人资料', route: '/profile', menuIndex: '2-2' },
+      { index: '2-3', title: '登录历史', route: '/loginHistory', menuIndex: '2-3' }
     ]
   },
   {

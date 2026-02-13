@@ -20,7 +20,11 @@ import type {
   CreateReportCardRequest,
   UpdateReportCardRequest,
   ReportCardAuditRequest,
-  ReportCardPageParams
+  ReportCardPageParams,
+  // LoginHistory types
+  LoginHistoryDTO,
+  LoginHistoryPageParams,
+  LoginHistoryPageResponse
 } from './types'
 
 // ============== 认证 API ==============
@@ -67,6 +71,25 @@ export const authApi = {
     return request({
       url: '/auth/validate',
       method: 'get'
+    })
+  },
+
+  /** 分页查询登录历史 */
+  getLoginHistory(
+    params: LoginHistoryPageParams
+  ): Promise<{ code: number; message: string; data: LoginHistoryPageResponse; timestamp: string }> {
+    return request({
+      url: '/auth/login-history',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 删除用户登录历史 */
+  deleteUserLoginHistory(userId: string): Promise<{ code: number; message: string; data: number; timestamp: string }> {
+    return request({
+      url: `/auth/login-history/user/${userId}`,
+      method: 'delete'
     })
   }
 }
@@ -297,6 +320,12 @@ interface ApiInterface {
   withdrawReportCard(id: string): Promise<{ message: string }>
   getPendingReportCards(): Promise<ReportCardDTO[]>
   getReportCardStatistics(): Promise<{ PENDING: number; APPROVED: number; REJECTED: number }>
+
+  // LoginHistory Management
+  getLoginHistory(
+    params: LoginHistoryPageParams
+  ): Promise<{ code: number; message: string; data: LoginHistoryPageResponse; timestamp: string }>
+  deleteUserLoginHistory(userId: string): Promise<{ code: number; message: string; data: number; timestamp: string }>
 }
 
 /** 通用 API 对象 (兼容旧代码，内部调用新的 authApi/userApi/reportCardApi) */
@@ -409,6 +438,15 @@ const api: ApiInterface = {
 
   getReportCardStatistics() {
     return reportCardApi.getReportCardStatistics()
+  },
+
+  // ========== LoginHistory Management ==========
+  getLoginHistory(params: LoginHistoryPageParams) {
+    return authApi.getLoginHistory(params)
+  },
+
+  deleteUserLoginHistory(userId: string) {
+    return authApi.deleteUserLoginHistory(userId)
   }
 }
 

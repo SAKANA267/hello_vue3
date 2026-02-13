@@ -44,6 +44,16 @@ const routes = [
         }
       },
       {
+        path: '/loginHistory',
+        name: 'loginHistory',
+        component: () => import('@/views/LoginHistory.vue'),
+        meta: {
+          title: '登录历史',
+          roles: MENU_ROLES['2-3'],
+          menuIndex: '2-3'
+        }
+      },
+      {
         path: '/objectManagement',
         name: 'objectManagement',
         component: () => import('@/views/ObjectManagement.vue'),

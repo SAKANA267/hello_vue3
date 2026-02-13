@@ -262,6 +262,45 @@ export interface UserInfoLegacy {
   loginLocation: string
 }
 
+// ============== 登录历史 (Login History) ==============
+
+/** 登录状态枚举 */
+export type LoginStatusEnum = 'SUCCESS' | 'FAILURE'
+
+/** 登录历史DTO */
+export interface LoginHistoryDTO {
+  id: string
+  userId: string
+  username: string
+  loginTime: string
+  loginLocation?: string
+  ipAddress: string
+  userAgent: string
+  status: LoginStatusEnum
+  failReason?: string | null
+}
+
+/** 登录历史分页查询参数 */
+export interface LoginHistoryPageParams {
+  userId: string
+  status?: LoginStatusEnum
+  startTime?: string
+  endTime?: string
+  page?: number
+  size?: number
+}
+
+/** 登录历史分页响应 */
+export interface LoginHistoryPageResponse {
+  total: number
+  totalPages: number
+  page: number
+  size: number
+  hasPrevious: boolean
+  hasNext: boolean
+  records: LoginHistoryDTO[]
+}
+
 // ============== Mock 相关 (保留以支持其他功能) ==============
 
 import type { MockjsRequestOptions } from 'mockjs'
