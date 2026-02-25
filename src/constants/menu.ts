@@ -24,7 +24,10 @@ export const MENU_ROLES: Record<string, UserRole[]> = {
   // 其他
   '4-1': ['SUPER_ADMIN', 'ADMIN'], // 设置
   '4-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 帮助
-  '4-3': ['SUPER_ADMIN', 'ADMIN'] // 测试页面
+  '4-3': ['SUPER_ADMIN', 'ADMIN'], // 测试页面
+
+  // AI 助手
+  '5-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER'] // AI 助手
 }
 
 /** 根据菜单索引获取允许的角色列表 */

@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { computed, markRaw } from 'vue'
 import { useAllDataStore } from '@/stores/index.js'
-import { Document, Menu as IconMenu, Location, MoreFilled } from '@element-plus/icons-vue'
+import { Document, Menu as IconMenu, Location, MoreFilled, ChatDotRound } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { MENU_ROLES } from '@/constants/menu'
 
@@ -95,6 +95,12 @@ const allMenuItems = [
       { index: '4-2', title: '帮助', route: '/help', menuIndex: '4-2' },
       { index: '4-3', title: '测试页面', route: '/test', menuIndex: '4-3' }
     ]
+  },
+  {
+    index: '5',
+    title: 'AI 助手',
+    icon: markRaw(ChatDotRound),
+    children: [{ index: '5-1', title: 'AI 助手', route: '/aiAssistant', menuIndex: '5-1' }]
   }
 ]
 

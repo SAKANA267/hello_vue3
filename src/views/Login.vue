@@ -35,8 +35,8 @@
         </el-form-item>
 
         <div class="footer-link">
-          <span>还没有账号？</span>
-          <el-link type="primary" @click="goToRegister">去注册</el-link>
+          <span>没有账号？</span>
+          <el-link class="register-link" type="primary" @click="goToRegister">去注册</el-link>
         </div>
       </el-form>
     </el-card>
@@ -166,6 +166,9 @@ const goToRegister = () => {
 }
 
 .footer-link {
+  display: flex;
+  justify-content: center;
+  padding: 0px;
   text-align: center;
   color: #606266;
   font-size: 14px;

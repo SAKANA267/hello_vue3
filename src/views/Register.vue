@@ -189,6 +189,8 @@ const goToLogin = () => {
 }
 
 .footer-link {
+  display: flex;
+  justify-content: center;
   text-align: center;
   color: #606266;
   font-size: 14px;

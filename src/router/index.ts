@@ -132,6 +132,16 @@ const routes = [
           roles: MENU_ROLES['4-3'],
           menuIndex: '4-3'
         }
+      },
+      {
+        path: '/aiAssistant',
+        name: 'aiAssistant',
+        component: () => import('@/views/AiAssistant.vue'),
+        meta: {
+          title: 'AI 助手',
+          roles: MENU_ROLES['5-1'],
+          menuIndex: '5-1'
+        }
       }
     ]
   },

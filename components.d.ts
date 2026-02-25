@@ -9,6 +9,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AuditDialog: typeof import('./src/components/AuditDialog.vue')['default']
+    ChatInput: typeof import('./src/components/ai/ChatInput.vue')['default']
+    ChatMessage: typeof import('./src/components/ai/ChatMessage.vue')['default']
+    ChatSidebar: typeof import('./src/components/ai/ChatSidebar.vue')['default']
     CommonAside: typeof import('./src/components/CommonAside.vue')['default']
     CommonHeader: typeof import('./src/components/CommonHeader.vue')['default']
     CommonTab: typeof import('./src/components/CommonTab.vue')['default']
@@ -47,11 +50,13 @@ declare module 'vue' {
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSkeleton: typeof import('element-plus/es')['ElSkeleton']
     ElSkeletonItem: typeof import('element-plus/es')['ElSkeletonItem']
+    ElSpan: typeof import('element-plus/es')['ElSpan']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    EmptyState: typeof import('./src/components/ai/EmptyState.vue')['default']
     PermissionButton: typeof import('./src/components/PermissionButton.vue')['default']
     QuickActions: typeof import('./src/components/dashboard/QuickActions.vue')['default']
     RecentActivities: typeof import('./src/components/dashboard/RecentActivities.vue')['default']
@@ -61,6 +66,7 @@ declare module 'vue' {
     TableEditDialog: typeof import('./src/components/TableEditDialog.vue')['default']
     TodoList: typeof import('./src/components/dashboard/TodoList.vue')['default']
     TrendChart: typeof import('./src/components/dashboard/TrendChart.vue')['default']
+    TypingIndicator: typeof import('./src/components/ai/TypingIndicator.vue')['default']
     UserInfo: typeof import('./src/components/UserInfo.vue')['default']
   }
 }

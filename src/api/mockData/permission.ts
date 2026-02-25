@@ -12,7 +12,7 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
   const { username, password } = JSON.parse(options.body)
 
   // 验证账号
-  if (username === 'admin' && password === 'admin') {
+  if (username === 'admin123' && password === 'admin123') {
     const role = USER_ROLES[username]
     return {
       code: 200,
@@ -30,7 +30,7 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
     }
   }
 
-  if (username === 'user' && password === 'user') {
+  if (username === 'user123' && password === 'user123') {
     const role = USER_ROLES[username]
     return {
       code: 200,
