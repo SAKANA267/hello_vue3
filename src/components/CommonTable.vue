@@ -394,6 +394,7 @@ defineExpose({
   /* 隐藏桌面端表格 */
   .table {
     display: none;
+    width: 100%;
   }
 
   /* 显示移动端卡片布局 */

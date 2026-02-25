@@ -79,7 +79,7 @@ export const authApi = {
     params: LoginHistoryPageParams
   ): Promise<{ code: number; message: string; data: LoginHistoryPageResponse; timestamp: string }> {
     return request({
-      url: '/auth/login-history',
+      url: '/login-history',
       method: 'get',
       params
     })
@@ -88,7 +88,7 @@ export const authApi = {
   /** 删除用户登录历史 */
   deleteUserLoginHistory(userId: string): Promise<{ code: number; message: string; data: number; timestamp: string }> {
     return request({
-      url: `/auth/login-history/user/${userId}`,
+      url: `/login-history/user/${userId}`,
       method: 'delete'
     })
   }
