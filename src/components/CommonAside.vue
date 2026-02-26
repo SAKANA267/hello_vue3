@@ -43,7 +43,13 @@
 <script setup lang="ts">
 import { computed, markRaw } from 'vue'
 import { useAllDataStore } from '@/stores/index.js'
-import { Document, Menu as IconMenu, Location, MoreFilled, ChatDotRound } from '@element-plus/icons-vue'
+import {
+  Document,
+  Menu as IconMenu,
+  Location,
+  MoreFilled,
+  ChatDotRound
+} from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 import { MENU_ROLES } from '@/constants/menu'
 

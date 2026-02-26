@@ -3,34 +3,11 @@ import type { QuickAction } from '@/types/ai'
 
 /** 意图模板配置 */
 export const INTENT_PATTERNS = {
-  [IntentType.NAVIGATE]: [
-    '打开{entity}页面',
-    '跳转到{entity}',
-    '去{entity}',
-    '{entity}管理'
-  ],
-  [IntentType.CREATE]: [
-    '新增{entity}',
-    '添加{entity}',
-    '创建{entity}',
-    '新建{entity}'
-  ],
-  [IntentType.READ]: [
-    '显示{entity}',
-    '查看{entity}',
-    '{entity}列表',
-    '列出所有{entity}'
-  ],
-  [IntentType.UPDATE]: [
-    '修改{entity}',
-    '更新{entity}',
-    '编辑{entity}',
-    '把状态改为'
-  ],
-  [IntentType.DELETE]: [
-    '删除{entity}',
-    '移除{entity}'
-  ],
+  [IntentType.NAVIGATE]: ['打开{entity}页面', '跳转到{entity}', '去{entity}', '{entity}管理'],
+  [IntentType.CREATE]: ['新增{entity}', '添加{entity}', '创建{entity}', '新建{entity}'],
+  [IntentType.READ]: ['显示{entity}', '查看{entity}', '{entity}列表', '列出所有{entity}'],
+  [IntentType.UPDATE]: ['修改{entity}', '更新{entity}', '编辑{entity}', '把状态改为'],
+  [IntentType.DELETE]: ['删除{entity}', '移除{entity}'],
   [IntentType.QUERY]: [
     '查询{entity}',
     '搜索{entity}',
@@ -38,16 +15,8 @@ export const INTENT_PATTERNS = {
     '显示待审核',
     '显示{status}的{entity}'
   ],
-  [IntentType.COUNT]: [
-    '有多少{entity}',
-    '{entity}数量',
-    '统计{entity}'
-  ],
-  [IntentType.HELP]: [
-    '帮助',
-    '你能做什么',
-    '怎么用'
-  ]
+  [IntentType.COUNT]: ['有多少{entity}', '{entity}数量', '统计{entity}'],
+  [IntentType.HELP]: ['帮助', '你能做什么', '怎么用']
 }
 
 /** 实体别名映射 */

@@ -12,13 +12,9 @@ export const useAiChatStore = defineStore('aiChat', () => {
   const isLoading = ref(false)
 
   // Computed
-  const currentSession = computed(() =>
-    sessions.value.find(s => s.id === currentSessionId.value)
-  )
+  const currentSession = computed(() => sessions.value.find(s => s.id === currentSessionId.value))
 
-  const messages = computed(() =>
-    currentSession.value?.messages || []
-  )
+  const messages = computed(() => currentSession.value?.messages || [])
 
   // Actions
   function createSession() {
@@ -121,6 +117,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     switchSession,
     deleteSession,
     updateSessionTitle,
+    saveToStorage,
     loadFromStorage,
     clearAll
   }

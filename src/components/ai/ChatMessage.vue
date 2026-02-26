@@ -19,9 +19,7 @@ const props = defineProps<{
   message: ChatMessage
 }>()
 
-const aiAvatar = computed(() =>
-  new URL('../../assets/images/user.svg', import.meta.url).href
-)
+const aiAvatar = computed(() => new URL('../../assets/images/user.svg', import.meta.url).href)
 
 const userInitial = computed(() => 'A')
 

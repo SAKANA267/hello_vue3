@@ -3,6 +3,7 @@ import userInfoApi from './mockData/userInfo'
 import userApi from './mockData/userManagement'
 import reportCardApi from './mockData/reportCard'
 import './mockData/permission' // Mock 已在文件内部注册
+import './mockData/ai' // AI Assistant Mock API
 
 // 登录接口始终使用 Mock（混合模式支持）
 // Profile.vue
@@ -11,6 +12,9 @@ Mock.mock('/api/user/getLoginInfo', 'get', userInfoApi.getLoginInfo)
 
 // 只在 VITE_MOCK=true 时注册其他 Mock
 if (import.meta.env.VITE_MOCK !== 'false') {
+  // AI Assistant Mock (always enabled for demo)
+  // Mock 已在 ai.ts 文件内部注册
+
   // User Management.vue
   // ========== RESTful API 端点 ==========
   Mock.mock(RegExp('/api/users(\\?.*)?$'), 'get', userApi.getUsers)

@@ -51,8 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, getCurrentInstance } from 'vue'
 import { Document, More } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { useAiChatStore } from '@/stores/aiChat'
 import ChatSidebar from '@/components/ai/ChatSidebar.vue'
 import ChatMessage from '@/components/ai/ChatMessage.vue'
@@ -60,8 +61,15 @@ import ChatInput from '@/components/ai/ChatInput.vue'
 import EmptyState from '@/components/ai/EmptyState.vue'
 import TypingIndicator from '@/components/ai/TypingIndicator.vue'
 import { QUICK_ACTIONS } from '@/constants/intents'
+import { createAiService } from '@/services/aiService'
+import type { AiResponse } from '@/types/ai'
 
+const { proxy } = getCurrentInstance() as any
+const router = useRouter()
 const store = useAiChatStore()
+
+// 创建 AI 服务实例
+const aiService = createAiService(router)
 const sessions = computed(() => store.sessions)
 const currentSessionId = computed(() => store.currentSessionId)
 const currentSession = computed(() => store.currentSession)
@@ -112,23 +120,62 @@ async function handleSend(text: string) {
   inputText.value = ''
   await scrollToBottom()
 
-  // TODO: 调用 AI 服务处理
-  // 这里先模拟响应
+  // 调用 AI 服务处理
   store.isLoading = true
-  setTimeout(() => {
+  try {
+    const response: AiResponse = await aiService.processMessage(text)
+
+    // 执行响应中的操作（如导航等）
+    if (response.action) {
+      await executeAction(response.action)
+    }
+
+    // 添加 AI 响应消息
     store.addMessage({
       role: 'assistant',
-      content: `收到您的消息: ${text}`,
+      content: response.message,
       type: 'text'
     })
+
+    await scrollToBottom()
+  } catch (error) {
+    console.error('AI processing error:', error)
+    store.addMessage({
+      role: 'assistant',
+      content: '抱歉，处理您的请求时出错，请稍后重试。',
+      type: 'error'
+    })
+  } finally {
     store.isLoading = false
-    scrollToBottom()
-  }, 1000)
+  }
+}
+
+/**
+ * 执行 AI 响应中的操作
+ */
+async function executeAction(action: NonNullable<AiResponse['action']>) {
+  switch (action.type) {
+    case 'navigate':
+      if (action.payload.route) {
+        router.push(action.payload.route)
+      }
+      break
+    case 'api':
+      // API 操作可以通过事件总线或其他方式触发
+      console.log('API action:', action.payload)
+      break
+    case 'callback':
+      // 回调操作
+      console.log('Callback action:', action.payload)
+      break
+  }
 }
 
 function handleSave() {
-  // 保存会话逻辑
-  console.log('保存会话')
+  // 会话已自动保存到 localStorage
+  // 这里可以添加额外的保存逻辑，如保存到服务器
+  store.saveToStorage()
+  proxy.$message.success('会话已保存')
 }
 
 function handleStop() {

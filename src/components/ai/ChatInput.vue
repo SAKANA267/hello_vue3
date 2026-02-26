@@ -12,9 +12,7 @@
     />
     <div class="input-actions">
       <span class="input-hint">已发送 {{ count }} 条消息</span>
-      <el-button type="primary" :disabled="!canSend" @click="handleSend">
-        发送
-      </el-button>
+      <el-button type="primary" :disabled="!canSend" @click="handleSend"> 发送 </el-button>
     </div>
   </div>
 </template>

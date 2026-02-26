@@ -86,7 +86,9 @@ export const authApi = {
   },
 
   /** 删除用户登录历史 */
-  deleteUserLoginHistory(userId: string): Promise<{ code: number; message: string; data: number; timestamp: string }> {
+  deleteUserLoginHistory(
+    userId: string
+  ): Promise<{ code: number; message: string; data: number; timestamp: string }> {
     return request({
       url: `/login-history/user/${userId}`,
       method: 'delete'
@@ -325,7 +327,9 @@ interface ApiInterface {
   getLoginHistory(
     params: LoginHistoryPageParams
   ): Promise<{ code: number; message: string; data: LoginHistoryPageResponse; timestamp: string }>
-  deleteUserLoginHistory(userId: string): Promise<{ code: number; message: string; data: number; timestamp: string }>
+  deleteUserLoginHistory(
+    userId: string
+  ): Promise<{ code: number; message: string; data: number; timestamp: string }>
 }
 
 /** 通用 API 对象 (兼容旧代码，内部调用新的 authApi/userApi/reportCardApi) */
