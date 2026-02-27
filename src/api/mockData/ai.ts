@@ -1,126 +1,143 @@
 import Mock from 'mockjs'
-import { IntentType, EntityType } from '@/types/ai'
-import type { ParsedIntent, AiResponse } from '@/types/ai'
-import {
-  INTENT_PATTERNS,
-  ENTITY_ALIASES,
-  RESPONSE_TEMPLATES,
-  ENTITY_NAMES
-} from '@/constants/intents'
+import type { AiResponse, IntentApiResponse } from '@/types/ai'
+import { IntentType, ActionType } from '@/types/ai'
 
 // Mock 延迟
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
- * 简单的意图匹配器（模拟 AI 服务）
+ * 生成模拟AI响应（与后端API格式一致）
  */
-function matchIntent(message: string): ParsedIntent {
+function generateMockResponse(message: string): AiResponse {
   const normalizedMessage = message.toLowerCase().trim()
 
-  // 1. 尝试匹配导航意图
+  // 导航意图
   if (/打开|跳转|去|管理.*页面/.test(normalizedMessage)) {
-    for (const [entity, aliases] of Object.entries(ENTITY_ALIASES)) {
-      for (const alias of aliases) {
-        if (normalizedMessage.includes(alias)) {
-          return {
-            intent: IntentType.NAVIGATE,
-            entity: entity as EntityType,
-            params: {},
-            confidence: 0.9
-          }
-        }
-      }
-    }
-  }
-
-  // 2. 尝试匹配创建意图
-  if (/新增|添加|创建|新建/.test(normalizedMessage)) {
-    for (const [entity, aliases] of Object.entries(ENTITY_ALIASES)) {
-      for (const alias of aliases) {
-        if (normalizedMessage.includes(alias)) {
-          // 提取参数（如姓名）
-          const nameMatch = message.match(
-            /(?:新增|添加|创建|新建).*?(?:叫|名为|名\s*[:：]?\s*)([\u4e00-\u9fa5]+)/i
-          )
-          const params = nameMatch ? { name: nameMatch[1] } : {}
-
-          return {
-            intent: IntentType.CREATE,
-            entity: entity as EntityType,
-            params,
-            confidence: 0.85
-          }
-        }
-      }
-    }
-  }
-
-  // 3. 尝试匹配查询意图
-  if (/显示|查看|列出|所有|待审核|待处理/.test(normalizedMessage)) {
-    for (const [entity, aliases] of Object.entries(ENTITY_ALIASES)) {
-      for (const alias of aliases) {
-        if (normalizedMessage.includes(alias)) {
-          const params: Record<string, any> = {}
-
-          // 检测状态
-          if (/待审核|pending|未审核/.test(normalizedMessage)) {
-            params.status = 'pending'
-          } else if (/已审核|approved|通过/.test(normalizedMessage)) {
-            params.status = 'approved'
-          } else if (/已拒绝|rejected|不通过/.test(normalizedMessage)) {
-            params.status = 'rejected'
-          }
-
-          return {
-            intent: IntentType.QUERY,
-            entity: entity as EntityType,
-            params,
-            confidence: 0.88
-          }
-        }
-      }
-    }
-  }
-
-  // 4. 尝试匹配统计意图
-  if (/多少|数量|统计/.test(normalizedMessage)) {
-    for (const [entity, aliases] of Object.entries(ENTITY_ALIASES)) {
-      for (const alias of aliases) {
-        if (normalizedMessage.includes(alias)) {
-          return {
-            intent: IntentType.COUNT,
-            entity: entity as EntityType,
-            params: {},
-            confidence: 0.92
-          }
-        }
-      }
-    }
-  }
-
-  // 5. 尝试匹配更新意图
-  if (/修改|更新|编辑|把.*改为/.test(normalizedMessage)) {
-    const statusMatch = normalizedMessage.match(/(?:状态改为|改为|变成)([\u4e00-\u9fa5]+)/i)
-    if (statusMatch) {
+    if (/用户|user/.test(normalizedMessage)) {
       return {
-        intent: IntentType.UPDATE,
-        entity: EntityType.REPORT_CARD,
-        params: { status: statusMatch[1] },
-        confidence: 0.8
+        message: '正在为您跳转到用户管理页面...',
+        action: {
+          type: ActionType.NAVIGATE,
+          payload: {
+            intent: 'navigate',
+            entity: 'user',
+            route: '/userManagement'
+          }
+        },
+        suggestions: ['查看详情', '新增用户', '返回']
       }
+    }
+    return {
+      message: '正在为您跳转到报告卡页面...',
+      action: {
+        type: ActionType.NAVIGATE,
+        payload: {
+          intent: 'navigate',
+          entity: 'reportCard',
+          route: '/objectManagement'
+        }
+      },
+      suggestions: ['查看详情', '导出数据', '返回']
     }
   }
 
-  // 6. 匹配帮助意图
+  // 创建意图
+  if (/新增|添加|创建|新建/.test(normalizedMessage)) {
+    return {
+      message: '已为您打开添加表单',
+      action: {
+        type: ActionType.CALLBACK,
+        payload: {
+          action: 'open-create',
+          entity: 'user',
+          params: {}
+        }
+      },
+      suggestions: ['继续添加', '查看列表', '返回']
+    }
+  }
+
+  // 查询意图
+  if (/显示|查看|列出|所有|待审核/.test(normalizedMessage)) {
+    const count = Mock.Random.integer(5, 50)
+    return {
+      message: `为您找到 ${count} 条待审核的报告卡`,
+      action: {
+        type: ActionType.NAVIGATE,
+        payload: {
+          intent: 'query',
+          entity: 'reportCard',
+          route: '/objectManagement',
+          filters: { status: 'pending' }
+        }
+      },
+      suggestions: ['查看详情', '导出数据', '修改筛选']
+    }
+  }
+
+  // 统计意图
+  if (/多少|数量|统计/.test(normalizedMessage)) {
+    const count = Mock.Random.integer(50, 500)
+    return {
+      message: `当前共有 ${count} 条报告卡`,
+      action: {
+        type: ActionType.API,
+        payload: {
+          entity: 'reportCard',
+          operation: 'count'
+        }
+      },
+      suggestions: ['查看列表', '统计分析', '导出报表']
+    }
+  }
+
+  // 帮助意图
   if (/帮助|你能做什么|怎么用|help/i.test(normalizedMessage)) {
     return {
-      intent: IntentType.HELP,
-      params: {},
-      confidence: 0.95
+      message: '我可以帮您进行数据查询、新增、修改、删除以及页面导航等操作。',
+      suggestions: ['显示待审核的报告卡', '新增用户', '打开用户管理页面', '有多少个用户']
     }
   }
 
-  // 未识别
+  // 默认响应
+  return {
+    message: '抱歉，我没有理解您的意思，请换一种说法。',
+    suggestions: ['显示待审核的报告卡', '新增用户', '打开用户管理页面']
+  }
+}
+
+/**
+ * 生成模拟意图识别响应
+ */
+function generateMockIntent(message: string): IntentApiResponse {
+  const normalizedMessage = message.toLowerCase().trim()
+
+  if (/打开|跳转|去/.test(normalizedMessage)) {
+    return {
+      intent: IntentType.NAVIGATE,
+      entity: {
+        code: 'reportCard',
+        name: '报告卡',
+        aliases: ['报告卡', '报卡', '报告', 'card']
+      },
+      params: {},
+      confidence: 0.9
+    }
+  }
+
+  if (/新增|添加|创建|新建/.test(normalizedMessage)) {
+    return {
+      intent: IntentType.CREATE,
+      entity: {
+        code: 'user',
+        name: '用户',
+        aliases: ['用户', 'user', '账号']
+      },
+      params: {},
+      confidence: 0.85
+    }
+  }
+
   return {
     intent: IntentType.UNKNOWN,
     params: {},
@@ -128,154 +145,78 @@ function matchIntent(message: string): ParsedIntent {
   }
 }
 
-/**
- * 生成 AI 响应
- */
-function generateResponse(intent: ParsedIntent): AiResponse {
-  const { intent: intentType, entity, params } = intent
-
-  switch (intentType) {
-    case IntentType.NAVIGATE:
-      return {
-        message: RESPONSE_TEMPLATES[intentType].replace('{entityName}', ENTITY_NAMES[entity!]),
-        action: {
-          type: 'navigate',
-          payload: {
-            route: getRouteForEntity(entity!)
-          }
-        }
-      }
-
-    case IntentType.CREATE:
-      return {
-        message: params.name
-          ? `已为您打开${ENTITY_NAMES[entity!]}添加表单，已预填姓名：${params.name}`
-          : RESPONSE_TEMPLATES[intentType].replace('{entityName}', ENTITY_NAMES[entity!]),
-        action: {
-          type: 'callback',
-          payload: {
-            action: 'open-create',
-            entity,
-            params
-          }
-        },
-        suggestions: ['继续添加', '查看列表', '返回']
-      }
-
-    case IntentType.QUERY: {
-      const count = Mock.Random.integer(5, 50)
-      const message = params.status
-        ? `为您找到 ${count} 条${params.status === 'pending' ? '待审核' : params.status === 'approved' ? '已审核' : '已拒绝'}的${ENTITY_NAMES[entity!]}`
-        : RESPONSE_TEMPLATES[intentType].replace('{entityName}', ENTITY_NAMES[entity!])
-
-      return {
-        message,
-        action: {
-          type: 'navigate',
-          payload: {
-            route: getRouteForEntity(entity!),
-            filters: params
-          }
-        },
-        suggestions: ['查看详情', '导出数据', '修改筛选']
-      }
-    }
-
-    case IntentType.COUNT: {
-      const totalCount = Mock.Random.integer(50, 500)
-      return {
-        message: RESPONSE_TEMPLATES[intentType]
-          .replace('{count}', totalCount.toString())
-          .replace('{entityName}', ENTITY_NAMES[entity!]),
-        action: {
-          type: 'api',
-          payload: {
-            entity,
-            operation: 'count'
-          }
-        },
-        suggestions: ['查看列表', '统计分析', '导出报表']
-      }
-    }
-
-    case IntentType.UPDATE:
-      return {
-        message: `已为您批量更新${params.status || ''}状态`,
-        action: {
-          type: 'api',
-          payload: {
-            entity,
-            operation: 'update',
-            params
-          }
-        }
-      }
-
-    case IntentType.HELP:
-      return {
-        message: RESPONSE_TEMPLATES[intentType],
-        suggestions: ['显示待审核的报告卡', '新增用户', '打开用户管理页面', '有多少个用户']
-      }
-
-    default:
-      return {
-        message: RESPONSE_TEMPLATES[IntentType.UNKNOWN]
-      }
-  }
-}
-
-/**
- * 根据实体获取路由
- */
-function getRouteForEntity(entity: EntityType): string {
-  const routeMap: Record<EntityType, string> = {
-    [EntityType.REPORT_CARD]: '/home/objectManagement',
-    [EntityType.USER]: '/home/userManagement',
-    [EntityType.OBJECT]: '/home/objectManagement',
-    [EntityType.AUDIT]: '/home/objectManagement'
-  }
-  return routeMap[entity] || '/home/dashboard'
-}
-
 // Mock API: 聊天接口
+// POST /api/ai/chat
 Mock.mock('/api/ai/chat', 'post', (options: { body: string }) => {
   const { message } = JSON.parse(options.body)
-
-  const intent = matchIntent(message)
-  const response = generateResponse(intent)
+  const response = generateMockResponse(message)
 
   return {
     code: 200,
     data: response,
-    msg: 'success'
+    msg: '操作成功'
   }
 })
 
 // Mock API: 意图识别接口
+// POST /api/ai/intent
 Mock.mock('/api/ai/intent', 'post', (options: { body: string }) => {
   const { message } = JSON.parse(options.body)
-
-  const intent = matchIntent(message)
+  const intent = generateMockIntent(message)
 
   return {
     code: 200,
     data: intent,
-    msg: 'success'
+    msg: '操作成功'
   }
 })
 
 // Mock API: 执行意图接口
+// POST /api/ai/execute
 Mock.mock('/api/ai/execute', 'post', (options: { body: string }) => {
-  const { intent } = JSON.parse(options.body)
-
-  const response = generateResponse(intent)
+  const { intent, entity } = JSON.parse(options.body)
+  const response = generateMockResponse(`${intent} ${entity || ''}`)
 
   return {
     code: 200,
     data: response,
-    msg: 'success'
+    msg: '操作成功'
   }
 })
 
-// 导出工具函数供其他模块使用
-export { matchIntent, generateResponse, getRouteForEntity }
+// Mock API: 创建会话接口
+// POST /api/ai/sessions
+Mock.mock('/api/ai/sessions', 'post', () => {
+  return {
+    code: 200,
+    data: {
+      sessionId: Mock.Random.guid(),
+      timestamp: Date.now()
+    },
+    msg: '操作成功'
+  }
+})
+
+// Mock API: 获取会话历史接口
+// GET /api/ai/sessions/{sessionId}
+Mock.mock(/\/api\/ai\/sessions\/[\w-]+$/, 'get', () => {
+  return {
+    code: 200,
+    data: {
+      sessionId: Mock.Random.guid(),
+      title: '测试对话',
+      messages: []
+    },
+    msg: '操作成功'
+  }
+})
+
+// Mock API: 删除会话接口
+// DELETE /api/ai/sessions/{sessionId}
+Mock.mock(/\/api\/ai\/sessions\/[\w-]+$/, 'delete', () => {
+  return {
+    code: 200,
+    data: null,
+    msg: '会话已删除'
+  }
+})

@@ -33,7 +33,21 @@
           :quick-actions="QUICK_ACTIONS"
           @action="handleQuickAction"
         />
-        <ChatMessage v-for="message in messages" :key="message.id" :message="message" />
+        <template v-for="message in messages" :key="message.id">
+          <ChatMessage :message="message" />
+          <!-- 显示建议操作按钮 -->
+          <div v-if="message.suggestions && message.suggestions.length > 0" class="suggestions-wrapper">
+            <el-button
+              v-for="(suggestion, index) in message.suggestions"
+              :key="index"
+              size="small"
+              plain
+              @click="handleSuggestionClick(suggestion)"
+            >
+              {{ suggestion }}
+            </el-button>
+          </div>
+        </template>
         <TypingIndicator v-if="isLoading" />
       </div>
 
@@ -79,23 +93,27 @@ const isLoading = computed(() => store.isLoading)
 const inputText = ref('')
 const messagesContainer = ref<HTMLElement>()
 
-onMounted(() => {
+onMounted(async () => {
+  // 加载本地存储的会话历史
   store.loadFromStorage()
-  if (!currentSessionId.value) {
-    store.createSession()
+
+  // 如果本地有会话，恢复第一个会话
+  // 如果没有会话，等用户首次发送消息时再由后端创建
+  if (!currentSessionId.value && sessions.value.length > 0) {
+    store.switchSession(sessions.value[0].id)
   }
 })
 
-function handleNewSession() {
-  store.createSession()
+async function handleNewSession() {
+  await store.createSession()
 }
 
 function handleSwitchSession(id: string) {
   store.switchSession(id)
 }
 
-function handleDeleteSession(id: string) {
-  store.deleteSession(id)
+async function handleDeleteSession(id: string) {
+  await store.deleteSession(id)
 }
 
 function handleUpdateTitle(id: string, title: string) {
@@ -107,73 +125,82 @@ function handleQuickAction(prompt: string) {
   handleSend(prompt)
 }
 
+function handleSuggestionClick(suggestion: string) {
+  inputText.value = suggestion
+  handleSend(suggestion)
+}
+
 async function handleSend(text: string) {
   if (!text.trim()) return
 
-  // 添加用户消息
-  store.addMessage({
-    role: 'user',
-    content: text,
-    type: 'text'
-  })
-
   inputText.value = ''
-  await scrollToBottom()
 
   // 调用 AI 服务处理
   store.isLoading = true
   try {
-    const response: AiResponse = await aiService.processMessage(text)
+    // 首次对话：currentSessionId 为空，不传 sessionId
+    // 后续对话：使用 currentSessionId
+    const response: AiResponse = await aiService.processMessage(
+      text,
+      currentSessionId.value || undefined
+    )
+
+    // 如果后端返回了新的 sessionId（首次对话），创建本地会话
+    if (response.sessionId && response.sessionId !== currentSessionId.value) {
+      store.createSessionWithId(response.sessionId, text.slice(0, 20))
+    }
 
     // 执行响应中的操作（如导航等）
     if (response.action) {
-      await executeAction(response.action)
+      aiService.executeAction(response.action)
     }
 
-    // 添加 AI 响应消息
+    // 添加用户消息和 AI 响应消息
+    store.addMessage({
+      role: 'user',
+      content: text,
+      type: 'text'
+    })
+
     store.addMessage({
       role: 'assistant',
       content: response.message,
-      type: 'text'
+      type: 'text',
+      suggestions: response.suggestions
     })
 
     await scrollToBottom()
   } catch (error) {
     console.error('AI processing error:', error)
+
+    // 确保有会话才添加错误消息
+    if (!currentSessionId.value) {
+      store.createSessionWithId(
+        Date.now().toString(36),
+        '新对话'
+      )
+    }
+
+    store.addMessage({
+      role: 'user',
+      content: text,
+      type: 'text'
+    })
+
     store.addMessage({
       role: 'assistant',
       content: '抱歉，处理您的请求时出错，请稍后重试。',
       type: 'error'
     })
+
+    await scrollToBottom()
   } finally {
     store.isLoading = false
   }
 }
 
-/**
- * 执行 AI 响应中的操作
- */
-async function executeAction(action: NonNullable<AiResponse['action']>) {
-  switch (action.type) {
-    case 'navigate':
-      if (action.payload.route) {
-        router.push(action.payload.route)
-      }
-      break
-    case 'api':
-      // API 操作可以通过事件总线或其他方式触发
-      console.log('API action:', action.payload)
-      break
-    case 'callback':
-      // 回调操作
-      console.log('Callback action:', action.payload)
-      break
-  }
-}
-
 function handleSave() {
   // 会话已自动保存到 localStorage
-  // 这里可以添加额外的保存逻辑，如保存到服务器
   store.saveToStorage()
   proxy.$message.success('会话已保存')
 }
@@ -233,5 +260,13 @@ function scrollToBottom() {
 .chat-input {
   padding: 16px 24px;
   border-top: 1px solid #e5e5e5;
+}
+
+.suggestions-wrapper {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-left: 48px; // 对齐消息内容
 }
 </style>

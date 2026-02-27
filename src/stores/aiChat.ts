@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { aiApi } from '@/api/ai'
 import type { ChatMessage, ChatSession } from '@/types/ai'
 
 const STORAGE_KEY_SESSIONS = 'ai_chat_sessions'
@@ -13,14 +14,45 @@ export const useAiChatStore = defineStore('aiChat', () => {
 
   // Computed
   const currentSession = computed(() => sessions.value.find(s => s.id === currentSessionId.value))
-
   const messages = computed(() => currentSession.value?.messages || [])
 
   // Actions
-  function createSession() {
+
+  /**
+   * 创建新会话（调用后端API）
+   */
+  async function createSession(title = '新对话') {
+    try {
+      const response = await aiApi.createSession({ title })
+      const sessionId = response.sessionId
+
+      const newSession: ChatSession = {
+        id: sessionId,
+        title,
+        messages: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+
+      sessions.value.unshift(newSession)
+      currentSessionId.value = sessionId
+      saveToStorage()
+
+      return newSession
+    } catch (error) {
+      console.error('Failed to create session:', error)
+      // 降级：创建本地会话
+      return createLocalSession(title)
+    }
+  }
+
+  /**
+   * 降级方案：创建本地会话（当后端不可用时）
+   */
+  function createLocalSession(title = '新对话') {
     const newSession: ChatSession = {
       id: generateId(),
-      title: '新对话',
+      title,
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -31,6 +63,37 @@ export const useAiChatStore = defineStore('aiChat', () => {
     return newSession
   }
 
+  /**
+   * 使用后端返回的 sessionId 创建本地会话
+   * @param sessionId 后端返回的会话ID
+   * @param title 会话标题
+   */
+  function createSessionWithId(sessionId: string, title = '新对话') {
+    // 检查会话是否已存在
+    const existing = sessions.value.find(s => s.id === sessionId)
+    if (existing) {
+      currentSessionId.value = sessionId
+      return existing
+    }
+
+    // 创建新会话
+    const newSession: ChatSession = {
+      id: sessionId,
+      title,
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    }
+
+    sessions.value.unshift(newSession)
+    currentSessionId.value = sessionId
+    saveToStorage()
+    return newSession
+  }
+
+  /**
+   * 添加消息到当前会话
+   */
   function addMessage(message: Omit<ChatMessage, 'id' | 'timestamp'>) {
     if (!currentSessionId.value) {
       createSession()
@@ -55,11 +118,25 @@ export const useAiChatStore = defineStore('aiChat', () => {
     }
   }
 
+  /**
+   * 切换会话
+   */
   function switchSession(sessionId: string) {
     currentSessionId.value = sessionId
   }
 
-  function deleteSession(sessionId: string) {
+  /**
+   * 删除会话
+   */
+  async function deleteSession(sessionId: string) {
+    try {
+      // 调用后端删除
+      await aiApi.deleteSession(sessionId)
+    } catch (error) {
+      console.error('Failed to delete session on server:', error)
+    }
+
+    // 从本地状态中删除
     const index = sessions.value.findIndex(s => s.id === sessionId)
     if (index !== -1) {
       sessions.value.splice(index, 1)
@@ -70,6 +147,9 @@ export const useAiChatStore = defineStore('aiChat', () => {
     }
   }
 
+  /**
+   * 更新会话标题
+   */
   function updateSessionTitle(sessionId: string, title: string) {
     const session = sessions.value.find(s => s.id === sessionId)
     if (session) {
@@ -79,13 +159,9 @@ export const useAiChatStore = defineStore('aiChat', () => {
     }
   }
 
-  function saveToStorage() {
-    localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions.value))
-    if (currentSessionId.value) {
-      localStorage.setItem(STORAGE_KEY_CURRENT, currentSessionId.value)
-    }
-  }
-
+  /**
+   * 从本地存储加载会话
+   */
   function loadFromStorage() {
     const stored = localStorage.getItem(STORAGE_KEY_SESSIONS)
     if (stored) {
@@ -99,6 +175,19 @@ export const useAiChatStore = defineStore('aiChat', () => {
     currentSessionId.value = localStorage.getItem(STORAGE_KEY_CURRENT) || null
   }
 
+  /**
+   * 保存到本地存储
+   */
+  function saveToStorage() {
+    localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions.value))
+    if (currentSessionId.value) {
+      localStorage.setItem(STORAGE_KEY_CURRENT, currentSessionId.value)
+    }
+  }
+
+  /**
+   * 清除所有会话
+   */
   function clearAll() {
     sessions.value = []
     currentSessionId.value = null
@@ -113,6 +202,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
     messages,
     isLoading,
     createSession,
+    createSessionWithId,
     addMessage,
     switchSession,
     deleteSession,
