@@ -1,19 +1,22 @@
 import { aiApi } from '@/api/ai'
+import { createAiActionHandler } from '@/utils/ai-action-handler'
 import type { AiResponse, ChatRequest, Action } from '@/types/ai'
+import type { Router } from 'vue-router'
+import type { CallbackHandler } from '@/utils/ai-action-handler'
 
 /**
- * AI 服务类（重构版）
+ * AI 服务类
  * 负责与后端AI API通信，并执行返回的操作
  *
  * 所有意图识别由后端处理，前端只负责：
  * 1. 发送用户消息到后端
- * 2. 执行后端返回的action
+ * 2. 执行后端返回的action（通过 AiActionHandler）
  */
 export class AiService {
-  private router: any
+  private actionHandler: ReturnType<typeof createAiActionHandler>
 
-  constructor(router: any) {
-    this.router = router
+  constructor(router: Router) {
+    this.actionHandler = createAiActionHandler(router)
   }
 
   /**
@@ -44,60 +47,50 @@ export class AiService {
   /**
    * 执行AI返回的操作
    * @param action 操作对象
+   * @returns 操作执行结果
    */
-  executeAction(action: Action): void {
-    switch (action.type) {
-      case 'NAVIGATE':
-        this.handleNavigate(action)
-        break
-      case 'API':
-        this.handleApi(action)
-        break
-      case 'CALLBACK':
-        this.handleCallback(action)
-        break
-    }
+  async executeAction(action: Action | null): Promise<any> {
+    return await this.actionHandler.handleAction(action)
   }
 
   /**
-   * 处理导航操作
+   * 注册回调处理器
+   * 用于处理 CALLBACK 类型的操作
+   *
+   * @param intent 回调意图名称（如 'HELP', 'SHOW_DIALOG' 等）
+   * @param handler 处理函数
+   *
+   * @example
+   * aiService.registerCallback('HELP', () => {
+   *   ElMessageBox.alert('帮助内容...', '帮助')
+   * })
    */
-  private handleNavigate(action: Action): void {
-    const route = action.payload.route
-    if (route) {
-      this.router.push(route)
-    }
+  registerCallback(intent: string, handler: CallbackHandler): void {
+    this.actionHandler.registerCallback(intent, handler)
   }
 
   /**
-   * 处理API操作
-   * 后端返回需要调用的API信息，前端执行调用
+   * 取消注册回调处理器
+   * @param intent 回调意图名称
+   * @param handler 要移除的处理函数（可选）
    */
-  private handleApi(action: Action): void {
-    // 可以通过事件总线或其他方式通知相关组件
-    // 这里留空，由具体业务场景决定如何处理
-    console.log('API action:', action.payload)
+  unregisterCallback(intent: string, handler?: CallbackHandler): void {
+    this.actionHandler.unregisterCallback(intent, handler)
   }
 
   /**
-   * 处理回调操作
-   * 后端返回的自定义操作，前端执行相应逻辑
+   * 获取底层 actionHandler 实例
+   * 用于高级用法
    */
-  private handleCallback(action: Action): void {
-    const callbackAction = action.payload.action
-    const entity = action.payload.entity
-    const params = action.payload.params
-
-    // 可以通过事件总线通知相关组件
-    // 例如：打开创建对话框、预填表单等
-    console.log('Callback action:', { callbackAction, entity, params })
+  getActionHandler() {
+    return this.actionHandler
   }
 }
 
 /**
  * 创建 AI 服务实例
  */
-export function createAiService(router: any): AiService {
+export function createAiService(router: Router): AiService {
   return new AiService(router)
 }
 
@@ -106,7 +99,7 @@ export function createAiService(router: any): AiService {
  */
 let defaultAiService: AiService | null = null
 
-export function initAiService(router: any): AiService {
+export function initAiService(router: Router): AiService {
   if (!defaultAiService) {
     defaultAiService = new AiService(router)
   }
