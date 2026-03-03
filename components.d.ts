@@ -17,6 +17,7 @@ declare module 'vue' {
     CommonTab: typeof import('./src/components/CommonTab.vue')['default']
     CommonTable: typeof import('./src/components/CommonTable.vue')['default']
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
+    DeleteConfirmDialog: typeof import('./src/components/ai/DeleteConfirmDialog.vue')['default']
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']

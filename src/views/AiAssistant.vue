@@ -150,24 +150,61 @@ async function handleSend(text: string) {
       store.createSessionWithId(response.sessionId, text.slice(0, 20))
     }
 
-    // 执行响应中的操作（如导航等）
-    if (response.action) {
-      aiService.executeAction(response.action)
-    }
-
-    // 添加用户消息和 AI 响应消息
+    // 添加用户消息
     store.addMessage({
       role: 'user',
       content: text,
       type: 'text'
     })
 
-    store.addMessage({
-      role: 'assistant',
-      content: response.message,
-      type: 'text',
-      suggestions: response.suggestions
-    })
+    // 检查是否为删除操作，需要显示确认对话框
+    const isDeleteAction = response.action?.payload?.intent === 'delete'
+    console.log('[AI Response]', response)
+    console.log('[Is Delete Action]', isDeleteAction, response.action?.payload?.intent)
+
+    if (isDeleteAction && response.action?.payload) {
+      // 显示删除确认对话框
+      const { id, entity } = response.action.payload
+
+      // 获取对象详情（这里可以通过 API 获取，暂时使用 payload 中的信息）
+      store.addMessage({
+        role: 'assistant',
+        content: response.message,
+        type: 'delete-confirm',
+        confirmData: {
+          objectInfo: {
+            id,
+            entity,
+            ...response.action.payload
+          },
+          onConfirm: async () => {
+            // 执行删除操作
+            await executeDelete(response.action?.payload)
+          },
+          onCancel: () => {
+            // 取消删除，添加提示消息
+            store.addMessage({
+              role: 'assistant',
+              content: '已取消删除操作',
+              type: 'text'
+            })
+          }
+        }
+      })
+    } else {
+      // 普通消息
+      store.addMessage({
+        role: 'assistant',
+        content: response.message,
+        type: 'text',
+        suggestions: response.suggestions
+      })
+
+      // 执行响应中的操作（如导航等）
+      if (response.action) {
+        aiService.executeAction(response.action)
+      }
+    }
 
     await scrollToBottom()
   } catch (error) {
@@ -196,6 +233,44 @@ async function handleSend(text: string) {
     await scrollToBottom()
   } finally {
     store.isLoading = false
+  }
+}
+
+// 执行删除操作
+async function executeDelete(payload: any) {
+  try {
+    const { id, entity } = payload
+    const idStr = String(id)
+
+    // 根据实体类型调用相应的删除 API
+    if (entity === 'user') {
+      await proxy.$api.deleteUserRestful(idStr)
+      store.addMessage({
+        role: 'assistant',
+        content: `删除成功：用户 #${id}`,
+        type: 'text'
+      })
+    } else if (entity === 'reportCard' || entity === 'object') {
+      await proxy.$api.deleteReportCard(idStr)
+      store.addMessage({
+        role: 'assistant',
+        content: `删除成功：报告卡 #${id}`,
+        type: 'text'
+      })
+    } else {
+      store.addMessage({
+        role: 'assistant',
+        content: `暂不支持删除 ${entity} 类型的数据`,
+        type: 'error'
+      })
+    }
+  } catch (error) {
+    console.error('Delete error:', error)
+    store.addMessage({
+      role: 'assistant',
+      content: '删除失败，请稍后重试',
+      type: 'error'
+    })
   }
 }
 

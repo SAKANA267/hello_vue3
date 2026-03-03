@@ -6,18 +6,37 @@
     </div>
     <div class="message-content">
       <div class="message-text">{{ message.content }}</div>
+      <!-- 删除确认对话框 -->
+      <DeleteConfirmDialog
+        v-if="message.type === 'delete-confirm' && message.confirmData"
+        :object-info="message.confirmData.objectInfo"
+        @confirm="message.confirmData.onConfirm"
+        @cancel="message.confirmData.onCancel"
+      />
       <div class="message-time">{{ formatTime(message.timestamp) }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { ChatMessage } from '@/types/ai'
+import DeleteConfirmDialog from './DeleteConfirmDialog.vue'
 
 const props = defineProps<{
   message: ChatMessage
 }>()
+
+// 调试日志 - 仅在删除确认时打印
+watch(
+  () => props.message,
+  (msg) => {
+    if (msg.type === 'delete-confirm') {
+      console.log('[ChatMessage Delete Confirm]', msg.type, msg.confirmData)
+    }
+  },
+  { immediate: true }
+)
 
 const aiAvatar = computed(() => new URL('../../assets/images/user.svg', import.meta.url).href)
 
@@ -105,5 +124,12 @@ function formatTime(timestamp: number): string {
   margin-top: 4px;
   font-size: 12px;
   color: #909399;
+}
+
+.message-content {
+  :deep(.delete-confirm-dialog) {
+    margin-top: 8px;
+    align-self: flex-start;
+  }
 }
 </style>

@@ -1,13 +1,21 @@
 // AI Assistant Type Definitions (与后端API保持一致)
 
+/** 删除确认对话框数据 */
+export interface DeleteConfirmData {
+  objectInfo: Record<string, any>
+  onConfirm: () => void
+  onCancel: () => void
+}
+
 /** 会话消息类型 */
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  type?: 'text' | 'action' | 'error' | 'loading'
+  type?: 'text' | 'action' | 'error' | 'loading' | 'delete-confirm'
   suggestions?: string[] // 建议操作按钮
+  confirmData?: DeleteConfirmData // 删除确认对话框数据
 }
 
 /** 历史会话 */
