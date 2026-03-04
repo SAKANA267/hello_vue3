@@ -35,24 +35,24 @@
         />
         <template v-for="message in messages" :key="message.id">
           <ChatMessage :message="message" />
-          <!-- 显示建议操作按钮 -->
-          <div v-if="message.suggestions && message.suggestions.length > 0" class="suggestions-wrapper">
-            <el-button
-              v-for="(suggestion, index) in message.suggestions"
-              :key="index"
-              size="small"
-              plain
-              @click="handleSuggestionClick(suggestion)"
-            >
-              {{ suggestion }}
-            </el-button>
-          </div>
         </template>
         <TypingIndicator v-if="isLoading" />
       </div>
 
       <!-- 输入区域 -->
       <div class="chat-input">
+        <!-- 建议操作按钮 -->
+        <div v-if="currentSuggestions.length > 0" class="suggestions-wrapper">
+          <el-button
+            v-for="(suggestion, index) in currentSuggestions"
+            :key="index"
+            size="small"
+            plain
+            @click="handleSuggestionClick(suggestion)"
+          >
+            {{ suggestion }}
+          </el-button>
+        </div>
         <ChatInput
           v-model="inputText"
           :disabled="isLoading"
@@ -89,6 +89,7 @@ const currentSessionId = computed(() => store.currentSessionId)
 const currentSession = computed(() => store.currentSession)
 const messages = computed(() => store.messages)
 const isLoading = computed(() => store.isLoading)
+const currentSuggestions = computed(() => store.currentSuggestions)
 
 const inputText = ref('')
 const messagesContainer = ref<HTMLElement>()
@@ -196,14 +197,20 @@ async function handleSend(text: string) {
       store.addMessage({
         role: 'assistant',
         content: response.message,
-        type: 'text',
-        suggestions: response.suggestions
+        type: 'text'
       })
 
       // 执行响应中的操作（如导航等）
       if (response.action) {
         aiService.executeAction(response.action)
       }
+    }
+
+    // 更新建议列表（统一处理）
+    if (response.suggestions && response.suggestions.length > 0) {
+      store.updateSuggestions(response.suggestions)
+    } else {
+      store.clearSuggestions()
     }
 
     await scrollToBottom()
@@ -229,6 +236,8 @@ async function handleSend(text: string) {
       content: '抱歉，处理您的请求时出错，请稍后重试。',
       type: 'error'
     })
+
+    store.clearSuggestions()
 
     await scrollToBottom()
   } finally {
@@ -335,13 +344,14 @@ function scrollToBottom() {
 .chat-input {
   padding: 16px 24px;
   border-top: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .suggestions-wrapper {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 8px;
-  margin-left: 48px; // 对齐消息内容
 }
 </style>

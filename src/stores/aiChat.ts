@@ -11,6 +11,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
   const sessions = ref<ChatSession[]>([])
   const currentSessionId = ref<string | null>(null)
   const isLoading = ref(false)
+  const currentSuggestions = ref<string[]>([])
 
   // Computed
   const currentSession = computed(() => sessions.value.find(s => s.id === currentSessionId.value))
@@ -195,18 +196,35 @@ export const useAiChatStore = defineStore('aiChat', () => {
     localStorage.removeItem(STORAGE_KEY_CURRENT)
   }
 
+  /**
+   * 更新当前建议列表
+   */
+  function updateSuggestions(suggestions: string[]) {
+    currentSuggestions.value = suggestions
+  }
+
+  /**
+   * 清除建议列表
+   */
+  function clearSuggestions() {
+    currentSuggestions.value = []
+  }
+
   return {
     sessions,
     currentSessionId,
     currentSession,
     messages,
     isLoading,
+    currentSuggestions,
     createSession,
     createSessionWithId,
     addMessage,
     switchSession,
     deleteSession,
     updateSessionTitle,
+    updateSuggestions,
+    clearSuggestions,
     saveToStorage,
     loadFromStorage,
     clearAll
