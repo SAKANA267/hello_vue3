@@ -136,6 +136,13 @@ async function handleSend(text: string) {
 
   inputText.value = ''
 
+  // 立即添加用户消息到界面，提升用户体验
+  store.addMessage({
+    role: 'user',
+    content: text,
+    type: 'text'
+  })
+
   // 调用 AI 服务处理
   store.isLoading = true
   try {
@@ -150,13 +157,6 @@ async function handleSend(text: string) {
     if (response.sessionId && response.sessionId !== currentSessionId.value) {
       store.createSessionWithId(response.sessionId, text.slice(0, 20))
     }
-
-    // 添加用户消息
-    store.addMessage({
-      role: 'user',
-      content: text,
-      type: 'text'
-    })
 
     // 检查是否为删除操作，需要显示确认对话框
     const isDeleteAction = response.action?.payload?.intent === 'delete'
