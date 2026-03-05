@@ -13,6 +13,18 @@
         @confirm="message.confirmData.onConfirm"
         @cancel="message.confirmData.onCancel"
       />
+      <!-- 请求数据卡片 -->
+      <RequestDataCard
+        v-if="message.type === 'request-data' && message.requestData"
+        :title="message.requestData.title"
+        :description="message.requestData.description"
+        :data="message.requestData.data"
+        :columns="message.requestData.columns"
+        :page-size="message.requestData.pageSize"
+        :show-actions="message.requestData.showActions"
+        :action-text="message.requestData.actionText"
+        @action="message.requestData.onAction"
+      />
       <div class="message-time">{{ formatTime(message.timestamp) }}</div>
     </div>
   </div>
@@ -22,6 +34,7 @@
 import { computed, watch } from 'vue'
 import type { ChatMessage } from '@/types/ai'
 import DeleteConfirmDialog from './DeleteConfirmDialog.vue'
+import RequestDataCard from './RequestDataCard.vue'
 
 const props = defineProps<{
   message: ChatMessage
@@ -127,7 +140,8 @@ function formatTime(timestamp: number): string {
 }
 
 .message-content {
-  :deep(.delete-confirm-dialog) {
+  :deep(.delete-confirm-dialog),
+  :deep(.request-data-card) {
     margin-top: 8px;
     align-self: flex-start;
   }

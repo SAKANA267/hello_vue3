@@ -139,43 +139,37 @@ function buildApiPath(
   return { url: path, queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined }
 }
 
+// ============== 操作处理器 ==============
+
 /**
- * 从 payload 中提取路径参数和查询参数
- * 路径参数：id, code 等用于构建 URL 的参数
- * 查询参数：filters, page, size 等用于筛选的参数
+ * 从 payload 中提取参数
  */
-function extractParamsFromPayload(payload: Record<string, any>): {
-  pathParams: Record<string, any>
-  queryParams: Record<string, any>
-  data: Record<string, any>
-} {
+function extractParams(payload: Record<string, any>) {
   const pathParams: Record<string, any> = {}
   const queryParams: Record<string, any> = {}
   const data: Record<string, any> = {}
 
-  // 常见的路径参数名
-  const pathParamKeys = ['id', 'code', 'userId']
+  // 路径参数
+  if (payload.id !== undefined) pathParams.id = payload.id
+  if (payload.code !== undefined) pathParams.code = payload.code
+  if (payload.userId !== undefined) pathParams.userId = payload.userId
 
+  // 查询参数
+  if (payload.page !== undefined) queryParams.page = payload.page
+  if (payload.size !== undefined) queryParams.size = payload.size
+  if (payload.limit !== undefined) queryParams.limit = payload.limit
+  if (payload.status !== undefined) queryParams.status = payload.status
+
+  // 其他字段作为请求体数据
   Object.entries(payload).forEach(([key, value]) => {
-    if (pathParamKeys.includes(key)) {
-      pathParams[key] = value
-    } else if (key === 'filters') {
-      // filters 对象展开到查询参数
-      Object.entries(value || {}).forEach(([filterKey, filterValue]) => {
-        queryParams[filterKey] = filterValue
-      })
-    } else if (['page', 'size', 'limit', 'keyword', 'status', 'department'].includes(key)) {
-      queryParams[key] = value
-    } else {
-      // 其他参数作为请求体数据（POST/PUT）
+    const metaKeys = ['entity', 'intent', 'type', 'route', 'action', 'id', 'code', 'userId', 'page', 'size', 'limit', 'status']
+    if (!metaKeys.includes(key) && value !== undefined && value !== null) {
       data[key] = value
     }
   })
 
   return { pathParams, queryParams, data }
 }
-
-// ============== 操作处理器 ==============
 
 /**
  * 处理导航操作
@@ -236,7 +230,7 @@ async function handleApiAction(
     }
 
     // 提取参数
-    const { pathParams, queryParams, data } = extractParamsFromPayload(payload)
+    const { pathParams, queryParams, data } = extractParams(payload)
 
     // 构建请求路径
     const { url, queryParams: finalQueryParams } = buildApiPath(apiConfig.pathTemplate, {

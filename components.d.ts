@@ -61,6 +61,7 @@ declare module 'vue' {
     PermissionButton: typeof import('./src/components/PermissionButton.vue')['default']
     QuickActions: typeof import('./src/components/dashboard/QuickActions.vue')['default']
     RecentActivities: typeof import('./src/components/dashboard/RecentActivities.vue')['default']
+    RequestDataCard: typeof import('./src/components/ai/RequestDataCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     StatCard: typeof import('./src/components/dashboard/StatCard.vue')['default']

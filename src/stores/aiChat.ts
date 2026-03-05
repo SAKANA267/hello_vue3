@@ -24,7 +24,19 @@ export const useAiChatStore = defineStore('aiChat', () => {
    */
   async function createSession(title = '新对话') {
     try {
-      const response = await aiApi.createSession({ title })
+      // 从 localStorage 获取用户信息
+      const userInfoStr = localStorage.getItem('user_info')
+      let userId: string | undefined
+      if (userInfoStr) {
+        try {
+          const userInfo = JSON.parse(userInfoStr)
+          userId = userInfo.id
+        } catch (e) {
+          console.error('Failed to parse user info:', e)
+        }
+      }
+
+      const response = await aiApi.createSession({ title, userId })
       const sessionId = response.sessionId
 
       const newSession: ChatSession = {

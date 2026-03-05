@@ -1,10 +1,29 @@
 // AI Assistant Type Definitions (与后端API保持一致)
 
+/** 表格列配置 */
+export interface TableColumn {
+  key: string
+  label: string
+  width?: number | string
+}
+
 /** 删除确认对话框数据 */
 export interface DeleteConfirmData {
   objectInfo: Record<string, any>
   onConfirm: () => void
   onCancel: () => void
+}
+
+/** 请求数据卡片数据 */
+export interface RequestDataData {
+  title: string
+  description?: string
+  data: Record<string, any>[] | Record<string, any>
+  columns?: TableColumn[]
+  pageSize?: number
+  showActions?: boolean
+  actionText?: string
+  onAction: () => void
 }
 
 /** 会话消息类型 */
@@ -13,9 +32,10 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  type?: 'text' | 'action' | 'error' | 'loading' | 'delete-confirm'
+  type?: 'text' | 'action' | 'error' | 'loading' | 'delete-confirm' | 'request-data'
   suggestions?: string[] // 建议操作按钮
   confirmData?: DeleteConfirmData // 删除确认对话框数据
+  requestData?: RequestDataData // 请求数据卡片数据
 }
 
 /** 历史会话 */
@@ -61,7 +81,6 @@ export interface Action {
     intent?: string
     entity?: string
     route?: string
-    filters?: Record<string, any>
     [key: string]: any
   }
 }

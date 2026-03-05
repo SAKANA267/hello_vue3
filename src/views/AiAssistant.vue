@@ -76,7 +76,8 @@ import EmptyState from '@/components/ai/EmptyState.vue'
 import TypingIndicator from '@/components/ai/TypingIndicator.vue'
 import { QUICK_ACTIONS } from '@/constants/intents'
 import { createAiService } from '@/services/aiService'
-import type { AiResponse } from '@/types/ai'
+import { extractQueryParams } from '@/utils/ai-utils'
+import type { AiResponse, TableColumn } from '@/types/ai'
 
 const { proxy } = getCurrentInstance() as any
 const router = useRouter()
@@ -160,14 +161,17 @@ async function handleSend(text: string) {
 
     // 检查是否为删除操作，需要显示确认对话框
     const isDeleteAction = response.action?.payload?.intent === 'delete'
+    // 检查是否为查询操作，需要展示数据表格
+    const isQueryAction = response.action?.payload?.intent === 'query' || response.action?.payload?.intent === 'QUERY'
+
     console.log('[AI Response]', response)
     console.log('[Is Delete Action]', isDeleteAction, response.action?.payload?.intent)
+    console.log('[Is Query Action]', isQueryAction, response.action?.payload?.intent)
 
     if (isDeleteAction && response.action?.payload) {
       // 显示删除确认对话框
       const { id, entity } = response.action.payload
 
-      // 获取对象详情（这里可以通过 API 获取，暂时使用 payload 中的信息）
       store.addMessage({
         role: 'assistant',
         content: response.message,
@@ -179,11 +183,9 @@ async function handleSend(text: string) {
             ...response.action.payload
           },
           onConfirm: async () => {
-            // 执行删除操作
             await executeDelete(response.action?.payload)
           },
           onCancel: () => {
-            // 取消删除，添加提示消息
             store.addMessage({
               role: 'assistant',
               content: '已取消删除操作',
@@ -192,6 +194,9 @@ async function handleSend(text: string) {
           }
         }
       })
+    } else if (isQueryAction && response.action?.payload) {
+      // 执行查询并展示数据表格
+      await executeQuery(response.action.payload, response.message, response.action)
     } else {
       // 普通消息
       store.addMessage({
@@ -226,12 +231,6 @@ async function handleSend(text: string) {
     }
 
     store.addMessage({
-      role: 'user',
-      content: text,
-      type: 'text'
-    })
-
-    store.addMessage({
       role: 'assistant',
       content: '抱歉，处理您的请求时出错，请稍后重试。',
       type: 'error'
@@ -242,6 +241,91 @@ async function handleSend(text: string) {
     await scrollToBottom()
   } finally {
     store.isLoading = false
+  }
+}
+
+// 执行查询操作
+async function executeQuery(payload: any, aiMessage: string, action?: any) {
+  try {
+    const entity = payload.entity
+    // 提取查询参数
+    const queryParams = extractQueryParams(payload)
+
+    console.log('[Execute Query] Received payload:', payload)
+    console.log('[Execute Query] entity:', entity, 'queryParams:', queryParams)
+
+    let queryResult: any = null
+    let title = '查询结果'
+    let columns: TableColumn[] = []
+
+    // 根据实体类型调用相应的查询 API
+    if (entity === 'user') {
+      const res = await proxy.$api.getUsers({
+        keyword: queryParams.keyword || '',
+        page: queryParams.page || 1,
+        size: queryParams.size || 10
+      })
+      queryResult = res.records || []
+      title = '用户列表'
+      columns = [
+        { key: 'id', label: 'ID', width: '60' },
+        { key: 'username', label: '用户名' },
+        { key: 'name', label: '姓名' },
+        { key: 'email', label: '邮箱' },
+        { key: 'phone', label: '电话' }
+      ]
+    } else if (entity === 'reportCard' || entity === 'object') {
+      const res = await proxy.$api.getReportCards({
+        keyword: queryParams.keyword || '',
+        page: queryParams.page || 1,
+        size: queryParams.size || 10
+      })
+      queryResult = res.records || []
+      title = '报告卡列表'
+      columns = [
+        { key: 'id', label: 'ID', width: '60' },
+        { key: 'date', label: '日期', width: '110' },
+        { key: 'name', label: '姓名', width: '100' },
+        { key: 'diseaseName', label: '疾病名称' },
+        { key: 'status', label: '状态', width: '80' }
+      ]
+    } else {
+      // 不支持的实体类型，尝试通过 ai-action-handler 执行
+      console.log('[Execute Query] Using ai-action-handler for entity:', entity)
+      const result = await aiService.executeAction(action)
+      if (result.success && result.data) {
+        queryResult = result.data.records || result.data.list || result.data.data || result.data
+        title = `${entity} 查询结果`
+      } else {
+        throw new Error(result.error || '查询失败')
+      }
+    }
+
+    console.log('[Execute Query] Result:', queryResult)
+
+    // 显示查询结果（使用 RequestDataCard）
+    store.addMessage({
+      role: 'assistant',
+      content: aiMessage,
+      type: 'request-data',
+      requestData: {
+        title,
+        description: `查询到 ${Array.isArray(queryResult) ? queryResult.length : 0} 条记录`,
+        data: queryResult,
+        columns,
+        pageSize: 5,
+        onAction: () => {
+          console.log('Query data action clicked')
+        }
+      }
+    })
+  } catch (error) {
+    console.error('[Execute Query] Error:', error)
+    store.addMessage({
+      role: 'assistant',
+      content: `查询失败：${error instanceof Error ? error.message : '未知错误'}`,
+      type: 'error'
+    })
   }
 }
 
