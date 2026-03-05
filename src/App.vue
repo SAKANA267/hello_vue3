@@ -26,11 +26,14 @@ export default {
 }
 </script>
 
-<style scoped>
-/* css */
+<style>
+/* 全局样式 - 移除滚动条 */
 html,
 body,
 #app {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 </style>

@@ -118,20 +118,20 @@ const updateReportCardWrapper = async formData => {
 
 //表格列配置
 const tableLabel = [
-  { prop: 'hospitalArea', label: '院区', width: '100' },
-  { prop: 'department', label: '科室', width: '120' },
-  { prop: 'diagnosisName', label: '诊断名称', width: '150' },
-  { prop: 'inpatientNo', label: '住院号', width: '120' },
-  { prop: 'outpatientNo', label: '门诊号', width: '120' },
-  { prop: 'name', label: '姓名', width: '80' },
-  { prop: 'gender', label: '性别', width: '60' },
-  { prop: 'age', label: '年龄', width: '60' },
-  { prop: 'phone', label: '联系电话', width: '120' },
-  { prop: 'reportDoctor', label: '报告医生', width: '100' },
-  { prop: 'fillDate', label: '填卡日期', width: '110' },
-  { prop: 'auditDate', label: '审核日期', width: '110' },
-  { prop: 'auditor', label: '审核人', width: '80' },
-  { prop: 'status', label: '状态', width: '100' }
+  { prop: 'hospitalArea', label: '院区', minWidth: '100' },
+  { prop: 'department', label: '科室', minWidth: '120' },
+  { prop: 'diagnosisName', label: '诊断名称', minWidth: '150' },
+  { prop: 'inpatientNo', label: '住院号', minWidth: '120' },
+  { prop: 'outpatientNo', label: '门诊号', minWidth: '120' },
+  { prop: 'name', label: '姓名', minWidth: '80' },
+  { prop: 'gender', label: '性别', minWidth: '60' },
+  { prop: 'age', label: '年龄', minWidth: '60' },
+  { prop: 'phone', label: '联系电话', minWidth: '120' },
+  { prop: 'reportDoctor', label: '报告医生', minWidth: '100' },
+  { prop: 'fillDate', label: '填卡日期', minWidth: '110' },
+  { prop: 'auditDate', label: '审核日期', minWidth: '110' },
+  { prop: 'auditor', label: '审核人', minWidth: '80' },
+  { prop: 'status', label: '状态', minWidth: '100' }
 ]
 
 //编辑与创建用户 用于v-for创建编辑/新增表单

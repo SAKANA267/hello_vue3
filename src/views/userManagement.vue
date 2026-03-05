@@ -75,14 +75,14 @@ const tableEditDialogRef = ref(null)
 
 //表格列配置 用于v-for创建表格列
 const tableLabel = [
-  { prop: 'username', label: '用户名', width: '120' },
-  { prop: 'name', label: '姓名', width: '100' },
-  { prop: 'email', label: '邮箱', width: '180' },
-  { prop: 'phone', label: '电话', width: '130' },
-  { prop: 'role', label: '角色', width: '100' },
-  { prop: 'status', label: '状态', width: '100' },
-  { prop: 'createTime', label: '创建时间', width: '180' },
-  { prop: 'lastLogin', label: '最后登录' }
+  { prop: 'username', label: '用户名', minWidth: '120' },
+  { prop: 'name', label: '姓名', minWidth: '100' },
+  { prop: 'email', label: '邮箱', minWidth: '180' },
+  { prop: 'phone', label: '电话', minWidth: '130' },
+  { prop: 'role', label: '角色', minWidth: '100' },
+  { prop: 'status', label: '状态', minWidth: '100' },
+  { prop: 'createTime', label: '创建时间', minWidth: '180' },
+  { prop: 'lastLogin', label: '最后登录', minWidth: '150' }
 ]
 
 // 密码字段（仅新增时使用）
@@ -180,7 +180,7 @@ onMounted(() => {})
   background: #fff;
   padding: 20px;
   border-radius: 2px;
-  width: 90%;
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }

@@ -43,6 +43,8 @@ import CommonHeader from '@/components/CommonHeader.vue'
 
 .el-main {
   background-color: #f5f5f5;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 // 路由过渡动画

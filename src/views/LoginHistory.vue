@@ -76,12 +76,12 @@ const currentUserId = computed(() => {
 
 // 表格列配置
 const tableLabel = [
-  { prop: 'username', label: '用户名', width: '120' },
-  { prop: 'loginTime', label: '登录时间', width: '180' },
-  { prop: 'loginLocation', label: '登录地点', width: '120' },
-  { prop: 'ipAddress', label: 'IP地址', width: '140' },
-  { prop: 'userAgent', label: '浏览器信息', width: '200' },
-  { prop: 'failReason', label: '失败原因', width: '150' }
+  { prop: 'username', label: '用户名', minWidth: '120' },
+  { prop: 'loginTime', label: '登录时间', minWidth: '180' },
+  { prop: 'loginLocation', label: '登录地点', minWidth: '120' },
+  { prop: 'ipAddress', label: 'IP地址', minWidth: '140' },
+  { prop: 'userAgent', label: '浏览器信息', minWidth: '200' },
+  { prop: 'failReason', label: '失败原因', minWidth: '150' }
 ]
 
 // 状态列配置

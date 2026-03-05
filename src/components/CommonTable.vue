@@ -385,7 +385,8 @@ defineExpose({
   background: #fff;
   padding: 20px;
   border-radius: 2px;
-  width: 90%;
+  width: 95%;
+  margin: 0 auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
