@@ -11,6 +11,8 @@ Mock.mock('/api/user/getLoginInfo', 'get', userInfoApi.getLoginInfo)
 
 // 只在 VITE_MOCK=true 时注册其他 Mock
 if (import.meta.env.VITE_MOCK !== 'false') {
+  // AI Assistant Mock（动态导入，避免在生产模式下拦截请求）
+  import('./mockData/ai')
   // AI Assistant Mock
   // User Management.vue
   // ========== RESTful API 端点 ==========

@@ -19,9 +19,7 @@ function generateMockResponse(message: string): AiResponse {
         action: {
           type: ActionType.NAVIGATE,
           payload: {
-            intent: 'navigate',
-            entity: 'user',
-            route: '/userManagement'
+            page: '/userManagement'
           }
         },
         suggestions: ['查看详情', '新增用户', '返回']
@@ -32,9 +30,7 @@ function generateMockResponse(message: string): AiResponse {
       action: {
         type: ActionType.NAVIGATE,
         payload: {
-          intent: 'navigate',
-          entity: 'reportCard',
-          route: '/objectManagement'
+          page: '/objectManagement'
         }
       },
       suggestions: ['查看详情', '导出数据', '返回']
@@ -48,9 +44,8 @@ function generateMockResponse(message: string): AiResponse {
       action: {
         type: ActionType.CALLBACK,
         payload: {
-          action: 'open-create',
-          entity: 'user',
-          params: {}
+          callback: 'open-create',
+          params: { entity: 'user' }
         }
       },
       suggestions: ['继续添加', '查看列表', '返回']
@@ -65,10 +60,8 @@ function generateMockResponse(message: string): AiResponse {
       action: {
         type: ActionType.NAVIGATE,
         payload: {
-          intent: 'query',
-          entity: 'reportCard',
-          route: '/objectManagement',
-          filters: { status: 'pending' }
+          page: '/objectManagement',
+          params: { status: 'pending' }
         }
       },
       suggestions: ['查看详情', '导出数据', '修改筛选']
@@ -83,8 +76,8 @@ function generateMockResponse(message: string): AiResponse {
       action: {
         type: ActionType.API,
         payload: {
-          entity: 'reportCard',
-          operation: 'count'
+          api: '/api/report-cards/count',
+          method: 'GET'
         }
       },
       suggestions: ['查看列表', '统计分析', '导出报表']

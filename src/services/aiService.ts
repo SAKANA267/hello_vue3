@@ -26,6 +26,7 @@ export class AiService {
    * @returns AI 响应
    */
   async processMessage(message: string, sessionId?: string): Promise<AiResponse> {
+    console.log('[🤖 AiService.processMessage START]', { message, sessionId })
     try {
       // 构建请求：首次对话（无 sessionId）时不传该字段
       const request: ChatRequest = {
@@ -33,10 +34,16 @@ export class AiService {
         ...(sessionId && { sessionId })  // 只有当 sessionId 存在时才添加
       }
 
+      console.log('[📡 Calling aiApi.chat]', request)
+
       // aiApi.chat 返回的已经是解包后的 AiResponse（响应拦截器处理）
-      return await aiApi.chat(request)
+      const response = await aiApi.chat(request)
+
+      console.log('[✅ aiApi.chat response]', response)
+
+      return response
     } catch (error) {
-      console.error('AI API error:', error)
+      console.error('[❌ AI API error]', error)
       return {
         message: '抱歉，服务暂时不可用，请稍后重试。',
         suggestions: ['重新尝试', '联系管理员']

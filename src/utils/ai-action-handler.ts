@@ -2,201 +2,98 @@
 AI Action Handler Utility
 处理从后端 AI API 返回的操作（NAVIGATE, API, CALLBACK）
 
-参考后端 API 文档：../public-health-api/docs/ai-action-handling-guide.md
+参考后端文档：../public-health-api/docs/ai/ai-frontend-guide.md
 */
 
 import type { Router } from 'vue-router'
 import request from '@/api/request'
-import type { Action, ActionType, IntentType } from '@/types/ai'
+import type { Action } from '@/types/ai'
 
 // ============== 类型定义 ==============
-
-/** HTTP 方法类型 */
-type HttpMethod = 'get' | 'post' | 'put' | 'delete'
-
-/** API 映射配置 */
-interface ApiMappingConfig {
-  method: HttpMethod
-  pathTemplate: string // 支持占位符，如 /report-cards/:id
-}
 
 /** 回调处理器类型 */
 type CallbackHandler = (params?: Record<string, any>) => void | Promise<void>
 
-// ============== API 映射配置 ==============
+/** HTTP 方法类型 */
+type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
-/** 实体类型常量 */
-const ENTITY_TYPE = {
-  REPORT_CARD: 'reportCard',
-  USER: 'user',
-  AUDIT: 'audit',
-  OBJECT: 'object'
-} as const
-
-/** 意图类型常量 */
-const INTENT_TYPE = {
-  NAVIGATE: 'NAVIGATE',
-  CREATE: 'CREATE',
-  READ: 'READ',
-  UPDATE: 'UPDATE',
-  DELETE: 'DELETE',
-  QUERY: 'QUERY',
-  COUNT: 'COUNT',
-  HELP: 'HELP',
-  UNKNOWN: 'UNKNOWN'
-} as const
-
-type EntityType = (typeof ENTITY_TYPE)[keyof typeof ENTITY_TYPE]
-type Intent = (typeof INTENT_TYPE)[keyof typeof INTENT_TYPE]
-
-/**
- * API 映射表
- * 根据 entity + intent 组合查找对应的 HTTP 方法和路径模板
- */
-const API_MAPPING: Record<string, Record<string, ApiMappingConfig>> = {
-  [ENTITY_TYPE.REPORT_CARD]: {
-    [INTENT_TYPE.CREATE]: { method: 'post', pathTemplate: '/report-cards' },
-    [INTENT_TYPE.READ]: { method: 'get', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.UPDATE]: { method: 'put', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.DELETE]: { method: 'delete', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.QUERY]: { method: 'get', pathTemplate: '/report-cards' },
-    [INTENT_TYPE.COUNT]: { method: 'get', pathTemplate: '/report-cards/count' }
-  },
-  [ENTITY_TYPE.USER]: {
-    [INTENT_TYPE.CREATE]: { method: 'post', pathTemplate: '/users' },
-    [INTENT_TYPE.READ]: { method: 'get', pathTemplate: '/users/:id' },
-    [INTENT_TYPE.UPDATE]: { method: 'put', pathTemplate: '/users/:id' },
-    [INTENT_TYPE.DELETE]: { method: 'delete', pathTemplate: '/users/:id' },
-    [INTENT_TYPE.QUERY]: { method: 'get', pathTemplate: '/users' }
-  },
-  [ENTITY_TYPE.AUDIT]: {
-    [INTENT_TYPE.QUERY]: { method: 'get', pathTemplate: '/report-cards' },
-    [INTENT_TYPE.READ]: { method: 'get', pathTemplate: '/report-cards/:id' }
-  },
-  [ENTITY_TYPE.OBJECT]: {
-    [INTENT_TYPE.CREATE]: { method: 'post', pathTemplate: '/report-cards' },
-    [INTENT_TYPE.READ]: { method: 'get', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.UPDATE]: { method: 'put', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.DELETE]: { method: 'delete', pathTemplate: '/report-cards/:id' },
-    [INTENT_TYPE.QUERY]: { method: 'get', pathTemplate: '/report-cards' }
-  }
+/** API Action Payload */
+interface ApiActionPayload {
+  api: string           // API路径，如 /api/report-cards/123
+  method: HttpMethod    // HTTP方法
+  params?: Record<string, any>   // 查询参数
+  body?: Record<string, any>     // 请求体（POST/PUT/PATCH使用）
 }
 
-// ============== 路由映射配置 ==============
-
-/** 实体到路由的映射表 */
-const ROUTE_MAPPING: Record<string, string> = {
-  [ENTITY_TYPE.REPORT_CARD]: '/objectManagement',
-  [ENTITY_TYPE.USER]: '/userManagement',
-  [ENTITY_TYPE.AUDIT]: '/auditManagement',
-  [ENTITY_TYPE.OBJECT]: '/objectManagement'
+/** Navigate Action Payload */
+interface NavigateActionPayload {
+  page: string                         // 目标页面路径
+  prefill?: Record<string, any>        // 预填充数据
+  params?: Record<string, any>         // 路由参数
 }
 
-// ============== 辅助函数 ==============
+/** Callback Action Payload */
+interface CallbackActionPayload {
+  callback: string                     // 回调函数名
+  params?: Record<string, any>         // 回调参数
+}
 
-/**
- * 构建 API 路径
- * 替换路径参数（:id）并附加查询字符串
- *
- * @param pathTemplate 路径模板，如 /report-cards/:id
- * @param params 参数对象，包含 pathParams（路径参数）和 queryParams（查询参数）
- * @returns 完整的 API 路径
- *
- * @example
- * buildApiPath('/report-cards/:id', { pathParams: { id: '123' } }) // '/report-cards/123'
- * buildApiPath('/report-cards', { queryParams: { status: 'PENDING' } }) // '/report-cards?status=PENDING'
- * buildApiPath('/report-cards/:id', { pathParams: { id: '123' }, queryParams: { detail: 'true' } }) // '/report-cards/123?detail=true'
- */
-function buildApiPath(
-  pathTemplate: string,
-  params?: {
-    pathParams?: Record<string, any>
-    queryParams?: Record<string, any>
-  }
-): { url: string; queryParams?: Record<string, any> } {
-  let path = pathTemplate
-  const queryParams: Record<string, any> = {}
+// ============== 类型守卫 ==============
 
-  // 处理路径参数（替换 :id, :name 等）
-  if (params?.pathParams) {
-    Object.entries(params.pathParams).forEach(([key, value]) => {
-      const placeholder = `:${key}`
-      if (path.includes(placeholder)) {
-        path = path.replace(placeholder, String(value))
-      }
-    })
-  }
+/** 提取 payload 数据（处理嵌套的 data 结构） */
+function extractPayloadData(payload: any): any {
+  return payload?.data || payload
+}
 
-  // 收集查询参数（不用于路径替换的参数）
-  if (params?.queryParams) {
-    Object.entries(params.queryParams).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams[key] = value
-      }
-    })
-  }
+/** 检查是否为 NavigateActionPayload */
+function isNavigateActionPayload(payload: any): payload is NavigateActionPayload {
+  const data = extractPayloadData(payload)
+  return data && typeof data.page === 'string'
+}
 
-  return { url: path, queryParams: Object.keys(queryParams).length > 0 ? queryParams : undefined }
+/** 检查是否为 ApiActionPayload */
+function isApiActionPayload(payload: any): payload is ApiActionPayload {
+  const data = extractPayloadData(payload)
+  return data && typeof data.api === 'string' && typeof data.method === 'string'
+}
+
+/** 检查是否为 CallbackActionPayload */
+function isCallbackActionPayload(payload: any): payload is CallbackActionPayload {
+  const data = extractPayloadData(payload)
+  return data && (typeof data.callback === 'string' || typeof data.action === 'string')
 }
 
 // ============== 操作处理器 ==============
-
-/**
- * 从 payload 中提取参数
- */
-function extractParams(payload: Record<string, any>) {
-  const pathParams: Record<string, any> = {}
-  const queryParams: Record<string, any> = {}
-  const data: Record<string, any> = {}
-
-  // 路径参数
-  if (payload.id !== undefined) pathParams.id = payload.id
-  if (payload.code !== undefined) pathParams.code = payload.code
-  if (payload.userId !== undefined) pathParams.userId = payload.userId
-
-  // 查询参数
-  if (payload.page !== undefined) queryParams.page = payload.page
-  if (payload.size !== undefined) queryParams.size = payload.size
-  if (payload.limit !== undefined) queryParams.limit = payload.limit
-  if (payload.status !== undefined) queryParams.status = payload.status
-
-  // 其他字段作为请求体数据
-  Object.entries(payload).forEach(([key, value]) => {
-    const metaKeys = ['entity', 'intent', 'type', 'route', 'action', 'id', 'code', 'userId', 'page', 'size', 'limit', 'status']
-    if (!metaKeys.includes(key) && value !== undefined && value !== null) {
-      data[key] = value
-    }
-  })
-
-  return { pathParams, queryParams, data }
-}
 
 /**
  * 处理导航操作
  * 使用 Vue Router 跳转到指定路由
  */
 function handleNavigateAction(
-  payload: Record<string, any>,
+  payload: NavigateActionPayload,
   router: Router
 ): { success: boolean; route?: string; error?: string } {
   try {
-    const route = payload.route
-    const entity = payload.entity
+    // 提取实际的 payload 数据
+    const data = extractPayloadData(payload)
+    const { page, prefill, params } = data
 
-    // 如果指定了 route，直接跳转
-    if (route) {
-      router.push(route)
-      return { success: true, route }
+    console.log('[🧭 handleNavigateAction]', { page, prefill, params })
+
+    // 如果有预填充数据，存储到 sessionStorage 供目标页面使用
+    if (prefill) {
+      try {
+        sessionStorage.setItem('ai_prefill_data', JSON.stringify(prefill))
+      } catch (e) {
+        console.warn('[AiActionHandler] Failed to store prefill data:', e)
+      }
     }
 
-    // 如果指定了 entity，查找对应路由
-    if (entity && ROUTE_MAPPING[entity]) {
-      const targetRoute = ROUTE_MAPPING[entity]
-      router.push(targetRoute)
-      return { success: true, route: targetRoute }
-    }
+    // 执行路由跳转
+    // params 通常用作查询参数，使用 query 传递
+    router.push({ path: page, query: params })
 
-    return { success: false, error: 'No valid route or entity specified' }
+    return { success: true, route: page }
   } catch (error) {
     console.error('[AiActionHandler] Navigate error:', error)
     return { success: false, error: String(error) }
@@ -205,50 +102,32 @@ function handleNavigateAction(
 
 /**
  * 处理 API 操作
- * 根据 entity + intent 查找 API 配置并执行 HTTP 请求
+ * 根据 payload 中的 api、method、params、body 直接执行 HTTP 请求
  */
 async function handleApiAction(
-  payload: Record<string, any>
+  payload: ApiActionPayload
 ): Promise<{ success: boolean; data?: any; error?: string }> {
+  console.log('[🔧 handleApiAction START]', payload)
   try {
-    const intent = payload.intent as Intent
-    const entity = payload.entity as EntityType
+    // 提取实际的 payload 数据
+    const data = extractPayloadData(payload)
+    const { api, method, params, body } = data
 
-    if (!intent || !entity) {
-      return { success: false, error: 'Missing intent or entity in payload' }
-    }
-
-    // 查找 API 配置
-    const entityConfig = API_MAPPING[entity]
-    if (!entityConfig) {
-      return { success: false, error: `Unknown entity: ${entity}` }
-    }
-
-    const apiConfig = entityConfig[intent]
-    if (!apiConfig) {
-      return { success: false, error: `Unsupported intent ${intent} for entity ${entity}` }
-    }
-
-    // 提取参数
-    const { pathParams, queryParams, data } = extractParams(payload)
-
-    // 构建请求路径
-    const { url, queryParams: finalQueryParams } = buildApiPath(apiConfig.pathTemplate, {
-      pathParams,
-      queryParams
-    })
+    console.log('[📡 About to make HTTP request]', { method, url: api, params, body })
 
     // 执行 HTTP 请求
     const response = await request({
-      method: apiConfig.method,
-      url,
-      params: finalQueryParams,
-      data: ['post', 'put'].includes(apiConfig.method) ? data : undefined
+      method,
+      url: api,
+      params,
+      data: ['post', 'put', 'patch'].includes(method.toLowerCase()) ? body : undefined
     })
+
+    console.log('[✅ HTTP request completed]', response)
 
     return { success: true, data: response }
   } catch (error) {
-    console.error('[AiActionHandler] API error:', error)
+    console.error('[❌ AiActionHandler] API error:', error)
     return { success: false, error: String(error) }
   }
 }
@@ -273,21 +152,36 @@ class AiActionHandler {
    * @returns 操作执行结果
    */
   async handleAction(action: Action | null): Promise<any> {
+    console.log('[🎯 AiActionHandler.handleAction START]', action)
     if (!action) {
+      console.log('[❌ No action provided]')
       return { success: false, error: 'No action provided' }
     }
 
     const { type, payload } = action
+    console.log('[📋 Action details]', { type, payload })
 
     switch (type) {
       case 'NAVIGATE':
-        return handleNavigateAction(payload, this.router)
+        console.log('[🧭 Handling NAVIGATE action]')
+        if (isNavigateActionPayload(payload)) {
+          return handleNavigateAction(payload, this.router)
+        }
+        return { success: false, error: 'Invalid NAVIGATE payload' }
 
       case 'API':
-        return await handleApiAction(payload)
+        console.log('[🌐 Handling API action]')
+        if (isApiActionPayload(payload)) {
+          return await handleApiAction(payload)
+        }
+        return { success: false, error: 'Invalid API payload' }
 
       case 'CALLBACK':
-        return this.handleCallbackAction(payload)
+        console.log('[📞 Handling CALLBACK action]')
+        if (isCallbackActionPayload(payload)) {
+          return this.handleCallbackAction(payload)
+        }
+        return { success: false, error: 'Invalid CALLBACK payload' }
 
       default:
         console.warn('[AiActionHandler] Unknown action type:', type)
@@ -299,22 +193,26 @@ class AiActionHandler {
    * 处理回调操作
    * 执行已注册的自定义回调函数
    */
-  private handleCallbackAction(payload: Record<string, any>): {
+  private handleCallbackAction(payload: CallbackActionPayload): {
     success: boolean
     error?: string
   } {
     try {
-      const callbackAction = payload.action
-      const params = payload.params
+      // 提取实际的 payload 数据
+      const data = extractPayloadData(payload)
+      const callback = data.callback || data.action
+      const params = data.params
 
-      if (!callbackAction) {
-        return { success: false, error: 'Missing callback action name' }
+      console.log('[📞 handleCallbackAction]', { callback, params })
+
+      if (!callback) {
+        return { success: false, error: 'Missing callback name' }
       }
 
-      const handlers = this.callbacks.get(callbackAction)
+      const handlers = this.callbacks.get(callback)
       if (!handlers || handlers.length === 0) {
-        console.warn(`[AiActionHandler] No registered callback for: ${callbackAction}`)
-        return { success: false, error: `No registered callback for: ${callbackAction}` }
+        console.warn(`[AiActionHandler] No registered callback for: ${callback}`)
+        return { success: false, error: `No registered callback for: ${callback}` }
       }
 
       // 执行所有注册的处理器
@@ -322,7 +220,7 @@ class AiActionHandler {
         try {
           handler(params)
         } catch (err) {
-          console.error(`[AiActionHandler] Callback ${callbackAction} error:`, err)
+          console.error(`[AiActionHandler] Callback ${callback} error:`, err)
         }
       })
 
@@ -335,43 +233,50 @@ class AiActionHandler {
 
   /**
    * 注册回调处理器
-   * @param intent 回调意图名称（如 'HELP', 'SHOW_DIALOG' 等）
+   * @param callbackName 回调函数名称（如 'openAuditDialog', 'showConfirm' 等）
    * @param handler 处理函数
    */
-  registerCallback(intent: string, handler: CallbackHandler): void {
-    if (!this.callbacks.has(intent)) {
-      this.callbacks.set(intent, [])
+  registerCallback(callbackName: string, handler: CallbackHandler): void {
+    if (!this.callbacks.has(callbackName)) {
+      this.callbacks.set(callbackName, [])
     }
-    this.callbacks.get(intent)!.push(handler)
+    this.callbacks.get(callbackName)!.push(handler)
   }
 
   /**
    * 取消注册回调处理器
-   * @param intent 回调意图名称
-   * @param handler 要移除的处理函数（如果不提供，移除该意图的所有处理器）
+   * @param callbackName 回调函数名称
+   * @param handler 要移除的处理函数（可选）
    */
-  unregisterCallback(intent: string, handler?: CallbackHandler): void {
-    if (!this.callbacks.has(intent)) return
+  unregisterCallback(callbackName: string, handler?: CallbackHandler): void {
+    if (!this.callbacks.has(callbackName)) return
 
     if (handler) {
-      const handlers = this.callbacks.get(intent)!
+      const handlers = this.callbacks.get(callbackName)!
       const index = handlers.indexOf(handler)
       if (index > -1) {
         handlers.splice(index, 1)
       }
       if (handlers.length === 0) {
-        this.callbacks.delete(intent)
+        this.callbacks.delete(callbackName)
       }
     } else {
-      this.callbacks.delete(intent)
+      this.callbacks.delete(callbackName)
     }
+  }
+
+  /**
+   * 获取所有已注册的回调名称
+   */
+  getRegisteredCallbacks(): string[] {
+    return Array.from(this.callbacks.keys())
   }
 }
 
 // ============== 导出 ==============
 
-export { AiActionHandler, buildApiPath, API_MAPPING, ROUTE_MAPPING }
-export type { ApiMappingConfig, CallbackHandler }
+export { AiActionHandler }
+export type { CallbackHandler, ApiActionPayload, NavigateActionPayload, CallbackActionPayload }
 
 /** 创建 AI Action Handler 实例的工厂函数 */
 export function createAiActionHandler(router: Router): AiActionHandler {

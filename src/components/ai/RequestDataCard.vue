@@ -110,7 +110,7 @@ const displayData = computed(() => {
 const dataCount = computed(() => displayData.value.length)
 
 // 自动推断列配置
-const inferredColumns = computed(() => {
+const inferredColumns = computed<TableColumn[]>(() => {
   if (displayData.value.length === 0) return []
 
   const firstItem = displayData.value[0]
