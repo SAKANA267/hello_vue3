@@ -8,13 +8,13 @@
 |------|------|------|
 | Vue | 3.5.17 | 渐进式前端框架 |
 | TypeScript | 5.8 | 类型安全开发 |
-| Vite | 6.3 | 现代化构建工具 |
-| Element Plus | 2.10 | UI 组件库 |
-| Pinia | 3.0 | 状态管理 |
-| Vue Router | 4.5 | 路由管理 |
-| Axios | 1.11 | HTTP 请求 |
+| Vite | 6.3.5 | 现代化构建工具 |
+| Element Plus | 2.10.4 | UI 组件库 |
+| Pinia | 3.0.3 | 状态管理 |
+| Vue Router | 4.5.1 | 路由管理 |
+| Axios | 1.11.0 | HTTP 请求 |
 | ECharts | 6.0 | 数据可视化 |
-| Mock.js | 1.1 | 数据模拟 |
+| Mock.js | 1.1.0 | 数据模拟 |
 | Less | 4.4 | CSS 预处理器 |
 
 ## 项目结构
