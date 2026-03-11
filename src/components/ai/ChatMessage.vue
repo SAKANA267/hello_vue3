@@ -40,17 +40,6 @@ const props = defineProps<{
   message: ChatMessage
 }>()
 
-// 调试日志 - 仅在删除确认时打印
-watch(
-  () => props.message,
-  (msg) => {
-    if (msg.type === 'delete-confirm') {
-      console.log('[ChatMessage Delete Confirm]', msg.type, msg.confirmData)
-    }
-  },
-  { immediate: true }
-)
-
 const aiAvatar = computed(() => new URL('../../assets/images/user.svg', import.meta.url).href)
 
 const userInitial = computed(() => 'A')

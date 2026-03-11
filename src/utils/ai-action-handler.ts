@@ -78,8 +78,6 @@ function handleNavigateAction(
     const data = extractPayloadData(payload)
     const { page, prefill, params } = data
 
-    console.log('[🧭 handleNavigateAction]', { page, prefill, params })
-
     // 如果有预填充数据，存储到 sessionStorage 供目标页面使用
     if (prefill) {
       try {
@@ -107,13 +105,10 @@ function handleNavigateAction(
 async function handleApiAction(
   payload: ApiActionPayload
 ): Promise<{ success: boolean; data?: any; error?: string }> {
-  console.log('[🔧 handleApiAction START]', payload)
   try {
     // 提取实际的 payload 数据
     const data = extractPayloadData(payload)
     const { api, method, params, body } = data
-
-    console.log('[📡 About to make HTTP request]', { method, url: api, params, body })
 
     // 执行 HTTP 请求
     const response = await request({
@@ -122,8 +117,6 @@ async function handleApiAction(
       params,
       data: ['post', 'put', 'patch'].includes(method.toLowerCase()) ? body : undefined
     })
-
-    console.log('[✅ HTTP request completed]', response)
 
     return { success: true, data: response }
   } catch (error) {
@@ -152,32 +145,26 @@ class AiActionHandler {
    * @returns 操作执行结果
    */
   async handleAction(action: Action | null): Promise<any> {
-    console.log('[🎯 AiActionHandler.handleAction START]', action)
     if (!action) {
-      console.log('[❌ No action provided]')
       return { success: false, error: 'No action provided' }
     }
 
     const { type, payload } = action
-    console.log('[📋 Action details]', { type, payload })
 
     switch (type) {
       case 'NAVIGATE':
-        console.log('[🧭 Handling NAVIGATE action]')
         if (isNavigateActionPayload(payload)) {
           return handleNavigateAction(payload, this.router)
         }
         return { success: false, error: 'Invalid NAVIGATE payload' }
 
       case 'API':
-        console.log('[🌐 Handling API action]')
         if (isApiActionPayload(payload)) {
           return await handleApiAction(payload)
         }
         return { success: false, error: 'Invalid API payload' }
 
       case 'CALLBACK':
-        console.log('[📞 Handling CALLBACK action]')
         if (isCallbackActionPayload(payload)) {
           return this.handleCallbackAction(payload)
         }
@@ -202,8 +189,6 @@ class AiActionHandler {
       const data = extractPayloadData(payload)
       const callback = data.callback || data.action
       const params = data.params
-
-      console.log('[📞 handleCallbackAction]', { callback, params })
 
       if (!callback) {
         return { success: false, error: 'Missing callback name' }

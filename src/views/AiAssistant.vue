@@ -132,7 +132,6 @@ function handleSuggestionClick(suggestion: string) {
 }
 
 async function handleSend(text: string) {
-  console.log('[🚀 handleSend START] text:', text)
   if (!text.trim()) return
 
   inputText.value = ''
@@ -147,45 +146,29 @@ async function handleSend(text: string) {
   // 调用 AI 服务处理
   store.isLoading = true
   try {
-    console.log('[📡 Calling AI] sessionId:', currentSessionId.value)
     // 首次对话：currentSessionId 为空，不传 sessionId
     // 后续对话：使用 currentSessionId
     const response: AiResponse = await aiService.processMessage(
       text,
       currentSessionId.value || undefined
     )
-    console.log('[✅ AI Response received]', response)
 
     // 如果后端返回了新的 sessionId（首次对话），创建本地会话
     if (response.sessionId && response.sessionId !== currentSessionId.value) {
-      console.log('[🆕 New session created]', response.sessionId)
       store.createSessionWithId(response.sessionId, text.slice(0, 20))
     }
 
-    console.log('[AI Response]', response)
-
     // 处理 action
     if (response.action) {
-      console.log('[🎯 Action detected]', { type: response.action.type, payload: response.action.payload })
       const { type, payload } = response.action
 
       // 类型守卫：检查是否为 API action
       // 注意：后端返回的 payload 结构可能是 { data: { api, method } }
       const payloadData = payload.data || payload
       const isApiAction = type === 'API' && 'api' in payloadData && 'method' in payloadData
-      console.log('[🔍 Type check]', {
-        isApiAction,
-        type,
-        hasData: 'data' in payload,
-        hasApi: 'api' in payload,
-        hasApiInData: 'api' in payloadData,
-        hasMethod: 'method' in payload,
-        hasMethodInData: 'method' in payloadData
-      })
 
       if (isApiAction) {
         const { api, method } = payloadData
-        console.log('[📋 API Action]', { api, method })
 
         // DELETE 操作：显示确认对话框
         if (method === 'DELETE') {
@@ -223,7 +206,6 @@ async function handleSend(text: string) {
         }
         // GET 操作：查询数据并展示表格
         else if (method === 'GET') {
-          console.log('[🔍 GET Query] Calling handleQueryAction')
           await handleQueryAction(response.action, response.message)
         }
         // POST/PUT/PATCH 操作：直接执行
@@ -298,28 +280,20 @@ async function handleSend(text: string) {
 
 // 处理查询操作（GET请求）
 async function handleQueryAction(action: any, aiMessage: string) {
-  console.log('[🔍 handleQueryAction START]', action)
   try {
     // 处理 payload 结构，兼容两种格式
     const payloadData = action.payload.data || action.payload
     const { api } = payloadData
 
-    console.log('[Query Action] API:', api)
-    console.log('[📡 About to call executeAction]')
-
     // 执行 API 请求
     const result = await aiService.executeAction(action)
 
-    console.log('[✅ executeAction completed]', result)
-
     if (!result.success) {
-      console.log('[❌ Query failed]', result.error)
       throw new Error(result.error || '查询失败')
     }
 
     // 解析返回的数据
     const data = result.data
-    console.log('[Query Action] Result:', data)
 
     // 根据不同的 API 路径确定表格配置
     let title = '查询结果'
@@ -365,13 +339,10 @@ async function handleQueryAction(action: any, aiMessage: string) {
         data: displayData,
         columns,
         pageSize: 5,
-        onAction: () => {
-          console.log('Query data action clicked')
-        }
+        onAction: () => {}
       }
     })
   } catch (error) {
-    console.error('[Query Action] Error:', error)
     store.addMessage({
       role: 'assistant',
       content: `查询失败：${error instanceof Error ? error.message : '未知错误'}`,
@@ -392,7 +363,6 @@ function handleStop() {
 
 function handleMore() {
   // 更多选项逻辑
-  console.log('更多选项')
 }
 
 function scrollToBottom() {
