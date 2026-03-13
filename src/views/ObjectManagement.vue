@@ -6,35 +6,22 @@
 -->
 <template>
   <div class="container">
-    <div class="header">
-      <el-form :inline="true" :model="formInline">
-        <el-form-item>
-          <permission-button
-            permission="object:create"
-            type="primary"
-            @click="openDialog('add', null)"
-          >
-            新增对象
-          </permission-button>
-        </el-form-item>
-        <el-form-item>
-          <el-input
-            v-model="formInline.keyWord"
-            placeholder="请输入查询内容"
-            :prefix-icon="Search"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch()"> 查询 </el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+    <CommonSearch v-model="formInline" :fields="searchFields" @search="handleSearch">
+      <template #actions>
+        <permission-button
+          permission="object:create"
+          type="primary"
+          @click="openDialog('add', null)"
+        >
+          新增对象
+        </permission-button>
+      </template>
+    </CommonSearch>
 
     <div class="object-table">
       <CommonTable
         ref="tableRef"
         :table-label="tableLabel"
-        :query-params="formInline.keyWord"
         :get-api="getReportCardsWrapper"
         :delete-api="deleteReportCardWrapper"
         :status-tag-types="statusTagTypes"
@@ -63,9 +50,9 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+<script setup lang="ts">
+import { ref, onMounted, getCurrentInstance, reactive } from 'vue'
+import CommonSearch from '@/components/CommonSearch.vue'
 import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
 import PermissionButton from '@/components/PermissionButton.vue'
@@ -75,12 +62,21 @@ import {
   transformFormDataForCreate,
   transformFormDataForUpdate
 } from '@/utils/reportCardUtils'
+import type { SearchField } from '@/components/CommonSearch.vue'
+
+// 定义 CommonTable 组件实例类型
+interface CommonTableInstance {
+  search: () => void
+}
 
 const { hasPermission } = usePermissions()
 
-const { proxy } = getCurrentInstance()
-const tableRef = ref(null)
+const { proxy } = getCurrentInstance() as any
+const tableRef = ref<CommonTableInstance | null>(null)
 const tableEditDialogRef = ref(null)
+
+// 搜索字段配置（关键词已内置到CommonSearch）
+const searchFields: SearchField[] = []
 
 // 状态标签类型映射
 const statusTagTypes = {
@@ -90,28 +86,40 @@ const statusTagTypes = {
 }
 
 // API 包装函数 - 适配新的 ReportCard API
-const getReportCardsWrapper = async config => {
-  const response = await proxy.$api.getReportCards({
-    keyword: config.keyword || config.keyWord,
+const getReportCardsWrapper = async (config: any) => {
+  const requestParams: any = {
     page: config.page || 1,
     size: 10
-  })
+  }
+
+  // 添加关键词筛选
+  if (formInline.keyWord) {
+    requestParams.keyword = formInline.keyWord
+  }
+
+  // 添加时间范围筛选
+  if (formInline.timeRange && formInline.timeRange.length === 2) {
+    requestParams.startTime = formInline.timeRange[0]
+    requestParams.endTime = formInline.timeRange[1]
+  }
+
+  const response = await proxy.$api.getReportCards(requestParams)
   return {
     records: response.records.map(transformReportCardForDisplay),
     total: response.total
   }
 }
 
-const deleteReportCardWrapper = async data => {
+const deleteReportCardWrapper = async (data: any) => {
   return await proxy.$api.deleteReportCard(data)
 }
 
-const createReportCardWrapper = async formData => {
+const createReportCardWrapper = async (formData: any) => {
   const transformedData = transformFormDataForCreate(formData)
   return await proxy.$api.createReportCard(transformedData)
 }
 
-const updateReportCardWrapper = async formData => {
+const updateReportCardWrapper = async (formData: any) => {
   const transformedData = transformFormDataForUpdate(formData)
   return await proxy.$api.updateReportCard(formData.id, transformedData)
 }
@@ -179,7 +187,8 @@ const rules = reactive({
 
 //搜索相关
 const formInline = reactive({
-  keyWord: ''
+  keyWord: '',
+  timeRange: null as [string, string] | null
 })
 const handleSearch = () => {
   tableRef.value?.search()
@@ -189,7 +198,7 @@ const handleSearch = () => {
 const dialogVisible = ref(false)
 const dialogAction = ref('add')
 const currentRow = ref(null)
-const openDialog = (action, row = null) => {
+const openDialog = (action: string, row: any = null) => {
   dialogAction.value = action
   currentRow.value = row
   dialogVisible.value = true
@@ -199,10 +208,5 @@ onMounted(() => {})
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+/* ObjectManagement styles */
 </style>

@@ -19,23 +19,23 @@ type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
 /** API Action Payload */
 interface ApiActionPayload {
-  api: string           // API路径，如 /api/report-cards/123
-  method: HttpMethod    // HTTP方法
-  params?: Record<string, any>   // 查询参数
-  body?: Record<string, any>     // 请求体（POST/PUT/PATCH使用）
+  api: string // API路径，如 /api/report-cards/123
+  method: HttpMethod // HTTP方法
+  params?: Record<string, any> // 查询参数
+  body?: Record<string, any> // 请求体（POST/PUT/PATCH使用）
 }
 
 /** Navigate Action Payload */
 interface NavigateActionPayload {
-  page: string                         // 目标页面路径
-  prefill?: Record<string, any>        // 预填充数据
-  params?: Record<string, any>         // 路由参数
+  page: string // 目标页面路径
+  prefill?: Record<string, any> // 预填充数据
+  params?: Record<string, any> // 路由参数
 }
 
 /** Callback Action Payload */
 interface CallbackActionPayload {
-  callback: string                     // 回调函数名
-  params?: Record<string, any>         // 回调参数
+  callback: string // 回调函数名
+  params?: Record<string, any> // 回调参数
 }
 
 // ============== 类型守卫 ==============

@@ -258,10 +258,7 @@ async function handleSend(text: string) {
 
     // 确保有会话才添加错误消息
     if (!currentSessionId.value) {
-      store.createSessionWithId(
-        Date.now().toString(36),
-        '新对话'
-      )
+      store.createSessionWithId(Date.now().toString(36), '新对话')
     }
 
     store.addMessage({

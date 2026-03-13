@@ -76,31 +76,31 @@ export enum ActionType {
 
 /** 导航操作 Payload */
 export interface NavigateActionPayload {
-  page?: string                        // 目标页面路径
-  prefill?: Record<string, any>        // 预填充数据
-  params?: Record<string, any>         // 路由参数
+  page?: string // 目标页面路径
+  prefill?: Record<string, any> // 预填充数据
+  params?: Record<string, any> // 路由参数
 }
 
 /** API操作 Payload */
 export interface ApiActionPayload {
-  api?: string                         // API路径，如 /api/report-cards/123
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'   // HTTP方法
-  params?: Record<string, any>         // 查询参数
-  body?: Record<string, any>           // 请求体（POST/PUT/PATCH使用）
-  data?: ApiActionPayload              // 嵌套的 data 字段（后端可能返回这种格式）
+  api?: string // API路径，如 /api/report-cards/123
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' // HTTP方法
+  params?: Record<string, any> // 查询参数
+  body?: Record<string, any> // 请求体（POST/PUT/PATCH使用）
+  data?: ApiActionPayload // 嵌套的 data 字段（后端可能返回这种格式）
 }
 
 /** 回调操作 Payload */
 export interface CallbackActionPayload {
-  callback?: string                    // 回调函数名
-  action?: string                      // 备选的回调名称字段
-  params?: Record<string, any>         // 回调参数
+  callback?: string // 回调函数名
+  action?: string // 备选的回调名称字段
+  params?: Record<string, any> // 回调参数
 }
 
 /** 操作 */
 export interface Action {
   type: ActionType
-  payload: Record<string, any>         // 使用松散类型以兼容不同格式
+  payload: Record<string, any> // 使用松散类型以兼容不同格式
 }
 
 /** 解析后的意图（后端返回） */

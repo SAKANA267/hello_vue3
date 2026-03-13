@@ -6,35 +6,18 @@
 -->
 <template>
   <div class="container">
-    <div class="header">
-      <el-form :inline="true" :model="formInline">
-        <el-form-item>
-          <permission-button
-            permission="user:manage"
-            type="primary"
-            @click="openDialog('add', null)"
-          >
-            新增用户
-          </permission-button>
-        </el-form-item>
-        <el-form-item>
-          <el-input
-            v-model="formInline.keyWord"
-            placeholder="请输入查询内容"
-            :prefix-icon="Search"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch()"> 查询 </el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+    <CommonSearch v-model="formInline" :fields="searchFields" @search="handleSearch">
+      <template #actions>
+        <permission-button permission="user:manage" type="primary" @click="openDialog('add', null)">
+          新增用户
+        </permission-button>
+      </template>
+    </CommonSearch>
 
     <CommonTable
       ref="tableRef"
       :table-label="tableLabel"
-      :query-params="formInline.keyWord"
-      :get-api="proxy?.$api.getUsers"
+      :get-api="getUsersWrapper"
       :delete-api="proxy?.$api.deleteUserRestful"
       :permissions="{
         canEdit: hasPermission('user:manage'),
@@ -60,18 +43,48 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import CommonSearch from '@/components/CommonSearch.vue'
 import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
 import PermissionButton from '@/components/PermissionButton.vue'
 import { usePermissions } from '@/composables/usePermissions'
+import type { SearchField } from '@/components/CommonSearch.vue'
+
+// 定义 CommonTable 组件实例类型
+interface CommonTableInstance {
+  search: () => void
+}
 
 const { hasPermission } = usePermissions()
-const { proxy } = getCurrentInstance()
-const tableRef = ref(null)
+const { proxy } = getCurrentInstance() as any
+const tableRef = ref<CommonTableInstance | null>(null)
 const tableEditDialogRef = ref(null)
+
+// 搜索字段配置（关键词和时间范围已内置到CommonSearch）
+const searchFields: SearchField[] = []
+
+// API 包装函数 - 获取用户列表
+const getUsersWrapper = async (config: any) => {
+  const requestParams: any = {
+    page: config.page || 1,
+    size: config.size || 10
+  }
+
+  // 添加关键词筛选
+  if (formInline.keyWord) {
+    requestParams.keyword = formInline.keyWord
+  }
+
+  // 添加时间范围筛选
+  if (formInline.timeRange && formInline.timeRange.length === 2) {
+    requestParams.startTime = formInline.timeRange[0]
+    requestParams.endTime = formInline.timeRange[1]
+  }
+
+  return await proxy.$api.getUsers(requestParams)
+}
 
 //表格列配置 用于v-for创建表格列
 const tableLabel = [
@@ -141,7 +154,8 @@ const rules = computed(() => {
 
 //搜索相关
 const formInline = reactive({
-  keyWord: ''
+  keyWord: '',
+  timeRange: null as [string, string] | null
 })
 const handleSearch = () => {
   tableRef.value?.search()
@@ -151,7 +165,7 @@ const handleSearch = () => {
 const dialogVisible = ref(false)
 const dialogAction = ref('add')
 const currentRow = ref(null)
-const openDialog = (action, row = null) => {
+const openDialog = (action: string, row: any = null) => {
   dialogAction.value = action
   currentRow.value = row
   dialogVisible.value = true
@@ -167,13 +181,6 @@ onMounted(() => {})
 
 .mobile-card-content {
   margin: 10px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 #table {

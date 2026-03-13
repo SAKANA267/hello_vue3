@@ -165,9 +165,7 @@ function handleAction() {
 
 function handleCopy() {
   const text = displayData.value
-    .map(item =>
-      columns.value.map(col => `${col.label}: ${item[col.key]}`).join(' | ')
-    )
+    .map(item => columns.value.map(col => `${col.label}: ${item[col.key]}`).join(' | '))
     .join('\n')
   emit('copy', text)
   ElMessage.success('已复制到剪贴板')

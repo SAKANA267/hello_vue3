@@ -30,7 +30,7 @@ export class AiService {
       // 构建请求：首次对话（无 sessionId）时不传该字段
       const request: ChatRequest = {
         message,
-        ...(sessionId && { sessionId })  // 只有当 sessionId 存在时才添加
+        ...(sessionId && { sessionId }) // 只有当 sessionId 存在时才添加
       }
 
       // aiApi.chat 返回的已经是解包后的 AiResponse（响应拦截器处理）

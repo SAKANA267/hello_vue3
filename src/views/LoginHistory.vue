@@ -6,40 +6,12 @@
 -->
 <template>
   <div class="container">
-    <div class="header">
-      <el-form :inline="true" :model="queryParams">
-        <el-form-item label="状态">
-          <el-select
-            v-model="queryParams.status"
-            placeholder="全部状态"
-            clearable
-            style="width: 120px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="成功" value="SUCCESS" />
-            <el-option label="失败" value="FAILURE" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间范围">
-          <el-date-picker
-            v-model="queryParams.timeRange"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DDTHH:mm:ss"
-            :default-time="defaultTime"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+    <CommonSearch
+      v-model="queryParams"
+      :fields="searchFields"
+      @search="handleSearch"
+      @reset="handleReset"
+    />
 
     <CommonTable
       ref="tableRef"
@@ -56,9 +28,24 @@
 <script setup lang="ts">
 import { ref, reactive, getCurrentInstance, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import CommonSearch from '@/components/CommonSearch.vue'
 import CommonTable from '@/components/CommonTable.vue'
-import type { LoginHistoryDTO } from '@/api/types'
+import type { SearchField } from '@/components/CommonSearch.vue'
 import { useAllDataStore } from '@/stores/index.js'
+
+// 搜索字段配置（关键词和时间范围已内置到CommonSearch）
+const searchFields: SearchField[] = [
+  {
+    prop: 'status',
+    label: '状态',
+    type: 'select',
+    options: [
+      { label: '全部', value: '' },
+      { label: '成功', value: 'SUCCESS' },
+      { label: '失败', value: 'FAILURE' }
+    ]
+  }
+]
 
 // 定义 CommonTable 组件实例类型
 interface CommonTableInstance {
@@ -93,11 +80,9 @@ const statusTagTypes = {
   FAILURE: 'danger'
 }
 
-// 默认时间范围选择器的默认时间
-const defaultTime: [Date, Date] = [new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]
-
 // 查询参数
 const queryParams = reactive({
+  keyWord: '',
   status: '',
   timeRange: null as [string, string] | null
 })
@@ -115,6 +100,11 @@ const fetchLoginHistory = async (params: { keyword?: string; page?: number; size
       userId,
       page: params.page || 1,
       size: params.size || 10
+    }
+
+    // 添加关键词筛选
+    if (queryParams.keyWord) {
+      requestParams.keyword = queryParams.keyWord
     }
 
     // 添加状态筛选
@@ -148,8 +138,6 @@ const handleSearch = () => {
 
 // 重置按钮点击
 const handleReset = () => {
-  queryParams.status = ''
-  queryParams.timeRange = null
   tableRef.value?.search()
 }
 </script>
@@ -157,12 +145,5 @@ const handleReset = () => {
 <style scoped>
 .container {
   padding: 20px;
-}
-
-.header {
-  background: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  margin-bottom: 20px;
 }
 </style>

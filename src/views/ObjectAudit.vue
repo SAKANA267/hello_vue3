@@ -6,26 +6,12 @@
 -->
 <template>
   <div class="container">
-    <div class="header">
-      <el-form :inline="true" :model="formInline">
-        <el-form-item>
-          <el-input
-            v-model="formInline.keyWord"
-            placeholder="请输入查询内容"
-            :prefix-icon="Search"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch()"> 查询 </el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+    <CommonSearch v-model="formInline" :fields="searchFields" @search="handleSearch" />
 
     <div class="object-table">
       <CommonTable
         ref="tableRef"
         :table-label="tableLabel"
-        :query-params="formInline.keyWord"
         :get-api="getReportCardsWrapper"
         operation-mode="audit"
         :status-column="{ prop: 'status', label: '状态' }"
@@ -50,20 +36,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, getCurrentInstance, reactive } from 'vue'
-import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import CommonSearch from '@/components/CommonSearch.vue'
 import CommonTable from '@/components/CommonTable.vue'
 import AuditDialog from '@/components/AuditDialog.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { useAllDataStore } from '@/stores/index.js'
 import { transformReportCardForDisplay } from '@/utils/reportCardUtils'
+import type { SearchField } from '@/components/CommonSearch.vue'
+
+// 定义 CommonTable 组件实例类型
+interface CommonTableInstance {
+  search: () => void
+}
 
 const { hasPermission } = usePermissions()
-const { proxy } = getCurrentInstance()
+const { proxy } = getCurrentInstance() as any
 const store = useAllDataStore()
-const tableRef = ref(null)
+const tableRef = ref<CommonTableInstance | null>(null)
+
+// 搜索字段配置（关键词已内置到CommonSearch）
+const searchFields: SearchField[] = []
 
 // 表格列配置
 const tableLabel = [
@@ -98,12 +93,24 @@ const auditDialogVisible = ref(false)
 const currentAuditRow = ref(null)
 
 // API 包装函数 - 适配新的 ReportCard API
-const getReportCardsWrapper = async config => {
-  const response = await proxy.$api.getReportCards({
-    keyword: config.keyword || config.keyWord,
+const getReportCardsWrapper = async (config: any) => {
+  const requestParams: any = {
     page: config.page || 1,
     size: 10
-  })
+  }
+
+  // 添加关键词筛选
+  if (formInline.keyWord) {
+    requestParams.keyword = formInline.keyWord
+  }
+
+  // 添加时间范围筛选
+  if (formInline.timeRange && formInline.timeRange.length === 2) {
+    requestParams.startTime = formInline.timeRange[0]
+    requestParams.endTime = formInline.timeRange[1]
+  }
+
+  const response = await proxy.$api.getReportCards(requestParams)
   return {
     records: response.records.map(transformReportCardForDisplay),
     total: response.total
@@ -112,21 +119,22 @@ const getReportCardsWrapper = async config => {
 
 // 搜索相关
 const formInline = reactive({
-  keyWord: ''
+  keyWord: '',
+  timeRange: null as [string, string] | null
 })
 const handleSearch = () => {
   tableRef.value?.search()
 }
 
 // 处理审核按钮点击
-const handleAuditClick = row => {
+const handleAuditClick = (row: any) => {
   console.log('handleAuditClick()审核对象:', row)
   currentAuditRow.value = row
   auditDialogVisible.value = true
 }
 
 // 执行审核操作
-const performAudit = async ({ action, rowData, remark }) => {
+const performAudit = async ({ action, rowData, remark }: any) => {
   try {
     const auditData = {
       auditorId: currentAuditorId.value,
@@ -150,14 +158,14 @@ const performAudit = async ({ action, rowData, remark }) => {
     console.error('审核操作失败:', error)
     ElMessage({
       showClose: true,
-      message: error.message || '审核操作失败，请重试',
+      message: (error as any).message || '审核操作失败，请重试',
       type: 'error'
     })
   }
 }
 
 // 处理撤回操作
-const handleRevoke = async row => {
+const handleRevoke = async (row: any) => {
   try {
     const res = await proxy.$api.withdrawReportCard(row.id)
     ElMessage({
@@ -170,7 +178,7 @@ const handleRevoke = async row => {
     console.error('撤回操作失败:', error)
     ElMessage({
       showClose: true,
-      message: error.message || '撤回操作失败，请重试',
+      message: (error as any).message || '撤回操作失败，请重试',
       type: 'error'
     })
   }
@@ -178,10 +186,5 @@ const handleRevoke = async row => {
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+/* ObjectAudit styles */
 </style>

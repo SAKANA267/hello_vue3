@@ -14,6 +14,7 @@ declare module 'vue' {
     ChatSidebar: typeof import('./src/components/ai/ChatSidebar.vue')['default']
     CommonAside: typeof import('./src/components/CommonAside.vue')['default']
     CommonHeader: typeof import('./src/components/CommonHeader.vue')['default']
+    CommonSearch: typeof import('./src/components/CommonSearch.vue')['default']
     CommonTab: typeof import('./src/components/CommonTab.vue')['default']
     CommonTable: typeof import('./src/components/CommonTable.vue')['default']
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
