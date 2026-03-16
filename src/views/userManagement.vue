@@ -45,12 +45,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance, reactive, computed } from 'vue'
+import type { ComponentInternalInstance } from 'vue'
 import CommonSearch from '@/components/CommonSearch.vue'
 import CommonTable from '@/components/CommonTable.vue'
 import TableEditDialog from '@/components/TableEditDialog.vue'
 import PermissionButton from '@/components/PermissionButton.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import type { SearchField } from '@/components/CommonSearch.vue'
+import type { RestfulPageParams, UserDTO } from '@/api/types'
 
 // 定义 CommonTable 组件实例类型
 interface CommonTableInstance {
@@ -58,16 +60,28 @@ interface CommonTableInstance {
 }
 
 const { hasPermission } = usePermissions()
-const { proxy } = getCurrentInstance() as any
+const instance = getCurrentInstance()
+const proxy = instance?.proxy
 const tableRef = ref<CommonTableInstance | null>(null)
-const tableEditDialogRef = ref(null)
+const tableEditDialogRef = ref<InstanceType<typeof TableEditDialog> | null>(null)
 
 // 搜索字段配置（关键词和时间范围已内置到CommonSearch）
 const searchFields: SearchField[] = []
 
 // API 包装函数 - 获取用户列表
-const getUsersWrapper = async (config: any) => {
-  const requestParams: any = {
+interface GetUsersConfig {
+  page?: number
+  size?: number
+}
+
+// 扩展分页参数以支持时间范围筛选
+interface UserSearchParams extends RestfulPageParams {
+  startTime?: string
+  endTime?: string
+}
+
+const getUsersWrapper = async (config: GetUsersConfig) => {
+  const requestParams: UserSearchParams = {
     page: config.page || 1,
     size: config.size || 10
   }
@@ -83,7 +97,7 @@ const getUsersWrapper = async (config: any) => {
     requestParams.endTime = formInline.timeRange[1]
   }
 
-  return await proxy.$api.getUsers(requestParams)
+  return await proxy?.$api.getUsers(requestParams)
 }
 
 //表格列配置 用于v-for创建表格列
@@ -164,8 +178,8 @@ const handleSearch = () => {
 //对话框表单相关
 const dialogVisible = ref(false)
 const dialogAction = ref('add')
-const currentRow = ref(null)
-const openDialog = (action: string, row: any = null) => {
+const currentRow = ref<UserDTO | null>(null)
+const openDialog = (action: string, row: UserDTO | null = null) => {
   dialogAction.value = action
   currentRow.value = row
   dialogVisible.value = true
