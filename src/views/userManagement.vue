@@ -37,7 +37,7 @@
       :row-data="currentRow"
       :add-api="proxy?.$api.createUserRestful"
       :edit-api="proxy?.$api.updateUserRestful"
-      @refresh="handleSearch()"
+      @refresh="refreshTable"
       @update:dialog-visible="dialogVisible = $event"
     />
   </div>
@@ -56,7 +56,7 @@ import type { RestfulPageParams, UserDTO } from '@/api/types'
 
 // 定义 CommonTable 组件实例类型
 interface CommonTableInstance {
-  search: () => void
+  search: (params?: Record<string, any>) => void
 }
 
 const { hasPermission } = usePermissions()
@@ -72,6 +72,9 @@ const searchFields: SearchField[] = []
 interface GetUsersConfig {
   page?: number
   size?: number
+  keyword?: string
+  startTime?: string
+  endTime?: string
 }
 
 // 扩展分页参数以支持时间范围筛选
@@ -86,15 +89,15 @@ const getUsersWrapper = async (config: GetUsersConfig) => {
     size: config.size || 10
   }
 
-  // 添加关键词筛选
-  if (formInline.keyWord) {
-    requestParams.keyword = formInline.keyWord
+  // 搜索参数（keyword, startTime, endTime）通过 CommonTable.search() 传入
+  if (config.keyword) {
+    requestParams.keyword = config.keyword
   }
-
-  // 添加时间范围筛选
-  if (formInline.timeRange && formInline.timeRange.length === 2) {
-    requestParams.startTime = formInline.timeRange[0]
-    requestParams.endTime = formInline.timeRange[1]
+  if (config.startTime) {
+    requestParams.startTime = config.startTime
+  }
+  if (config.endTime) {
+    requestParams.endTime = config.endTime
   }
 
   return await proxy?.$api.getUsers(requestParams)
@@ -171,7 +174,27 @@ const formInline = reactive({
   keyWord: '',
   timeRange: null as [string, string] | null
 })
-const handleSearch = () => {
+
+const handleSearch = (searchData: Record<string, any>) => {
+  const params: Record<string, any> = {}
+
+  // 添加关键词筛选
+  if (searchData.keyWord) {
+    params.keyword = searchData.keyWord
+  }
+
+  // 添加时间范围筛选
+  if (searchData.timeRange && searchData.timeRange.length === 2) {
+    params.startTime = searchData.timeRange[0]
+    params.endTime = searchData.timeRange[1]
+  }
+
+  console.log('handleSearch params:', params)
+  tableRef.value?.search(params)
+}
+
+// 刷新表格（保持当前搜索条件）
+const refreshTable = () => {
   tableRef.value?.search()
 }
 

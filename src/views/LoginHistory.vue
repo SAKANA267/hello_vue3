@@ -19,8 +19,7 @@
       :get-api="fetchLoginHistory"
       :status-column="statusColumn"
       :status-tag-types="statusTagTypes"
-      operation-mode="none"
-      :permissions="{ canEdit: false, canDelete: false }"
+      :permissions="{ canEdit: false, canDelete: false, canAudit: false, canRevoke: false }"
     />
   </div>
 </template>
@@ -49,7 +48,7 @@ const searchFields: SearchField[] = [
 
 // 定义 CommonTable 组件实例类型
 interface CommonTableInstance {
-  search: () => void
+  search: (params?: Record<string, any>) => void
 }
 
 const { proxy } = getCurrentInstance() as any
@@ -88,7 +87,14 @@ const queryParams = reactive({
 })
 
 // 获取登录历史数据（适配CommonTable的数据格式）
-const fetchLoginHistory = async (params: { keyword?: string; page?: number; size?: number }) => {
+const fetchLoginHistory = async (params: {
+  keyword?: string
+  page?: number
+  size?: number
+  status?: string
+  startTime?: string
+  endTime?: string
+}) => {
   try {
     const userId = currentUserId.value
     if (!userId) {
@@ -102,20 +108,18 @@ const fetchLoginHistory = async (params: { keyword?: string; page?: number; size
       size: params.size || 10
     }
 
-    // 添加关键词筛选
-    if (queryParams.keyWord) {
-      requestParams.keyword = queryParams.keyWord
+    // 搜索参数通过 CommonTable.search() 传入
+    if (params.keyword) {
+      requestParams.keyword = params.keyword
     }
-
-    // 添加状态筛选
-    if (queryParams.status) {
-      requestParams.status = queryParams.status
+    if (params.status) {
+      requestParams.status = params.status
     }
-
-    // 添加时间范围筛选
-    if (queryParams.timeRange && queryParams.timeRange.length === 2) {
-      requestParams.startTime = queryParams.timeRange[0]
-      requestParams.endTime = queryParams.timeRange[1]
+    if (params.startTime) {
+      requestParams.startTime = params.startTime
+    }
+    if (params.endTime) {
+      requestParams.endTime = params.endTime
     }
 
     const res = await proxy.$api.getLoginHistory(requestParams)
@@ -132,13 +136,36 @@ const fetchLoginHistory = async (params: { keyword?: string; page?: number; size
 }
 
 // 查询按钮点击
-const handleSearch = () => {
-  tableRef.value?.search()
+const handleSearch = (searchData: Record<string, any>) => {
+  const params: Record<string, any> = {}
+
+  // 添加关键词筛选
+  if (searchData.keyWord) {
+    params.keyword = searchData.keyWord
+  }
+
+  // 添加状态筛选
+  if (searchData.status) {
+    params.status = searchData.status
+  }
+
+  // 添加时间范围筛选
+  if (searchData.timeRange && searchData.timeRange.length === 2) {
+    params.startTime = searchData.timeRange[0]
+    params.endTime = searchData.timeRange[1]
+  }
+
+  console.log('handleSearch params:', params)
+  tableRef.value?.search(params)
 }
 
 // 重置按钮点击
 const handleReset = () => {
-  tableRef.value?.search()
+  // 清空查询参数并刷新
+  queryParams.keyWord = ''
+  queryParams.status = ''
+  queryParams.timeRange = null
+  tableRef.value?.search({})
 }
 </script>
 

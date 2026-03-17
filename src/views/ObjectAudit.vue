@@ -49,7 +49,7 @@ import type { SearchField } from '@/components/CommonSearch.vue'
 
 // 定义 CommonTable 组件实例类型
 interface CommonTableInstance {
-  search: () => void
+  search: (params?: Record<string, any>) => void
 }
 
 const { hasPermission } = usePermissions()
@@ -99,15 +99,15 @@ const getReportCardsWrapper = async (config: any) => {
     size: 10
   }
 
-  // 添加关键词筛选
-  if (formInline.keyWord) {
-    requestParams.keyword = formInline.keyWord
+  // 搜索参数（keyword, startTime, endTime）通过 CommonTable.search() 传入
+  if (config.keyword) {
+    requestParams.keyword = config.keyword
   }
-
-  // 添加时间范围筛选
-  if (formInline.timeRange && formInline.timeRange.length === 2) {
-    requestParams.startTime = formInline.timeRange[0]
-    requestParams.endTime = formInline.timeRange[1]
+  if (config.startTime) {
+    requestParams.startTime = config.startTime
+  }
+  if (config.endTime) {
+    requestParams.endTime = config.endTime
   }
 
   const response = await proxy.$api.getReportCards(requestParams)
@@ -122,8 +122,23 @@ const formInline = reactive({
   keyWord: '',
   timeRange: null as [string, string] | null
 })
-const handleSearch = () => {
-  tableRef.value?.search()
+
+const handleSearch = (searchData: Record<string, any>) => {
+  const params: Record<string, any> = {}
+
+  // 添加关键词筛选
+  if (searchData.keyWord) {
+    params.keyword = searchData.keyWord
+  }
+
+  // 添加时间范围筛选
+  if (searchData.timeRange && searchData.timeRange.length === 2) {
+    params.startTime = searchData.timeRange[0]
+    params.endTime = searchData.timeRange[1]
+  }
+
+  console.log('handleSearch params:', params)
+  tableRef.value?.search(params)
 }
 
 // 处理审核按钮点击

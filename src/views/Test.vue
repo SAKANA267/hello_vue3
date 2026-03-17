@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <CommonTable :table-label="tableLabel" />
+    <CommonTable :table-label="tableLabel" :get-api="mockGetApi" />
   </div>
 </template>
 
@@ -19,6 +19,11 @@ const tableLabel = [
   { prop: 'name', label: '姓名', width: '80' },
   { prop: 'address', label: '地址' }
 ]
+
+// 模拟 API 函数
+const mockGetApi = async () => {
+  return { records: [], total: 0 }
+}
 </script>
 
 <style scoped></style>
