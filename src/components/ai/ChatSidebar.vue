@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
 import type { ChatSession } from '@/types/ai'
 
 const props = defineProps<{
@@ -109,16 +110,33 @@ function handleClick(session: ChatSession) {
 }
 
 function handleEdit(session: ChatSession) {
-  const newTitle = prompt('修改会话标题', session.title)
-  if (newTitle) {
-    emit('update-title', session.id, newTitle)
-  }
+  ElMessageBox.prompt('请输入新的会话标题', '修改会话标题', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: session.title,
+    inputPattern: /\S+/,
+    inputErrorMessage: '标题不能为空'
+  })
+    .then(({ value }) => {
+      emit('update-title', session.id, value)
+    })
+    .catch(() => {
+      // 用户取消操作
+    })
 }
 
 function handleDelete(session: ChatSession) {
-  if (confirm(`确定要删除 "${session.title}" 吗？`)) {
-    emit('delete-session', session.id)
-  }
+  ElMessageBox.confirm(`确定要删除 "${session.title}" 吗？`, '确认删除', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      emit('delete-session', session.id)
+    })
+    .catch(() => {
+      // 用户取消操作
+    })
 }
 
 function getImageUrl(name: string): string {
