@@ -57,9 +57,7 @@
           <!-- 审核模式 -->
           <template v-if="showAuditButton">
             <el-button
-              :disabled="
-                permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'
-              "
+              :disabled="permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'"
               type="text"
               @click="emit('audit', scope.row)"
               size="small"
@@ -113,9 +111,7 @@
           <!-- 审核模式 -->
           <template v-if="showAuditButton">
             <el-button
-              :disabled="
-                permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'
-              "
+              :disabled="permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'"
               type="text"
               @click="emit('audit', scope.row)"
               size="small"
@@ -253,16 +249,19 @@ const searchParams = ref<Record<string, any>>({})
 
 // 计算属性：显示哪些操作按钮
 const showAuditButton = computed(() => props.operationMode === 'audit')
-const showEditDeleteButtons = computed(() =>
-  props.operationMode === 'edit-delete' || props.operationMode === undefined
+const showEditDeleteButtons = computed(
+  () => props.operationMode === 'edit-delete' || props.operationMode === undefined
 )
 
 // 类型安全的状态标签类型获取
-const statusTagTypes = computed(() => props.statusTagTypes || {
-  待审核: 'warning',
-  已审核: 'success',
-  审核不通过: 'danger'
-})
+const statusTagTypes = computed(
+  () =>
+    props.statusTagTypes || {
+      待审核: 'warning',
+      已审核: 'success',
+      审核不通过: 'danger'
+    }
+)
 
 // 获取状态列属性名（用于模板中的动态索引）
 const statusColumnProp = computed(() => props.statusColumn?.prop || 'status')

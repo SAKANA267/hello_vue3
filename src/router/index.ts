@@ -96,7 +96,7 @@ const routes = [
       {
         path: '/apiDocs',
         name: 'apiDocs',
-        component: () => import('@/views/ToDo.vue'),
+        component: () => import('@/views/ApiDocs.vue'),
         meta: {
           title: 'API 文档',
           roles: MENU_ROLES['3-2'],

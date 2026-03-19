@@ -5,10 +5,7 @@
       <span v-else class="user-avatar-icon">{{ userInitial }}</span>
     </div>
     <div class="message-content">
-      <div
-        class="message-text"
-        v-if="message.type === 'text' || message.type === 'error'"
-      >
+      <div class="message-text" v-if="message.type === 'text' || message.type === 'error'">
         <span v-if="message.role === 'user'">{{ message.content }}</span>
         <div v-else v-html="renderedContent" class="markdown-body"></div>
       </div>
