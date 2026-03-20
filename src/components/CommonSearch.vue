@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="common-search">
-    <el-form :inline="true" :model="formData" class="search-form">
+    <el-form :inline="!isMobile" :model="formData" class="search-form">
       <!-- 左侧操作按钮（如新增按钮） -->
       <el-form-item v-if="$slots.actions">
         <slot name="actions" />
@@ -140,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { reactive, watch, ref, onMounted, onUnmounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 
 // 定义字段类型
@@ -211,6 +211,22 @@ const emit = defineEmits<{
 
 // 表单数据
 const formData = reactive<Record<string, any>>({})
+
+// 响应式状态
+const isMobile = ref(window.innerWidth <= 768)
+
+// 处理窗口大小变化
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 // 默认时间范围选择器的默认时间
 const defaultTime: [Date, Date] = [new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]
@@ -302,7 +318,7 @@ defineExpose({
 })
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .common-search {
   background: #fff;
   padding: 20px;
@@ -315,24 +331,54 @@ defineExpose({
   flex-wrap: wrap;
 }
 
-@media screen and (max-width: 768px) {
+// 移动端样式
+@media (max-width: 768px) {
   .common-search {
-    padding: 15px;
+    padding: 12px;
   }
 
-  .search-form :deep(.el-form-item) {
-    width: 100%;
-    margin-right: 0;
-  }
+  .search-form {
+    :deep(.el-form-item) {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 12px;
+      display: block;
 
-  .search-form :deep(.el-form-item__content) {
-    width: 100%;
-  }
+      .el-form-item__label {
+        display: block;
+        text-align: left;
+        margin-bottom: 4px;
+      }
+    }
 
-  .search-form :deep(.el-input),
-  .search-form :deep(.el-select),
-  .search-form :deep(.el-date-editor) {
-    width: 100% !important;
+    :deep(.el-form-item__content) {
+      width: 100%;
+    }
+
+    :deep(.el-input),
+    :deep(.el-select),
+    :deep(.el-date-editor) {
+      width: 100% !important;
+    }
+
+    // 时间范围选择器适配
+    :deep(.el-date-editor--datetimerange) {
+      .el-input__wrapper {
+        width: 100%;
+      }
+    }
+
+    // 按钮适配 - 查询和重置按钮占满宽度
+    :deep(.el-form-item) {
+      // 只包含按钮的表单项（没有label）
+      &:has(> .el-form-item__content > .el-button):not(:has(.el-form-item__label)) {
+        display: block;
+
+        .el-button {
+          width: 100%;
+        }
+      }
+    }
   }
 }
 </style>

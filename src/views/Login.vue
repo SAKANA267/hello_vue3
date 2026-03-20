@@ -149,6 +149,24 @@ const goToRegister = () => {
   .card-header h2 {
     font-size: 20px;
   }
+
+  // 输入框高度调整
+  :deep(.el-button--large) {
+    height: 48px;
+    font-size: 15px;
+  }
+
+  :deep(.el-input--large) {
+    .el-input__wrapper {
+      padding: 10px 15px;
+    }
+  }
+
+  // 底部链接间距优化
+  .footer-link {
+    gap: 4px;
+    font-size: 13px;
+  }
 }
 
 /* 表单项样式调整 */

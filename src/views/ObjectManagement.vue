@@ -227,6 +227,14 @@ const openDialog = (action: string, row: any = null) => {
 onMounted(() => {})
 </script>
 
-<style scoped>
-/* ObjectManagement styles */
+<style scoped lang="less">
+.container {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+}
 </style>

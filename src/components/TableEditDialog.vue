@@ -8,10 +8,12 @@
   <el-dialog
     :model-value="dialogVisible"
     :title="dialogTitle"
-    :width="isMobile ? '90%' : '50%'"
+    :width="isMobile ? '95%' : '50%'"
+    :fullscreen="isMobile"
     :before-close="handleClose"
+    class="table-edit-dialog"
   >
-    <el-form :model="form" :rules="rules" ref="objectForm">
+    <el-form :model="form" :rules="rules" ref="objectForm" label-position="top">
       <el-form-item
         v-for="field in formFields"
         :key="field.prop"
@@ -87,7 +89,7 @@
  * />
  */
 import { ElMessage } from 'element-plus'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 
 //组件属性定义
 const props = defineProps({
@@ -179,10 +181,59 @@ const handleSubmit = async () => {
 
 //响应式布局检测
 const isMobile = ref(window.innerWidth <= 768)
-const labelWidth = computed(() => (isMobile.value ? '60px' : '100px'))
-window.addEventListener('resize', () => {
+
+// 处理窗口大小变化
+const handleResize = () => {
   isMobile.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+:deep(.table-edit-dialog) {
+  .el-dialog__body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .el-form-item {
+    margin-bottom: 18px;
+  }
+
+  // 移动端全屏样式
+  &.is-fullscreen {
+    .el-dialog__body {
+      max-height: calc(100vh - 120px);
+    }
+
+    .el-form-item {
+      margin-bottom: 20px;
+    }
+
+    .el-input,
+    .el-select,
+    .el-date-picker {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  :deep(.el-dialog__footer) {
+    padding: 12px 16px;
+    text-align: center;
+
+    .el-button {
+      min-width: 80px;
+    }
+  }
+}
+</style>

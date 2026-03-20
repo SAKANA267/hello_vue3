@@ -200,6 +200,14 @@ const handleRevoke = async (row: any) => {
 }
 </script>
 
-<style scoped>
-/* ObjectAudit styles */
+<style scoped lang="less">
+.container {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+}
 </style>

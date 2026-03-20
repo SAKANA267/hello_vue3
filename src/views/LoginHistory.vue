@@ -169,8 +169,14 @@ const handleReset = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .container {
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
 }
 </style>

@@ -201,10 +201,29 @@ const goToLogin = () => {
   .register-card {
     width: 95%;
     margin: 0 10px;
+    max-height: 90vh;
+    overflow-y: auto;
   }
 
   .card-header h2 {
     font-size: 20px;
+  }
+
+  // 输入框高度调整
+  :deep(.el-button--large) {
+    height: 48px;
+    font-size: 15px;
+  }
+
+  :deep(.el-input--large) {
+    .el-input__wrapper {
+      padding: 10px 15px;
+    }
+  }
+
+  // 表单项间距优化
+  :deep(.el-form-item) {
+    margin-bottom: 16px;
   }
 }
 

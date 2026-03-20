@@ -35,4 +35,26 @@ const goBack = () => {
     text-align: center;
   }
 }
+
+@media (max-width: 768px) {
+  .todo-container {
+    padding: 12px;
+    min-height: 50vh;
+  }
+
+  .todo-content {
+    :deep(.el-icon) {
+      font-size: 60px !important;
+    }
+
+    :deep(.el-empty__description) {
+      font-size: 14px;
+    }
+
+    :deep(.el-button) {
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+  }
+}
 </style>

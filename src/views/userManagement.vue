@@ -211,46 +211,14 @@ const openDialog = (action: string, row: UserDTO | null = null) => {
 onMounted(() => {})
 </script>
 
-<style scoped>
-.mobile-cards {
-  display: none;
-}
-
-.mobile-card-content {
-  margin: 10px;
-}
-
-#table {
-  background: #fff;
+<style scoped lang="less">
+.container {
   padding: 20px;
-  border-radius: 2px;
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
-@media screen and (max-width: 768px) {
-  /* 隐藏桌面端表格 */
-  .table {
-    display: none;
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
   }
-
-  /* 显示移动端卡片布局 */
-  .mobile-cards {
-    display: block;
-    width: 100%;
-  }
-
-  /* 调整分页宽度 */
-  .pagination {
-    width: 100%;
-    padding: 10px;
-  }
-}
-
-.pagination {
-  display: flex;
-  margin-top: 20px;
-  justify-content: center;
 }
 </style>
