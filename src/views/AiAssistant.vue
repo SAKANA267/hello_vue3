@@ -1,24 +1,56 @@
 <template>
   <div class="ai-assistant-container">
-    <!-- 左侧边栏 -->
-    <ChatSidebar
-      v-model:session-id="currentSessionId"
-      :sessions="sessions"
-      @new-session="handleNewSession"
-      @switch-session="handleSwitchSession"
-      @delete-session="handleDeleteSession"
-      @update-title="handleUpdateTitle"
-    />
+    <!-- 移动端侧边栏抽屉 -->
+    <el-drawer
+      v-model="sidebarVisible"
+      :size="280"
+      direction="ltr"
+      :with-header="false"
+      class="sidebar-drawer"
+    >
+      <ChatSidebar
+        v-model:session-id="currentSessionId"
+        :sessions="sessions"
+        :is-in-drawer="true"
+        @new-session="handleNewSession"
+        @switch-session="handleSwitchSession"
+        @delete-session="handleDeleteSession"
+        @update-title="handleUpdateTitle"
+        @close-mobile-sidebar="closeSidebar"
+      />
+    </el-drawer>
+
+    <!-- 桌面端侧边栏 -->
+    <div v-if="!isMobile" class="sidebar-desktop">
+      <ChatSidebar
+        v-model:session-id="currentSessionId"
+        :sessions="sessions"
+        @new-session="handleNewSession"
+        @switch-session="handleSwitchSession"
+        @delete-session="handleDeleteSession"
+        @update-title="handleUpdateTitle"
+      />
+    </div>
 
     <!-- 右侧聊天区域 -->
     <div class="chat-main">
       <!-- 操作栏 -->
       <div class="chat-header">
-        <span class="session-title">{{ currentSession?.title || 'AI 助手' }}</span>
+        <div class="header-left">
+          <el-button
+            v-if="isMobile"
+            class="menu-toggle"
+            text
+            @click="toggleSidebar"
+          >
+            <el-icon><Menu /></el-icon>
+          </el-button>
+          <span class="session-title">{{ currentSession?.title || 'AI 助手' }}</span>
+        </div>
         <div class="header-actions">
           <el-button text @click="handleSave">
             <el-icon><Document /></el-icon>
-            保存
+            <span v-if="!isMobile">保存</span>
           </el-button>
           <el-button text @click="handleMore">
             <el-icon><More /></el-icon>
@@ -65,8 +97,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, getCurrentInstance } from 'vue'
-import { Document, More } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, getCurrentInstance } from 'vue'
+import { Document, More, Menu } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { useAiChatStore } from '@/stores/aiChat'
 import ChatSidebar from '@/components/ai/ChatSidebar.vue'
@@ -94,6 +126,27 @@ const currentSuggestions = computed(() => store.currentSuggestions)
 const inputText = ref('')
 const messagesContainer = ref<HTMLElement>()
 
+// 响应式状态
+const isMobile = ref(window.innerWidth <= 768)
+const sidebarVisible = ref(false)
+
+// 处理窗口大小变化
+function handleResize() {
+  isMobile.value = window.innerWidth <= 768
+  // 桌面端关闭抽屉
+  if (!isMobile.value) {
+    sidebarVisible.value = false
+  }
+}
+
+function toggleSidebar() {
+  sidebarVisible.value = !sidebarVisible.value
+}
+
+function closeSidebar() {
+  sidebarVisible.value = false
+}
+
 onMounted(async () => {
   // 加载本地存储的会话历史
   store.loadFromStorage()
@@ -103,6 +156,14 @@ onMounted(async () => {
   if (!currentSessionId.value && sessions.value.length > 0) {
     store.switchSession(sessions.value[0].id)
   }
+
+  // 添加窗口大小变化监听
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  // 清理窗口大小变化监听
+  window.removeEventListener('resize', handleResize)
 })
 
 async function handleNewSession() {
@@ -377,6 +438,11 @@ function scrollToBottom() {
   display: flex;
   height: 100%;
   background: #f5f5f5;
+  position: relative;
+}
+
+.sidebar-desktop {
+  display: block;
 }
 
 .chat-main {
@@ -384,6 +450,7 @@ function scrollToBottom() {
   display: flex;
   flex-direction: column;
   background: #fff;
+  min-width: 0;
 }
 
 .chat-header {
@@ -393,9 +460,25 @@ function scrollToBottom() {
   padding: 16px 24px;
   border-bottom: 1px solid #e5e5e5;
 
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .menu-toggle {
+    padding: 8px;
+    font-size: 20px;
+  }
+
   .session-title {
     font-size: 16px;
     font-weight: 500;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
   }
 }
 
@@ -417,5 +500,52 @@ function scrollToBottom() {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+// 移动端样式
+@media (max-width: 768px) {
+  .sidebar-desktop {
+    display: none;
+  }
+
+  .chat-header {
+    padding: 12px 16px;
+
+    .session-title {
+      font-size: 15px;
+    }
+  }
+
+  .chat-messages {
+    padding: 16px;
+  }
+
+  .chat-input {
+    padding: 12px 16px;
+  }
+
+  .suggestions-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+
+    :deep(.el-button) {
+      font-size: 13px;
+      padding: 6px 12px;
+      height: auto;
+      white-space: normal;
+      text-align: left;
+    }
+  }
+}
+</style>
+
+<style lang="less">
+// 侧边栏抽屉样式（非scoped）
+.sidebar-drawer {
+  :deep(.el-drawer__body) {
+    padding: 0;
+    background: #171717;
+  }
 }
 </style>

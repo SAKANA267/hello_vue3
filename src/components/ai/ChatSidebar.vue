@@ -1,5 +1,12 @@
 <template>
   <div class="chat-sidebar">
+    <!-- 移动端关闭按钮 -->
+    <div v-if="isInDrawer" class="mobile-close-btn">
+      <el-button text @click="$emit('close-mobile-sidebar')">
+        <el-icon><Close /></el-icon>
+      </el-button>
+    </div>
+
     <!-- 新建对话按钮 -->
     <div class="sidebar-header">
       <el-button class="new-chat-btn" @click="$emit('new-session')">
@@ -57,13 +64,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Plus, Edit, Delete, ArrowDown } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, ArrowDown, Close } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import type { ChatSession } from '@/types/ai'
 
 const props = defineProps<{
   sessionId: string | null
   sessions: ChatSession[]
+  isInDrawer?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -72,6 +80,7 @@ const emit = defineEmits<{
   'switch-session': [id: string]
   'delete-session': [id: string]
   'update-title': [id: string, title: string]
+  'close-mobile-sidebar': []
 }>()
 
 const userName = computed(() => 'Administrator')
@@ -152,6 +161,17 @@ function getImageUrl(name: string): string {
   color: #ececec;
   display: flex;
   flex-direction: column;
+}
+
+.mobile-close-btn {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px;
+
+  :deep(.el-button) {
+    color: #ececec;
+    font-size: 20px;
+  }
 }
 
 .sidebar-header {
