@@ -149,23 +149,42 @@ export interface ExecuteRequest {
   params?: Record<string, any>
 }
 
+/** 会话列表项（后端 SessionDTO） */
+export interface SessionDTO {
+  sessionId: string
+  userId: string
+  title: string
+  messageCount: number
+  lastMessageAt: number
+  createdAt: number
+  updatedAt: number
+}
+
+/** 消息列表项（后端 MessageDTO） */
+export interface MessageDTO {
+  messageId: string
+  sessionId: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  messageType: 'text' | 'action' | 'error'
+  metadata?: string // JSON string
+  createdAt: number
+}
+
+/** 会话列表响应（后端直接返回数组） */
+export type SessionListResponse = SessionDTO[]
+
 /** 创建会话请求 */
 export interface CreateSessionRequest {
-  userId?: string
-  title?: string
+  title?: string // userId no longer needed, extracted from JWT token
 }
 
-/** 创建会话响应 */
-export interface CreateSessionResponse {
-  sessionId: string
-  timestamp: number
-}
+/** 创建会话响应（后端返回完整 SessionDTO） */
+export interface CreateSessionResponse extends SessionDTO {}
 
-/** 会话详情响应 */
-export interface SessionDetailResponse {
-  sessionId: string
-  title: string
-  messages: ChatMessage[]
+/** 会话详情响应（后端返回完整会话信息） */
+export interface SessionDetailResponse extends SessionDTO {
+  messages: MessageDTO[]
 }
 
 /** 快捷操作配置 */

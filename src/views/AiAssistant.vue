@@ -37,12 +37,7 @@
       <!-- 操作栏 -->
       <div class="chat-header">
         <div class="header-left">
-          <el-button
-            v-if="isMobile"
-            class="menu-toggle"
-            text
-            @click="toggleSidebar"
-          >
+          <el-button v-if="isMobile" class="menu-toggle" text @click="toggleSidebar">
             <el-icon><Menu /></el-icon>
           </el-button>
           <span class="session-title">{{ currentSession?.title || 'AI 助手' }}</span>
@@ -148,16 +143,14 @@ function closeSidebar() {
 }
 
 onMounted(async () => {
-  // 加载本地存储的会话历史
-  store.loadFromStorage()
+  // Fetch sessions from backend (per-user)
+  await store.fetchSessionList()
 
-  // 如果本地有会话，恢复第一个会话
-  // 如果没有会话，等用户首次发送消息时再由后端创建
+  // Restore last active session or first session
   if (!currentSessionId.value && sessions.value.length > 0) {
     store.switchSession(sessions.value[0].id)
   }
 
-  // 添加窗口大小变化监听
   window.addEventListener('resize', handleResize)
 })
 
@@ -170,8 +163,8 @@ async function handleNewSession() {
   await store.createSession()
 }
 
-function handleSwitchSession(id: string) {
-  store.switchSession(id)
+async function handleSwitchSession(id: string) {
+  await store.switchSession(id)
 }
 
 async function handleDeleteSession(id: string) {

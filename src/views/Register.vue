@@ -151,7 +151,7 @@ const goToLogin = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .register-container {
   min-height: 100vh;
   display: flex;

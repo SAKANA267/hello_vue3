@@ -7,7 +7,8 @@ import type {
   ExecuteRequest,
   CreateSessionRequest,
   CreateSessionResponse,
-  SessionDetailResponse
+  SessionDetailResponse,
+  SessionListResponse
 } from '@/types/ai'
 
 /**
@@ -62,6 +63,17 @@ export const aiApi = {
       url: '/ai/sessions',
       method: 'post',
       data: data || {}
+    })
+  },
+
+  /**
+   * 获取当前用户的所有会话
+   * GET /api/ai/sessions
+   */
+  getSessionList(): Promise<SessionListResponse> {
+    return request({
+      url: '/ai/sessions',
+      method: 'get'
     })
   },
 

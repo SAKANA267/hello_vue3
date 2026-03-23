@@ -8,7 +8,13 @@
       </div>
       <div class="banner-actions">
         <el-button :icon="Search" circle @click="showSearchDialog = true" />
-        <el-button :icon="Menu" class="menu-toggle" @click="toggleMobileDrawer" circle v-if="isMobile" />
+        <el-button
+          :icon="Menu"
+          class="menu-toggle"
+          @click="toggleMobileDrawer"
+          circle
+          v-if="isMobile"
+        />
       </div>
     </div>
 
@@ -98,19 +104,11 @@
 
         <!-- Page Navigation (Footer) -->
         <div class="docs-navigation" v-if="!loading && currentContent">
-          <a
-            v-if="prevSection"
-            class="nav-link prev"
-            @click="handleSectionClick(prevSection.id)"
-          >
+          <a v-if="prevSection" class="nav-link prev" @click="handleSectionClick(prevSection.id)">
             <span class="nav-label">← 上一页</span>
             <span class="nav-title">{{ prevSection.title }}</span>
           </a>
-          <a
-            v-if="nextSection"
-            class="nav-link next"
-            @click="handleSectionClick(nextSection.id)"
-          >
+          <a v-if="nextSection" class="nav-link next" @click="handleSectionClick(nextSection.id)">
             <span class="nav-label">下一页 →</span>
             <span class="nav-title">{{ nextSection.title }}</span>
           </a>
@@ -143,7 +141,10 @@
           </div>
         </a>
       </div>
-      <el-empty v-else-if="searchKeyword && searchResults.length === 0" description="未找到相关文档" />
+      <el-empty
+        v-else-if="searchKeyword && searchResults.length === 0"
+        description="未找到相关文档"
+      />
     </el-dialog>
   </div>
 </template>
@@ -461,7 +462,8 @@ onUnmounted(() => {
         }
       }
 
-      :deep(ul), :deep(ol) {
+      :deep(ul),
+      :deep(ol) {
         padding-left: 1.5rem;
         margin: 1rem 0;
       }
@@ -475,7 +477,8 @@ onUnmounted(() => {
         border-collapse: collapse;
         margin: 1rem 0;
 
-        th, td {
+        th,
+        td {
           padding: 12px;
           text-align: left;
           border-bottom: 1px solid #e5e5e5;
@@ -710,7 +713,8 @@ onUnmounted(() => {
         :deep(table) {
           font-size: 14px;
 
-          th, td {
+          th,
+          td {
             padding: 8px 4px;
           }
         }

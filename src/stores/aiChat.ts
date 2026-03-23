@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { aiApi } from '@/api/ai'
-import type { ChatMessage, ChatSession } from '@/types/ai'
+import type { ChatMessage, ChatSession, MessageDTO, SessionDTO } from '@/types/ai'
 
 const STORAGE_KEY_SESSIONS = 'ai_chat_sessions'
 const STORAGE_KEY_CURRENT = 'ai_chat_current'
@@ -20,23 +20,57 @@ export const useAiChatStore = defineStore('aiChat', () => {
   // Actions
 
   /**
+   * 从后端获取当前用户的会话列表
+   */
+  async function fetchSessionList() {
+    try {
+      const response = await aiApi.getSessionList()
+      // Backend returns array directly, Convert SessionDTO to ChatSession
+      sessions.value = response.map(dto => ({
+        id: dto.sessionId,
+        title: dto.title,
+        messages: [], // Messages loaded separately on demand
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt
+      }))
+      saveToStorage() // Cache to localStorage
+    } catch (error) {
+      console.error('Failed to fetch sessions:', error)
+      // Fallback to localStorage cache
+      loadFromStorage()
+    }
+  }
+
+  /**
+   * 加载指定会话的消息
+   */
+  async function loadSessionMessages(sessionId: string) {
+    try {
+      const response = await aiApi.getSession(sessionId)
+      const session = sessions.value.find(s => s.id === sessionId)
+      if (session) {
+        // Convert MessageDTO to ChatMessage
+        session.messages = response.messages.map(msg => ({
+          id: msg.messageId,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.createdAt,
+          type: msg.messageType as any
+        }))
+        saveToStorage()
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error)
+    }
+  }
+
+  /**
    * 创建新会话（调用后端API）
+   * Note: userId is extracted from JWT token by backend
    */
   async function createSession(title = '新对话') {
     try {
-      // 从 localStorage 获取用户信息
-      const userInfoStr = localStorage.getItem('user_info')
-      let userId: string | undefined
-      if (userInfoStr) {
-        try {
-          const userInfo = JSON.parse(userInfoStr)
-          userId = userInfo.id
-        } catch (e) {
-          console.error('Failed to parse user info:', e)
-        }
-      }
-
-      const response = await aiApi.createSession({ title, userId })
+      const response = await aiApi.createSession({ title })
       const sessionId = response.sessionId
 
       const newSession: ChatSession = {
@@ -133,9 +167,15 @@ export const useAiChatStore = defineStore('aiChat', () => {
 
   /**
    * 切换会话
+   * Loads messages if not already loaded
    */
-  function switchSession(sessionId: string) {
+  async function switchSession(sessionId: string) {
     currentSessionId.value = sessionId
+    // Load messages if not already loaded
+    const session = sessions.value.find(s => s.id === sessionId)
+    if (session && session.messages.length === 0) {
+      await loadSessionMessages(sessionId)
+    }
   }
 
   /**
@@ -173,7 +213,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
   }
 
   /**
-   * 从本地存储加载会话
+   * 从本地存储加载会话（降级方案）
    */
   function loadFromStorage() {
     const stored = localStorage.getItem(STORAGE_KEY_SESSIONS)
@@ -189,7 +229,7 @@ export const useAiChatStore = defineStore('aiChat', () => {
   }
 
   /**
-   * 保存到本地存储
+   * 保存到本地存储（缓存）
    */
   function saveToStorage() {
     localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions.value))
@@ -229,6 +269,8 @@ export const useAiChatStore = defineStore('aiChat', () => {
     messages,
     isLoading,
     currentSuggestions,
+    fetchSessionList,
+    loadSessionMessages,
     createSession,
     createSessionWithId,
     addMessage,

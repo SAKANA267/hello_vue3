@@ -102,7 +102,7 @@ const goToRegister = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .login-container {
   min-height: 100vh;
   display: flex;
