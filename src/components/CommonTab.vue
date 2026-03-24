@@ -5,22 +5,27 @@
  * CommonTab.vue
 -->
 <template>
-  <div class="tags">
-    <el-tag
-      v-for="(tag, index) in tags"
-      :key="tag.name"
-      :closable="tag.path !== '/dashboard'"
-      :effect="route.path == tag.path ? 'dark' : 'light'"
-      @click="handleTag(tag)"
-      @close="handleClose(tag, index)"
+  <div class="tags-nav">
+    <el-tabs
+      v-model="activeTab"
+      type="card"
+      closable
+      @tab-click="handleTabClick"
+      @tab-remove="handleTabRemove"
     >
-      {{ tag.label }}
-    </el-tag>
+      <el-tab-pane
+        v-for="tag in tags"
+        :key="tag.path"
+        :label="tag.label"
+        :name="tag.path"
+        :closable="tag.path !== '/home'"
+      />
+    </el-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAllDataStore } from '@/stores/index.js'
 
@@ -29,27 +34,63 @@ const router = useRouter()
 const route = useRoute()
 const tags = computed(() => store.state.tags)
 
-// 点击标签跳转
-const handleTag = (tag: any) => {
-  router.push(tag.path)
+const activeTab = ref(route.path)
+
+watch(
+  () => route.path,
+  (newPath) => {
+    activeTab.value = newPath
+  }
+)
+
+const handleTabClick = (tab: any) => {
+  router.push(tab.paneName)
 }
 
-// 关闭标签
-const handleClose = (tag: any, index: any) => {
-  store.state.tags.splice(index, 1)
-  // 如果关闭的是当前标签，跳转到最后一个标签
-  if (route.path === tag.path) {
-    const lastTag = store.state.tags[store.state.tags.length - 1]
-    router.push(lastTag.path)
+const handleTabRemove = (targetName: string) => {
+  const index = tags.value.findIndex((tag) => tag.path === targetName)
+  if (index > -1) {
+    store.state.tags.splice(index, 1)
+    if (route.path === targetName) {
+      const lastTag = store.state.tags[store.state.tags.length - 1]
+      if (lastTag) {
+        router.push(lastTag.path)
+      }
+    }
   }
 }
 </script>
 
 <style scoped>
-.tags {
-  margin: 10px 0 10px 20px;
+.tags-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 12px;
 }
-.el-tag {
-  margin-right: 8px;
+
+.tags-nav :deep(.el-tabs) {
+  width: 100%;
+}
+
+.tags-nav :deep(.el-tabs__header) {
+  margin: 0;
+  border-bottom: none;
+}
+
+.tags-nav :deep(.el-tabs__item) {
+  background: #fff;
+}
+
+.tags-nav :deep(.el-tabs__nav) {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 768px) {
+  .tags-nav {
+    padding: 0 8px;
+  }
 }
 </style>

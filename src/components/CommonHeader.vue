@@ -22,7 +22,9 @@
           </el-icon>
         </el-button>
       </div>
-      <common-tab />
+      <div class="m-cont">
+        <common-tab />
+      </div>
       <!-- 右侧内容 -->
       <div class="r-cont">
         <el-dropdown>
@@ -73,7 +75,6 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   padding: 0;
-  height: calc(100% - 42px);
   width: 100%;
 }
 
@@ -86,13 +87,38 @@ const handleLogout = () => {
   border-radius: 10%;
 }
 
-:deep(.tags) {
+:deep(.m-cont) {
+  flex: 1;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+:deep(.tags-nav) {
   flex: 1;
   display: flex;
 }
 
-:deep(.tags .el-tag) {
-  flex-shrink: 0;
+:deep(.tags-nav .el-tabs) {
+  width: 100%;
+  display: flex;
+}
+
+:deep(.tags-nav .el-tabs__header) {
+  width: 100%;
+}
+
+:deep(.tags-nav .el-tabs__nav-wrap) {
+  width: 100%;
+}
+
+:deep(.tags-nav .el-tabs__nav-scroll) {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+:deep(.tags-nav .el-tabs__nav) {
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .r-cont {
