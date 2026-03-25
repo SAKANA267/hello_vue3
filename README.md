@@ -1,6 +1,6 @@
 # 公共卫生平台管理系统
 
-基于 Vue 3 + TypeScript + Element Plus 构建的公共卫生平台管理系统，提供传染病上报、审核流程、用户管理和 AI 智能助手等核心功能。
+基于 Vue 3 + TypeScript + Element Plus 构建的公共卫生平台管理系统，提供传染病上报、审核流程、用户管理、AI 智能助手和 API 文档等核心功能。
 
 ## 技术栈
 
@@ -16,6 +16,7 @@
 | ECharts | 6.0 | 数据可视化 |
 | Mock.js | 1.1.0 | 数据模拟 |
 | Less | 4.4 | CSS 预处理器 |
+| Marked & Highlight.js | - | Markdown 渲染与语法高亮 |
 
 ## 项目结构
 
@@ -43,18 +44,26 @@ src/
 │   ├── AuditDialog.vue      # 审核对话框
 │   ├── CommonHeader.vue     # 公共头部
 │   ├── CommonAside.vue      # 公共侧边栏
-│   ├── CommonTab.vue        # 标签页
+│   ├── CommonTab.vue        # 标签页导航
+│   ├── CommonSearch.vue     # 通用搜索
 │   ├── UserInfo.vue         # 用户信息组件
 │   ├── PermissionButton.vue # 权限按钮
+│   ├── MarkdownRenderer.vue # Markdown 渲染器
+│   ├── ContributionGraph.vue # 贡献图表
 │   ├── ai/                  # AI 相关组件
 │   │   ├── ChatSidebar.vue  # 聊天侧边栏
 │   │   ├── ChatMessage.vue  # 聊天消息
 │   │   ├── ChatInput.vue    # 聊天输入
-│   │   └── TypingIndicator.vue
+│   │   ├── TypingIndicator.vue
+│   │   ├── DeleteConfirmDialog.vue
+│   │   └── RequestDataCard.vue
 │   └── dashboard/           # 仪表盘组件
 │       ├── StatCard.vue     # 统计卡片
 │       ├── TrendChart.vue   # 趋势图表
-│       └── ...
+│       ├── DistributionList.vue
+│       ├── QuickActions.vue
+│       ├── RecentActivities.vue
+│       └── TodoList.vue
 ├── composables/              # 组合式函数
 │   └── usePermissions.ts    # 权限钩子
 ├── config/                   # 配置
@@ -83,12 +92,15 @@ src/
 │   ├── Home.vue             # 首页布局
 │   ├── Dashboard.vue        # 仪表盘
 │   ├── Profile.vue          # 个人中心
+│   ├── LoginHistory.vue     # 登录历史
 │   ├── ObjectManagement.vue # 对象管理
 │   ├── ObjectAudit.vue      # 对象审核
 │   ├── UserManagement.vue   # 用户管理
 │   ├── AiAssistant.vue      # AI 助手
-│   ├── Forbidden.vue        # 403 页面
-│   └── ...
+│   ├── ApiDocs.vue          # API 文档
+│   ├── ToDo.vue             # 待办事项
+│   ├── Test.vue             # 测试页
+│   └── Forbidden.vue        # 403 页面
 ├── App.vue                   # 根组件
 └── main.ts                   # 应用入口
 ```
@@ -100,48 +112,62 @@ src/
 - JWT Token 认证
 - 路由守卫
 - 自动登出（Token 过期）
+- 登录历史记录
 
 ### 2. 仪表盘
 - 统计数据卡片
-- 趋势图表
+- 趋势图表（ECharts）
 - 分布列表
 - 快捷操作
 - 待办事项
 - 最近活动
+- 用户贡献统计图表
 
 ### 3. 对象管理
 - 数据表格展示（桌面端/移动端适配）
 - 新增/编辑/删除对象
 - 分页查询
 - 关键词搜索
+- 状态标签显示
 
 ### 4. 对象审核
 - 审核流程
 - 通过/驳回操作
-- 备注信息
+- 备注信息输入
 
 ### 5. 用户管理
-- 用户 CRUD
-- 登录历史记录
-- 贡献统计图表
+- 用户 CRUD 操作
+- 角色权限分配
+- 登录历史追踪
+- 贡献统计可视化
 
 ### 6. AI 智能助手
-- 自然语言对话
-- 意图识别
-- 动作执行（跳转页面、查询数据等）
-- 打字指示器动画
+- 自然语言对话界面
+- 意图识别与动作执行
+- 会话历史管理（每用户独立存储）
+- 会话分组与删除
+- 请求/响应数据查看
+- 打字机效果动画
+- 移动端侧边栏抽屉
 
-### 7. 权限管理
+### 7. API 文档
+- Markdown 格式 API 文档
+- 代码语法高亮
+- 响应式布局
+
+### 8. 权限管理
 - 基于角色的菜单权限
 - 按钮级权限控制
-- 自定义权限指令
+- 自定义 `v-permission` 指令
 - 权限工具函数
 
-### 8. 系统功能
-- 可折叠侧边栏
-- 标签页导航
+### 9. 系统功能
+- 可折叠侧边栏（桌面端/移动端抽屉）
+- 动态标签页导航（支持重命名/关闭）
 - 面包屑导航
 - 响应式布局（768px 断点）
+- 通用搜索组件
+- Markdown 渲染组件
 
 ## 开发指南
 
@@ -171,7 +197,7 @@ npm run preview        # 预览构建产物
 
 ```bash
 npm run lint    # ESLint 检查并自动修复
-npm run format  # Prettier 格式化
+npm run format  # Prettier 格式化所有 src/ 文件
 ```
 
 ## 环境变量
@@ -221,6 +247,22 @@ const { proxy } = getCurrentInstance() as any
 const data = await proxy.$api.getTableData(config)
 ```
 
+### 认证流程
+
+1. 用户登录 → `proxy.$api.getMenu()` 验证
+2. 返回 `{ token, menuList }`
+3. `store.setToken(res.token)` 存储到 Pinia + localStorage
+4. `store.updateMenuList(res.menuList)` 存储菜单权限
+5. Axios 拦截器自动添加 `Authorization: Bearer ${token}`
+6. Code `401` 自动登出并重定向
+
+### AI 助手架构
+
+- **会话隔离**: 基于 JWT 用户 ID 的独立会话存储
+- **意图识别**: 预定义意图常量 (`src/constants/intents.ts`)
+- **动作处理**: `ai-action-handler.ts` 统一处理动作执行
+- **状态管理**: `aiChat.ts` Pinia Store 管理会话状态
+
 ## 代码规范
 
 ### Prettier 配置
@@ -241,21 +283,37 @@ const data = await proxy.$api.getTableData(config)
 
 - 使用 `<script setup lang="ts">`
 - `defineProps` 和 `defineEmits` 定义组件 API
-- Less 样式作用域
+- Less 样式作用域 (`<style scoped lang="less">`)
+
+## 响应式设计
+
+### 断点
+
+- **移动端**: ≤ 768px
+- **桌面端**: > 768px
+
+### 适配策略
+
+| 组件 | 桌面端 | 移动端 |
+|------|--------|--------|
+| CommonTable | 完整表格 | 卡片布局 |
+| CommonAside | 固定侧边栏 | 抽屉式 |
+| CommonTab | 标签页 | 标签页 |
+| Dashboard | 4 列网格 | 1 列堆叠 |
 
 ## 部署说明
 
-1. **构建生产版本**
+### 1. 构建生产版本
 
 ```bash
 npm run build
 ```
 
-2. **部署产物**
+### 2. 部署产物
 
 将 `dist` 目录部署到服务器
 
-3. **Nginx 配置示例**
+### 3. Nginx 配置示例
 
 ```nginx
 server {
