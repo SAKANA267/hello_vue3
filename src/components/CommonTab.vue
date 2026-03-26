@@ -29,6 +29,13 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAllDataStore } from '@/stores/index.js'
 
+interface TabItem {
+  name: string
+  path: string
+  label: string
+  icon: string
+}
+
 const store = useAllDataStore()
 const router = useRouter()
 const route = useRoute()
@@ -38,17 +45,17 @@ const activeTab = ref(route.path)
 
 watch(
   () => route.path,
-  (newPath) => {
+  newPath => {
     activeTab.value = newPath
   }
 )
 
-const handleTabClick = (tab: any) => {
+const handleTabClick = (tab: { paneName: string }) => {
   router.push(tab.paneName)
 }
 
 const handleTabRemove = (targetName: string) => {
-  const index = tags.value.findIndex((tag) => tag.path === targetName)
+  const index = tags.value.findIndex((tag: TabItem) => tag.path === targetName)
   if (index > -1) {
     store.state.tags.splice(index, 1)
     if (route.path === targetName) {
