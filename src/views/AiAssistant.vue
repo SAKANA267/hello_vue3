@@ -224,39 +224,197 @@ async function handleSend(text: string) {
       if (isApiAction) {
         const { api, method } = payloadData
 
-        // DELETE 操作：显示确认对话框
+        // DELETE 操作：智能查询对象详情，再显示确认对话框
         if (method === 'DELETE') {
+          // 先显示 AI 消息
           store.addMessage({
             role: 'assistant',
             content: response.message,
-            type: 'delete-confirm',
-            confirmData: {
-              objectInfo: { api, method },
-              onConfirm: async () => {
-                const result = await aiService.executeAction(response.action!)
-                if (result.success) {
-                  store.addMessage({
-                    role: 'assistant',
-                    content: '删除成功',
-                    type: 'text'
-                  })
-                } else {
-                  store.addMessage({
-                    role: 'assistant',
-                    content: `删除失败：${result.error}`,
-                    type: 'error'
-                  })
+            type: 'text'
+          })
+
+          // 定义删除执行的回调函数（复用）
+          const executeDelete = async () => {
+            const result = await aiService.executeAction(response.action!)
+            if (result.success) {
+              store.addMessage({
+                role: 'assistant',
+                content: '删除成功',
+                type: 'text'
+              })
+            } else {
+              store.addMessage({
+                role: 'assistant',
+                content: `删除失败：${result.error}`,
+                type: 'error'
+              })
+            }
+          }
+
+          const cancelDelete = () => {
+            store.addMessage({
+              role: 'assistant',
+              content: '已取消删除操作',
+              type: 'text'
+            })
+          }
+
+          try {
+            let objectInfo: any = { api, method }
+
+            // 判断 URL 格式并智能处理
+            if (api.includes('?')) {
+              // 带查询参数：如 /users?name=张三 或 /report-cards?name=肺炎
+              const [resourcePath, queryString] = api.split('?')
+              const params = new URLSearchParams(queryString)
+
+              // 构造搜索 API 请求
+              // 检测资源类型并使用对应的搜索接口
+              let searchApi = resourcePath + '/search'
+              // 特殊处理：如果是 report-cards，可能需要不同的搜索端点
+              if (resourcePath.includes('report-cards')) {
+                searchApi = resourcePath + '/search'
+              }
+
+              const searchAction = {
+                type: 'API',
+                payload: {
+                  data: {
+                    api: searchApi,
+                    method: 'GET',
+                    params: Object.fromEntries(params)
+                  }
                 }
-              },
-              onCancel: () => {
-                store.addMessage({
-                  role: 'assistant',
-                  content: '已取消删除操作',
-                  type: 'text'
-                })
+              }
+
+              const searchResult = await aiService.executeAction(searchAction)
+
+              if (searchResult.success && searchResult.data) {
+                // 提取搜索结果
+                let items = searchResult.data
+                if (items?.records) items = items.records
+                else if (items?.list) items = items.list
+                else if (items?.data) items = items.data
+
+                if (Array.isArray(items) && items.length > 0) {
+                  // 使用搜索结果的第一项
+                  objectInfo = { api, method, ...items[0] }
+                } else if (!Array.isArray(items)) {
+                  // 单个对象
+                  objectInfo = { api, method, ...items }
+                }
+              }
+            } else if (api.match(/\/(users|report-cards)\/[^/]+$/)) {
+              // 资源标识符路径：如 /users/1, /users/admin, /report-cards/123
+              // 先尝试直接 GET，如果失败再用搜索接口兜底
+              const identifier = api.split('/').pop()!
+              const resourcePath = api.substring(0, api.lastIndexOf('/'))
+
+              // 尝试1: 直接 GET 请求
+              const getAction = {
+                type: 'API',
+                payload: { data: { api, method: 'GET' } }
+              }
+
+              const getResult = await aiService.executeAction(getAction)
+
+              if (getResult.success && getResult.data) {
+                let objectData = getResult.data
+                if (objectData?.records) objectData = objectData.records
+                else if (objectData?.list) objectData = objectData.list
+                else if (objectData?.data) objectData = objectData.data
+
+                const item = Array.isArray(objectData) ? objectData[0] : objectData
+                if (item) {
+                  objectInfo = { api, method, ...item }
+                }
+              } else {
+                // 尝试2: 使用搜索接口兜底（可能是用户名而非 ID）
+                const searchAction = {
+                  type: 'API',
+                  payload: {
+                    data: {
+                      api: `${resourcePath}/search`,
+                      method: 'GET',
+                      params: { keyword: identifier }
+                    }
+                  }
+                }
+
+                const searchResult = await aiService.executeAction(searchAction)
+
+                if (searchResult.success && searchResult.data) {
+                  let items = searchResult.data
+                  if (items?.records) items = items.records
+                  else if (items?.list) items = items.list
+                  else if (items?.data) items = items.data
+
+                  if (Array.isArray(items) && items.length > 0) {
+                    objectInfo = { api, method, ...items[0] }
+                  } else if (!Array.isArray(items)) {
+                    objectInfo = { api, method, ...items }
+                  }
+                }
+              }
+            } else if (api.match(/\/(users|report-cards)\/\w+\/[\w%]+$/)) {
+              // 用户名/名称路径：如 /users/username/张三 或 /report-cards/name/肺炎
+              // 尝试提取查询条件并用搜索接口
+              const matches = api.match(/\/(users|report-cards)\/(\w+)\/([^/]+)$/)
+              if (matches) {
+                const [, resource, field, value] = matches
+                const searchAction = {
+                  type: 'API',
+                  payload: {
+                    data: {
+                      api: `/${resource}/search`,
+                      method: 'GET',
+                      params: { [field]: decodeURIComponent(value) }
+                    }
+                  }
+                }
+
+                const searchResult = await aiService.executeAction(searchAction)
+
+                if (searchResult.success && searchResult.data) {
+                  let items = searchResult.data
+                  if (items?.records) items = items.records
+                  else if (items?.list) items = items.list
+                  else if (items?.data) items = items.data
+
+                  if (Array.isArray(items) && items.length > 0) {
+                    objectInfo = { api, method, ...items[0] }
+                  } else if (!Array.isArray(items)) {
+                    objectInfo = { api, method, ...items }
+                  }
+                }
               }
             }
-          })
+
+            // 显示删除确认对话框
+            store.addMessage({
+              role: 'assistant',
+              content: '确认删除',
+              type: 'delete-confirm',
+              confirmData: {
+                objectInfo,
+                onConfirm: executeDelete,
+                onCancel: cancelDelete
+              }
+            })
+          } catch (error) {
+            // 任何错误，显示简化版确认框
+            console.error('[DELETE] 获取对象详情失败:', error)
+            store.addMessage({
+              role: 'assistant',
+              content: '确认删除',
+              type: 'delete-confirm',
+              confirmData: {
+                objectInfo: { api, method },
+                onConfirm: executeDelete,
+                onCancel: cancelDelete
+              }
+            })
+          }
         }
         // GET 操作：查询数据并展示表格
         else if (method === 'GET') {
