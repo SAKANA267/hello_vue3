@@ -3,6 +3,8 @@ import { createAiActionHandler } from '@/utils/ai-action-handler'
 import type { AiResponse, ChatRequest, Action } from '@/types/ai'
 import type { Router } from 'vue-router'
 import type { CallbackHandler } from '@/utils/ai-action-handler'
+import { FORM_CONFIGS } from '@/constants/formConfigs'
+import type { CreateFormData } from '@/types/ai'
 
 /**
  * AI 服务类
@@ -14,6 +16,7 @@ import type { CallbackHandler } from '@/utils/ai-action-handler'
  */
 export class AiService {
   private actionHandler: ReturnType<typeof createAiActionHandler>
+  public getPendingCreateFormData: () => CreateFormData | null = () => null
 
   constructor(router: Router) {
     this.actionHandler = createAiActionHandler(router)
@@ -93,7 +96,40 @@ export class AiService {
  * 创建 AI 服务实例
  */
 export function createAiService(router: Router): AiService {
-  return new AiService(router)
+  const service = new AiService(router)
+
+  // 用于存储待处理的创建表单数据
+  let pendingCreateFormData: CreateFormData | null = null
+
+  // 注册创建表单回调
+  service.registerCallback('open-create-form', ((params: any) => {
+    const { entity, prefill, formConfig } = params
+    const config = formConfig || FORM_CONFIGS[entity]
+
+    if (!config) {
+      console.warn(`[AI Service] No form config found for entity: ${entity}`)
+      return
+    }
+
+    // 构造创建表单数据并存储
+    pendingCreateFormData = {
+      title: config.title,
+      description: config.description,
+      fields: config.fields,
+      initialData: prefill || {},
+      submitApi: `/api/${entity}s`,
+      submitMethod: 'POST'
+    }
+  }) as CallbackHandler)
+
+  // 获取并清除待处理的创建表单数据
+  service.getPendingCreateFormData = (): CreateFormData | null => {
+    const data = pendingCreateFormData
+    pendingCreateFormData = null
+    return data
+  }
+
+  return service
 }
 
 /**

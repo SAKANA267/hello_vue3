@@ -39,16 +39,33 @@ function generateMockResponse(message: string): AiResponse {
 
   // 创建意图
   if (/新增|添加|创建|新建/.test(normalizedMessage)) {
+    // 判断实体类型
+    let entity = 'user'
+    let prefill: any = {}
+
+    if (/报告卡|report.?card|传染病/.test(normalizedMessage)) {
+      entity = 'report-card'
+      // 尝试提取疾病名称作为预填充
+      const diseaseMatch = normalizedMessage.match(/(?:新增|创建|新建)(?:一个)?(?:的)?(.+?)(?:报告卡|报卡)/)
+      if (diseaseMatch && diseaseMatch[1]) {
+        prefill.diseaseName = diseaseMatch[1].trim()
+      }
+    } else if (/用户|user/.test(normalizedMessage)) {
+      entity = 'user'
+    }
+
     return {
-      message: '已为您打开添加表单',
+      message: entity === 'report-card'
+        ? '好的，我来帮您创建一个新的报告卡。请填写以下信息：'
+        : '好的，我来帮您创建一个新用户。请填写以下信息：',
       action: {
         type: ActionType.CALLBACK,
         payload: {
-          callback: 'open-create',
-          params: { entity: 'user' }
+          callback: 'open-create-form',
+          params: { entity, prefill }
         }
       },
-      suggestions: ['继续添加', '查看列表', '返回']
+      suggestions: ['继续创建', '查看列表', '返回首页']
     }
   }
 

@@ -61,7 +61,12 @@
           @action="handleQuickAction"
         />
         <template v-for="message in messages" :key="message.id">
-          <ChatMessage :message="message" />
+          <ChatMessage
+            :message="message"
+            @create-success="handleCreateSuccess"
+            @create-cancel="handleCreateCancel"
+            @create-error="handleCreateError"
+          />
         </template>
         <TypingIndicator v-if="isLoading" />
       </div>
@@ -441,12 +446,26 @@ async function handleSend(text: string) {
       }
       // CALLBACK 或其他操作
       else {
-        store.addMessage({
-          role: 'assistant',
-          content: response.message,
-          type: 'text'
-        })
+        // 先执行回调
         await aiService.executeAction(response.action)
+
+        // 检查是否有待处理的创建表单数据
+        const createFormData = aiService.getPendingCreateFormData()
+        if (createFormData) {
+          store.addMessage({
+            role: 'assistant',
+            content: response.message,
+            type: 'create-form',
+            createFormData
+          })
+        } else {
+          // 普通回调，只显示文本消息
+          store.addMessage({
+            role: 'assistant',
+            content: response.message,
+            type: 'text'
+          })
+        }
       }
     } else {
       // 无action，仅显示文本消息
@@ -572,6 +591,39 @@ function handleStop() {
 
 function handleMore() {
   // 更多选项逻辑
+}
+
+// 创建表单成功处理
+function handleCreateSuccess(data: any) {
+  store.addMessage({
+    role: 'assistant',
+    content: '创建成功！',
+    type: 'text'
+  })
+  store.updateSuggestions(['继续创建', '查看列表', '返回首页'])
+  scrollToBottom()
+}
+
+// 创建表单取消处理
+function handleCreateCancel() {
+  store.addMessage({
+    role: 'assistant',
+    content: '已取消创建操作',
+    type: 'text'
+  })
+  store.clearSuggestions()
+  scrollToBottom()
+}
+
+// 创建表单错误处理
+function handleCreateError(message: string) {
+  store.addMessage({
+    role: 'assistant',
+    content: `创建失败：${message}`,
+    type: 'error'
+  })
+  store.clearSuggestions()
+  scrollToBottom()
 }
 
 function scrollToBottom() {

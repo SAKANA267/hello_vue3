@@ -28,6 +28,14 @@
         :action-text="message.requestData.actionText"
         @action="message.requestData.onAction"
       />
+      <!-- 创建表单对话框 -->
+      <CreateFormDialog
+        v-if="message.type === 'create-form' && message.createFormData"
+        :create-form-data="message.createFormData"
+        @success="handleCreateSuccess"
+        @cancel="handleCreateCancel"
+        @error="handleCreateError"
+      />
       <div class="message-time">{{ formatTime(message.timestamp) }}</div>
     </div>
   </div>
@@ -40,6 +48,7 @@ import hljs from 'highlight.js'
 import type { ChatMessage } from '@/types/ai'
 import DeleteConfirmDialog from './DeleteConfirmDialog.vue'
 import RequestDataCard from './RequestDataCard.vue'
+import CreateFormDialog from './CreateFormDialog.vue'
 
 // 配置 marked 的渲染器
 const renderer = new marked.Renderer()
@@ -61,6 +70,12 @@ const props = defineProps<{
   message: ChatMessage
 }>()
 
+const emit = defineEmits<{
+  createSuccess: [data: any]
+  createCancel: []
+  createError: [message: string]
+}>()
+
 // 渲染 Markdown 内容（仅对 AI 消息）
 const renderedContent = computed(() => {
   if (props.message.role === 'assistant') {
@@ -78,6 +93,18 @@ function formatTime(timestamp: number): string {
   const hours = date.getHours().toString().padStart(2, '0')
   const minutes = date.getMinutes().toString().padStart(2, '0')
   return `${hours}:${minutes}`
+}
+
+function handleCreateSuccess(data: any) {
+  emit('createSuccess', data)
+}
+
+function handleCreateCancel() {
+  emit('createCancel')
+}
+
+function handleCreateError(message: string) {
+  emit('createError', message)
 }
 </script>
 

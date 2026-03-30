@@ -26,16 +26,39 @@ export interface RequestDataData {
   onAction: () => void
 }
 
+/** 表单字段配置 */
+export interface FormFieldConfig {
+  prop: string
+  label: string
+  type: 'input' | 'select' | 'radio' | 'date' | 'textarea'
+  options?: Array<{ label: string; value: any }> | string[]
+  defaultValue?: any
+  required?: boolean
+  placeholder?: string
+  disabled?: boolean
+}
+
+/** 创建表单数据 */
+export interface CreateFormData {
+  title: string // 对话框标题，如 "新增报告卡"
+  description?: string // 表单描述
+  fields: FormFieldConfig[] // 表单字段配置
+  initialData?: Record<string, any> // AI预填充的默认值
+  submitApi: string // 提交API路径
+  submitMethod?: 'POST' | 'PUT' | 'PATCH'
+}
+
 /** 会话消息类型 */
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  type?: 'text' | 'action' | 'error' | 'loading' | 'delete-confirm' | 'request-data'
+  type?: 'text' | 'action' | 'error' | 'loading' | 'delete-confirm' | 'request-data' | 'create-form'
   suggestions?: string[] // 建议操作按钮
   confirmData?: DeleteConfirmData // 删除确认对话框数据
   requestData?: RequestDataData // 请求数据卡片数据
+  createFormData?: CreateFormData // 创建表单数据
 }
 
 /** 历史会话 */
