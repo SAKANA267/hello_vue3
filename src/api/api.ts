@@ -24,7 +24,15 @@ import type {
   // LoginHistory types
   LoginHistoryDTO,
   LoginHistoryPageParams,
-  LoginHistoryPageResponse
+  LoginHistoryPageResponse,
+  // AuditGroup types
+  AuditGroupDTO,
+  CreateAuditGroupRequest,
+  UpdateAuditGroupRequest,
+  AuditGroupPageParams,
+  AuditGroupMemberDTO,
+  AddGroupMembersRequest,
+  RemoveGroupMembersRequest
 } from './types'
 
 // ============== 认证 API ==============
@@ -286,6 +294,140 @@ export const reportCardApi = {
   }
 }
 
+// ============== RESTful AuditGroup Management API ==============
+
+/** 审核组管理 API */
+export const auditGroupApi = {
+  /** 分页查询审核组列表 */
+  getAuditGroups(params?: AuditGroupPageParams): Promise<RestfulPageResponse<AuditGroupDTO>> {
+    return request({
+      url: '/audit-groups',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 根据ID获取审核组 */
+  getAuditGroupById(id: string): Promise<AuditGroupDTO> {
+    return request({
+      url: `/audit-groups/${id}`,
+      method: 'get'
+    })
+  },
+
+  /** 创建审核组 */
+  createAuditGroup(data: CreateAuditGroupRequest): Promise<AuditGroupDTO> {
+    return request({
+      url: '/audit-groups',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 更新审核组 */
+  updateAuditGroup(id: string, data: UpdateAuditGroupRequest): Promise<AuditGroupDTO> {
+    return request({
+      url: `/audit-groups/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  /** 删除审核组 */
+  deleteAuditGroup(id: string): Promise<{ message: string }> {
+    return request({
+      url: `/audit-groups/${id}`,
+      method: 'delete'
+    })
+  },
+
+  /** 启用审核组 */
+  activateAuditGroup(id: string): Promise<{ message: string }> {
+    return request({
+      url: `/audit-groups/${id}/activate`,
+      method: 'put'
+    })
+  },
+
+  /** 停用审核组 */
+  deactivateAuditGroup(id: string): Promise<{ message: string }> {
+    return request({
+      url: `/audit-groups/${id}/deactivate`,
+      method: 'put'
+    })
+  },
+
+  /** 搜索审核组 */
+  searchAuditGroups(keyword: string): Promise<AuditGroupDTO[]> {
+    return request({
+      url: '/audit-groups/search',
+      method: 'get',
+      params: { keyword }
+    })
+  },
+
+  /** 获取所有启用的审核组 */
+  getActiveAuditGroups(): Promise<AuditGroupDTO[]> {
+    return request({
+      url: '/audit-groups/active',
+      method: 'get'
+    })
+  },
+
+  /** 获取审核组成员 */
+  getAuditGroupMembers(id: string): Promise<AuditGroupMemberDTO[]> {
+    return request({
+      url: `/audit-groups/${id}/members`,
+      method: 'get'
+    })
+  },
+
+  /** 添加组成员 */
+  addGroupMembers(data: AddGroupMembersRequest): Promise<{ message: string }> {
+    return request({
+      url: '/audit-groups/members/add',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 移除组成员 */
+  removeGroupMembers(data: RemoveGroupMembersRequest): Promise<{ message: string }> {
+    return request({
+      url: '/audit-groups/members/remove',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 设置审核组组长 */
+  setAuditGroupLeader(id: string, leaderId: string): Promise<{ message: string }> {
+    return request({
+      url: `/audit-groups/${id}/leader`,
+      method: 'put',
+      params: { leaderId }
+    })
+  },
+
+  /** 检查组名是否存在 */
+  checkGroupNameExists(groupName: string, excludeId?: string): Promise<boolean> {
+    return request({
+      url: '/audit-groups/check/name',
+      method: 'get',
+      params: { groupName, excludeId }
+    })
+  },
+
+  /** 检查组编码是否存在 */
+  checkGroupCodeExists(groupCode: string, excludeId?: string): Promise<boolean> {
+    return request({
+      url: '/audit-groups/check/code',
+      method: 'get',
+      params: { groupCode, excludeId }
+    })
+  }
+}
+
 // ============== 通用 API (兼容旧代码) ==============
 
 /** API 接口对象 */
@@ -330,6 +472,23 @@ interface ApiInterface {
   deleteUserLoginHistory(
     userId: string
   ): Promise<{ code: number; message: string; data: number; timestamp: string }>
+
+  // AuditGroup Management
+  getAuditGroups(params?: AuditGroupPageParams): Promise<RestfulPageResponse<AuditGroupDTO>>
+  getAuditGroupById(id: string): Promise<AuditGroupDTO>
+  createAuditGroup(data: CreateAuditGroupRequest): Promise<AuditGroupDTO>
+  updateAuditGroup(id: string, data: UpdateAuditGroupRequest): Promise<AuditGroupDTO>
+  deleteAuditGroup(id: string): Promise<{ message: string }>
+  activateAuditGroup(id: string): Promise<{ message: string }>
+  deactivateAuditGroup(id: string): Promise<{ message: string }>
+  searchAuditGroups(keyword: string): Promise<AuditGroupDTO[]>
+  getActiveAuditGroups(): Promise<AuditGroupDTO[]>
+  getAuditGroupMembers(id: string): Promise<AuditGroupMemberDTO[]>
+  addGroupMembers(data: AddGroupMembersRequest): Promise<{ message: string }>
+  removeGroupMembers(data: RemoveGroupMembersRequest): Promise<{ message: string }>
+  setAuditGroupLeader(id: string, leaderId: string): Promise<{ message: string }>
+  checkGroupNameExists(groupName: string, excludeId?: string): Promise<boolean>
+  checkGroupCodeExists(groupCode: string, excludeId?: string): Promise<boolean>
 }
 
 /** 通用 API 对象 (兼容旧代码，内部调用新的 authApi/userApi/reportCardApi) */
@@ -451,6 +610,67 @@ const api: ApiInterface = {
 
   deleteUserLoginHistory(userId: string) {
     return authApi.deleteUserLoginHistory(userId)
+  },
+
+  // ========== AuditGroup Management ==========
+  getAuditGroups(params?: AuditGroupPageParams) {
+    return auditGroupApi.getAuditGroups(params)
+  },
+
+  getAuditGroupById(id: string) {
+    return auditGroupApi.getAuditGroupById(id)
+  },
+
+  createAuditGroup(data: CreateAuditGroupRequest) {
+    return auditGroupApi.createAuditGroup(data)
+  },
+
+  updateAuditGroup(id: string, data: UpdateAuditGroupRequest) {
+    return auditGroupApi.updateAuditGroup(id, data)
+  },
+
+  deleteAuditGroup(id: string) {
+    return auditGroupApi.deleteAuditGroup(id)
+  },
+
+  activateAuditGroup(id: string) {
+    return auditGroupApi.activateAuditGroup(id)
+  },
+
+  deactivateAuditGroup(id: string) {
+    return auditGroupApi.deactivateAuditGroup(id)
+  },
+
+  searchAuditGroups(keyword: string) {
+    return auditGroupApi.searchAuditGroups(keyword)
+  },
+
+  getActiveAuditGroups() {
+    return auditGroupApi.getActiveAuditGroups()
+  },
+
+  getAuditGroupMembers(id: string) {
+    return auditGroupApi.getAuditGroupMembers(id)
+  },
+
+  addGroupMembers(data: AddGroupMembersRequest) {
+    return auditGroupApi.addGroupMembers(data)
+  },
+
+  removeGroupMembers(data: RemoveGroupMembersRequest) {
+    return auditGroupApi.removeGroupMembers(data)
+  },
+
+  setAuditGroupLeader(id: string, leaderId: string) {
+    return auditGroupApi.setAuditGroupLeader(id, leaderId)
+  },
+
+  checkGroupNameExists(groupName: string, excludeId?: string) {
+    return auditGroupApi.checkGroupNameExists(groupName, excludeId)
+  },
+
+  checkGroupCodeExists(groupCode: string, excludeId?: string) {
+    return auditGroupApi.checkGroupCodeExists(groupCode, excludeId)
   }
 }
 

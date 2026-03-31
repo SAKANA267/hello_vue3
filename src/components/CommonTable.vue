@@ -32,10 +32,12 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="150">
+      <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
+          <!-- 自定义操作插槽 -->
+          <slot name="operations" :row="scope.row"></slot>
           <!-- 编辑删除模式（默认） -->
-          <template v-if="showEditDeleteButtons">
+          <template v-if="showEditDeleteButtons && !$slots.operations">
             <el-button
               :disabled="permissions?.canEdit === false"
               type="text"
@@ -55,7 +57,7 @@
             </el-button>
           </template>
           <!-- 审核模式 -->
-          <template v-if="showAuditButton">
+          <template v-if="showAuditButton && !$slots.operations">
             <el-button
               :disabled="permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'"
               type="text"
@@ -85,7 +87,7 @@
       <el-table-column type="expand">
         <template #default="scope">
           <div v-for="item in tableLabel" :key="item.prop" class="mobile-card-content">
-            <p v-if="item.prop !== 'name'">{{ item.label }}: {{ scope.row[item.prop] }}</p>
+            <p v-if="item.prop !== mobileDisplayProp">{{ item.label }}: {{ scope.row[item.prop] }}</p>
           </div>
           <!-- 状态信息（移动端展开时显示） -->
           <p v-if="statusColumn" class="mobile-card-content">
@@ -93,7 +95,7 @@
           </p>
         </template>
       </el-table-column>
-      <el-table-column label="姓名" prop="name" />
+      <el-table-column :label="mobileDisplayLabel" :prop="mobileDisplayProp" />
       <!-- 状态标签列（移动端） -->
       <el-table-column
         v-if="statusColumn"
@@ -106,10 +108,12 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="150">
+      <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
+          <!-- 自定义操作插槽 -->
+          <slot name="operations" :row="scope.row"></slot>
           <!-- 审核模式 -->
-          <template v-if="showAuditButton">
+          <template v-if="showAuditButton && !$slots.operations">
             <el-button
               :disabled="permissions?.canAudit !== true || scope.row[statusColumnProp] !== '待审核'"
               type="text"
@@ -130,7 +134,7 @@
             </el-button>
           </template>
           <!-- 编辑删除模式（默认） -->
-          <template v-if="showEditDeleteButtons">
+          <template v-if="showEditDeleteButtons && !$slots.operations">
             <el-button type="text" @click="handleEdit(scope.row)" size="small"> 编辑 </el-button>
             <el-button
               type="text"
@@ -233,6 +237,7 @@ const props = defineProps<{
   statusColumn?: StatusColumn | null
   statusTagTypes?: Record<string, string>
   permissions?: Permissions
+  mobileDisplayProp?: string // 移动端主显示字段 prop
 }>()
 
 //表格数据
@@ -252,6 +257,27 @@ const showAuditButton = computed(() => props.operationMode === 'audit')
 const showEditDeleteButtons = computed(
   () => props.operationMode === 'edit-delete' || props.operationMode === undefined
 )
+
+// 移动端主显示字段
+const mobileDisplayProp = computed(() => {
+  // 如果指定了，使用指定的字段
+  if (props.mobileDisplayProp) {
+    return props.mobileDisplayProp
+  }
+  // 否则自动检测：优先查找常见的主字段
+  const propList = props.tableLabel.map(item => item.prop)
+  if (propList.includes('groupName')) return 'groupName'
+  if (propList.includes('userName')) return 'userName'
+  if (propList.includes('name')) return 'name'
+  // 如果都没找到，使用第一个字段
+  return props.tableLabel[0]?.prop || 'name'
+})
+
+// 移动端主显示标签
+const mobileDisplayLabel = computed(() => {
+  const item = props.tableLabel.find(item => item.prop === mobileDisplayProp.value)
+  return item?.label || '名称'
+})
 
 // 类型安全的状态标签类型获取
 const statusTagTypes = computed(

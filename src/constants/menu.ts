@@ -11,6 +11,7 @@ export const MENU_ROLES: Record<string, UserRole[]> = {
   '1-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER'], // 对象管理
   '1-2': ['SUPER_ADMIN', 'ADMIN'], // 用户管理
   '1-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 审核管理
+  '1-4': ['SUPER_ADMIN', 'ADMIN'], // 审核组管理
 
   // 菜单
   '2-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 首页

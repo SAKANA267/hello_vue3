@@ -84,6 +84,16 @@ const routes = [
         }
       },
       {
+        path: '/auditGroupManagement',
+        name: 'auditGroupManagement',
+        component: () => import('@/views/AuditGroupManagement.vue'),
+        meta: {
+          title: '审核组管理',
+          roles: MENU_ROLES['1-4'],
+          menuIndex: '1-4'
+        }
+      },
+      {
         path: '/quickStart',
         name: 'quickStart',
         component: () => import('@/views/ToDo.vue'),

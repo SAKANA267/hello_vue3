@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AuditDialog: typeof import('./src/components/AuditDialog.vue')['default']
+    AuditGroupMemberDialog: typeof import('./src/components/AuditGroupMemberDialog.vue')['default']
     ChatInput: typeof import('./src/components/ai/ChatInput.vue')['default']
     ChatMessage: typeof import('./src/components/ai/ChatMessage.vue')['default']
     ChatSidebar: typeof import('./src/components/ai/ChatSidebar.vue')['default']
@@ -21,6 +22,7 @@ declare module 'vue' {
     CreateFormDialog: typeof import('./src/components/ai/CreateFormDialog.vue')['default']
     DeleteConfirmDialog: typeof import('./src/components/ai/DeleteConfirmDialog.vue')['default']
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']

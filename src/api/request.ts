@@ -6,6 +6,7 @@ HTTP 请求模块 - 后端 API 对接版本
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 import type { RequestConfig } from './types'
 import { authApi } from './api'
+import { useAllDataStore } from '@/stores/index.js'
 
 // 扩展 Axios 配置以支持 metadata
 interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
@@ -96,6 +97,10 @@ service.interceptors.response.use(
 
           // 更新用户信息
           localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.userInfo))
+
+          // 同步更新 Pinia store (关键修复)
+          const store = useAllDataStore()
+          store.setAuth(res.accessToken, res.refreshToken, res.userInfo)
 
           // 更新请求头
           if (originalRequest.headers) {

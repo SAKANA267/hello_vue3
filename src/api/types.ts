@@ -322,3 +322,82 @@ export interface MockResponse<T = unknown> {
 export interface ParsedParams extends PageParams {
   [key: string]: unknown
 }
+
+// ============== 审核组管理 (RESTful) ==============
+
+/** 审核组状态枚举 */
+export type AuditGroupStatusEnum = 'ACTIVE' | 'INACTIVE'
+
+/** 审核组DTO */
+export interface AuditGroupDTO {
+  id: string
+  groupName: string
+  groupCode: string
+  description?: string
+  leaderId?: string
+  leaderName?: string
+  status: AuditGroupStatusEnum
+  memberCount: number
+  createTime: string
+  updateTime?: string
+}
+
+/** 创建审核组请求 */
+export interface CreateAuditGroupRequest {
+  groupName: string
+  groupCode: string
+  description?: string
+  leaderId?: string
+  status?: AuditGroupStatusEnum
+}
+
+/** 更新审核组请求 */
+export interface UpdateAuditGroupRequest {
+  groupName?: string
+  description?: string
+  leaderId?: string
+  status?: AuditGroupStatusEnum
+}
+
+/** 审核组分页参数 */
+export interface AuditGroupPageParams {
+  page?: number
+  size?: number
+  keyword?: string
+  status?: AuditGroupStatusEnum
+}
+
+/** 审核组成员DTO */
+export interface AuditGroupMemberDTO {
+  userId: string
+  username: string
+  name: string
+  email?: string
+  phone?: string
+  role: string
+  status: string
+  joinTime: string
+}
+
+/** 添加组成员请求 */
+export interface AddGroupMembersRequest {
+  groupId: string
+  userIds: string[]
+}
+
+/** 移除组成员请求 */
+export interface RemoveGroupMembersRequest {
+  groupId: string
+  userIds: string[]
+}
+
+/** 用户审核组信息DTO */
+export interface UserAuditGroupDTO {
+  groupId: string
+  groupName: string
+  groupCode: string
+  description?: string
+  status: AuditGroupStatusEnum
+  isLeader: boolean
+  joinTime: string
+}

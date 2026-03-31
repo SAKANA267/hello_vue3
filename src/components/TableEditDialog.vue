@@ -54,6 +54,14 @@
           value-format="YYYY-MM-DD"
           placeholder="请选择日期"
         />
+        <el-input
+          v-else-if="field.type === 'textarea'"
+          type="textarea"
+          :rows="3"
+          v-model="form[field.prop]"
+          :placeholder="field.placeholder || '请输入'"
+          :disabled="field.disabled"
+        />
       </el-form-item>
     </el-form>
     <template #footer>

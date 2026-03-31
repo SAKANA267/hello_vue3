@@ -2,6 +2,7 @@ import Mock from 'mockjs'
 import userInfoApi from './mockData/userInfo'
 import userApi from './mockData/userManagement'
 import reportCardApi from './mockData/reportCard'
+import registerAuditGroupMock from './mockData/auditGroup'
 import './mockData/permission' // Mock 已在文件内部注册
 
 // 登录接口始终使用 Mock（混合模式支持）
@@ -40,4 +41,8 @@ if (import.meta.env.VITE_MOCK !== 'false') {
   Mock.mock(RegExp('/api/report-cards/[\\w-]+/withdraw'), 'put', reportCardApi.withdrawReportCard)
   Mock.mock('/api/report-cards/pending', 'get', reportCardApi.getPendingReportCards)
   Mock.mock('/api/report-cards/statistics', 'get', reportCardApi.getReportCardStatistics)
+
+  // AuditGroup Management.vue
+  // ========== RESTful API 端点 ==========
+  registerAuditGroupMock()
 }
