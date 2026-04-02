@@ -94,6 +94,26 @@ const routes = [
         }
       },
       {
+        path: '/diseaseCategory',
+        name: 'diseaseCategory',
+        component: () => import('@/views/DiseaseManagement/DiseaseCategory.vue'),
+        meta: {
+          title: '疾病分类管理',
+          roles: MENU_ROLES['1-5'],
+          menuIndex: '1-5'
+        }
+      },
+      {
+        path: '/diseaseType',
+        name: 'diseaseType',
+        component: () => import('@/views/DiseaseManagement/DiseaseType.vue'),
+        meta: {
+          title: '疾病种类管理',
+          roles: MENU_ROLES['1-6'],
+          menuIndex: '1-6'
+        }
+      },
+      {
         path: '/quickStart',
         name: 'quickStart',
         component: () => import('@/views/ToDo.vue'),

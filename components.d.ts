@@ -10,6 +10,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     AuditDialog: typeof import('./src/components/AuditDialog.vue')['default']
     AuditGroupMemberDialog: typeof import('./src/components/AuditGroupMemberDialog.vue')['default']
+    CascadedSelector: typeof import('./src/components/DiseaseManagement/CascadedSelector.vue')['default']
+    CategoryDialog: typeof import('./src/components/DiseaseManagement/CategoryDialog.vue')['default']
     ChatInput: typeof import('./src/components/ai/ChatInput.vue')['default']
     ChatMessage: typeof import('./src/components/ai/ChatMessage.vue')['default']
     ChatSidebar: typeof import('./src/components/ai/ChatSidebar.vue')['default']
@@ -21,11 +23,10 @@ declare module 'vue' {
     ContributionGraph: typeof import('./src/components/ContributionGraph.vue')['default']
     CreateFormDialog: typeof import('./src/components/ai/CreateFormDialog.vue')['default']
     DeleteConfirmDialog: typeof import('./src/components/ai/DeleteConfirmDialog.vue')['default']
+    DiseaseDialog: typeof import('./src/components/DiseaseManagement/DiseaseDialog.vue')['default']
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
-    ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
-    ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -44,6 +45,7 @@ declare module 'vue' {
     ElHeader: typeof import('element-plus/es')['ElHeader']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
     ElLink: typeof import('element-plus/es')['ElLink']
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']
@@ -57,9 +59,8 @@ declare module 'vue' {
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSkeleton: typeof import('element-plus/es')['ElSkeleton']
-    ElSkeletonItem: typeof import('element-plus/es')['ElSkeletonItem']
-    ElSpan: typeof import('element-plus/es')['ElSpan']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
@@ -67,6 +68,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     EmptyState: typeof import('./src/components/ai/EmptyState.vue')['default']
+    InfectiousBadge: typeof import('./src/components/DiseaseManagement/InfectiousBadge.vue')['default']
     MarkdownRenderer: typeof import('./src/components/MarkdownRenderer.vue')['default']
     PermissionButton: typeof import('./src/components/PermissionButton.vue')['default']
     QuickActions: typeof import('./src/components/dashboard/QuickActions.vue')['default']
@@ -80,5 +82,8 @@ declare module 'vue' {
     TrendChart: typeof import('./src/components/dashboard/TrendChart.vue')['default']
     TypingIndicator: typeof import('./src/components/ai/TypingIndicator.vue')['default']
     UserInfo: typeof import('./src/components/UserInfo.vue')['default']
+  }
+  export interface GlobalDirectives {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }

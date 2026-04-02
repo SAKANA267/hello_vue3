@@ -71,7 +71,9 @@ const allMenuItems = [
       { index: '1-1', title: '对象管理', route: '/objectManagement', menuIndex: '1-1' },
       { index: '1-2', title: '用户管理', route: '/userManagement', menuIndex: '1-2' },
       { index: '1-3', title: '审核管理', route: '/auditManagement', menuIndex: '1-3' },
-      { index: '1-4', title: '审核组管理', route: '/auditGroupManagement', menuIndex: '1-4' }
+      { index: '1-4', title: '审核组管理', route: '/auditGroupManagement', menuIndex: '1-4' },
+      { index: '1-5', title: '疾病分类管理', route: '/diseaseCategory', menuIndex: '1-5' },
+      { index: '1-6', title: '疾病种类管理', route: '/diseaseType', menuIndex: '1-6' }
     ]
   },
   {
