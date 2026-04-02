@@ -185,13 +185,15 @@ export interface SessionDTO {
 
 /** 消息列表项（后端 MessageDTO） */
 export interface MessageDTO {
-  messageId: string
+  id: string // 后端返回 id 字段
+  messageId?: string // 兼容旧格式
   sessionId: string
   role: 'user' | 'assistant' | 'system'
   content: string
   messageType: 'text' | 'action' | 'error'
   metadata?: string // JSON string
-  createdAt: number
+  timestamp: number // 后端返回 timestamp 字段
+  createdAt?: number // 兼容旧格式
 }
 
 /** 会话列表响应（后端直接返回数组） */

@@ -1,11 +1,7 @@
 <template>
   <div class="chat-message" :class="message.role">
-    <div class="message-avatar">
-      <img v-if="message.role === 'assistant'" :src="aiAvatar" />
-      <span v-else class="user-avatar-icon">{{ userInitial }}</span>
-    </div>
     <div class="message-content">
-      <div class="message-text" v-if="message.type === 'text' || message.type === 'error'">
+      <div class="message-text" v-if="message.type === 'text' || message.type === 'error' || message.type === 'action'">
         <span v-if="message.role === 'user'">{{ message.content }}</span>
         <div v-else v-html="renderedContent" class="markdown-body"></div>
       </div>
@@ -84,10 +80,6 @@ const renderedContent = computed(() => {
   return props.message.content
 })
 
-const aiAvatar = computed(() => new URL('../../assets/images/user.svg', import.meta.url).href)
-
-const userInitial = computed(() => 'A')
-
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp)
   const hours = date.getHours().toString().padStart(2, '0')
@@ -111,56 +103,29 @@ function handleCreateError(message: string) {
 <style scoped lang="less">
 .chat-message {
   display: flex;
-  gap: 12px;
   margin-bottom: 24px;
 
   &.user {
-    flex-direction: row-reverse;
-
-    .message-content {
-      align-items: flex-end;
-    }
+    justify-content: flex-end;
 
     .message-text {
       background: #f4f4f4;
       color: #303133;
     }
+
+    .message-time {
+      text-align: right;
+    }
   }
 
   &.assistant {
-    .message-content {
-      align-items: flex-start;
-    }
+    justify-content: flex-start;
 
     .message-text {
       background: #fff;
       color: #303133;
       border: 1px solid #e5e5e5;
     }
-  }
-}
-
-.message-avatar {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-  }
-
-  .user-avatar-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background: #409eff;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 16px;
   }
 }
 

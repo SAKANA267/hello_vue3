@@ -50,11 +50,12 @@ export const useAiChatStore = defineStore('aiChat', () => {
       const session = sessions.value.find(s => s.id === sessionId)
       if (session) {
         // Convert MessageDTO to ChatMessage
+        // Note: Backend returns 'id' and 'timestamp', not 'messageId' and 'createdAt'
         session.messages = response.messages.map(msg => ({
-          id: msg.messageId,
+          id: (msg as any).id || msg.messageId,
           role: msg.role,
           content: msg.content,
-          timestamp: msg.createdAt,
+          timestamp: (msg as any).timestamp || msg.createdAt,
           type: msg.messageType as any
         }))
         saveToStorage()
