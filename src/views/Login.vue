@@ -87,7 +87,7 @@ const handleLogin = async () => {
         store.setAuth(res.accessToken, res.refreshToken, res.userInfo)
 
         ElMessage.success('登录成功')
-        router.push('/dashboard')
+        router.push('/home/dashboard')
       } catch (error: any) {
         ElMessage.error(error.message || '登录失败')
       } finally {

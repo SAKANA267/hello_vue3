@@ -15,7 +15,7 @@ function initState() {
     tags: [
       {
         name: 'dashboard',
-        path: '/dashboard',
+        path: '/home/dashboard',
         label: '首页',
         icon: ''
       }
@@ -33,8 +33,8 @@ export const useAllDataStore = defineStore('allData', () => {
 
   // CommonAside.vue tags 标签栏操作
   function selectMenu(val) {
-    //传入值为对象 eg：index: '1-1', title: '对象管理', route: '/objectManagement'
-    if (val.route !== '/dashboard') {
+    //传入值为对象 eg：index: '1-1', title: '对象管理', route: '/home/objectManagement'
+    if (val.route !== '/home/dashboard') {
       // 检查标签是否已存在
       const index = state.value.tags.findIndex(item => item.path === val.route)
       if (index === -1) {
@@ -89,7 +89,7 @@ export const useAllDataStore = defineStore('allData', () => {
     state.value.refreshToken = ''
     state.value.user = null
     state.value.menuList = []
-    state.value.tags = [{ name: 'dashboard', path: '/dashboard', label: '主页', icon: '' }]
+    state.value.tags = [{ name: 'dashboard', path: '/home/dashboard', label: '主页', icon: '' }]
     state.value.currentMenu = null
 
     localStorage.removeItem(ACCESS_TOKEN_KEY)

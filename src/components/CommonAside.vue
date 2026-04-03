@@ -68,12 +68,12 @@ const allMenuItems = [
     title: '导航',
     icon: markRaw(Location),
     children: [
-      { index: '1-1', title: '对象管理', route: '/objectManagement', menuIndex: '1-1' },
-      { index: '1-2', title: '用户管理', route: '/userManagement', menuIndex: '1-2' },
-      { index: '1-3', title: '审核管理', route: '/auditManagement', menuIndex: '1-3' },
-      { index: '1-4', title: '审核组管理', route: '/auditGroupManagement', menuIndex: '1-4' },
-      { index: '1-5', title: '疾病分类管理', route: '/diseaseCategory', menuIndex: '1-5' },
-      { index: '1-6', title: '疾病种类管理', route: '/diseaseType', menuIndex: '1-6' }
+      { index: '1-1', title: '对象管理', route: '/home/objectManagement', menuIndex: '1-1' },
+      { index: '1-2', title: '用户管理', route: '/home/userManagement', menuIndex: '1-2' },
+      { index: '1-3', title: '审核管理', route: '/home/auditManagement', menuIndex: '1-3' },
+      { index: '1-4', title: '审核组管理', route: '/home/auditGroupManagement', menuIndex: '1-4' },
+      { index: '1-5', title: '疾病分类管理', route: '/home/diseaseCategory', menuIndex: '1-5' },
+      { index: '1-6', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-6' }
     ]
   },
   {
@@ -81,9 +81,9 @@ const allMenuItems = [
     title: '菜单',
     icon: markRaw(IconMenu),
     children: [
-      { index: '2-1', title: '首页', route: '/dashboard', menuIndex: '2-1' },
-      { index: '2-2', title: '个人资料', route: '/profile', menuIndex: '2-2' },
-      { index: '2-3', title: '登录历史', route: '/loginHistory', menuIndex: '2-3' }
+      { index: '2-1', title: '首页', route: '/home/dashboard', menuIndex: '2-1' },
+      { index: '2-2', title: '个人资料', route: '/home/profile', menuIndex: '2-2' },
+      { index: '2-3', title: '登录历史', route: '/home/loginHistory', menuIndex: '2-3' }
     ]
   },
   {
@@ -91,8 +91,8 @@ const allMenuItems = [
     title: '文档',
     icon: markRaw(Document),
     children: [
-      { index: '3-1', title: '快速开始', route: '/quickStart', menuIndex: '3-1' },
-      { index: '3-2', title: 'API 文档', route: '/apiDocs', menuIndex: '3-2' }
+      { index: '3-1', title: '快速开始', route: '/home/quickStart', menuIndex: '3-1' },
+      { index: '3-2', title: 'API 文档', route: '/home/apiDocs', menuIndex: '3-2' }
     ]
   },
   {
@@ -100,16 +100,16 @@ const allMenuItems = [
     title: '其他',
     icon: markRaw(MoreFilled),
     children: [
-      { index: '4-1', title: '设置', route: '/settings', menuIndex: '4-1' },
-      { index: '4-2', title: '帮助', route: '/help', menuIndex: '4-2' },
-      { index: '4-3', title: '测试页面', route: '/test', menuIndex: '4-3' }
+      { index: '4-1', title: '设置', route: '/home/settings', menuIndex: '4-1' },
+      { index: '4-2', title: '帮助', route: '/home/help', menuIndex: '4-2' },
+      { index: '4-3', title: '测试页面', route: '/home/test', menuIndex: '4-3' }
     ]
   },
   {
     index: '5',
     title: 'AI 助手',
     icon: markRaw(ChatDotRound),
-    children: [{ index: '5-1', title: 'AI 助手', route: '/aiAssistant', menuIndex: '5-1' }]
+    children: [{ index: '5-1', title: 'AI 助手', route: '/home/aiAssistant', menuIndex: '5-1' }]
   }
 ]
 

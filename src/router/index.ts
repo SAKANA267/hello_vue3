@@ -21,10 +21,11 @@ const routes = [
   {
     path: '/home',
     name: 'Home',
+    redirect: '/home/dashboard',
     component: () => import('@/views/Home.vue'),
     children: [
       {
-        path: '/dashboard',
+        path: 'dashboard',
         name: 'dashboard',
         component: () => import('@/views/Dashboard.vue'),
         meta: {
@@ -34,7 +35,7 @@ const routes = [
         }
       },
       {
-        path: '/profile',
+        path: 'profile',
         name: 'profile',
         component: () => import('@/views/Profile.vue'),
         meta: {
@@ -44,7 +45,7 @@ const routes = [
         }
       },
       {
-        path: '/loginHistory',
+        path: 'loginHistory',
         name: 'loginHistory',
         component: () => import('@/views/LoginHistory.vue'),
         meta: {
@@ -54,7 +55,7 @@ const routes = [
         }
       },
       {
-        path: '/objectManagement',
+        path: 'objectManagement',
         name: 'objectManagement',
         component: () => import('@/views/ObjectManagement.vue'),
         meta: {
@@ -64,7 +65,7 @@ const routes = [
         }
       },
       {
-        path: '/userManagement',
+        path: 'userManagement',
         name: 'userManagement',
         component: () => import('@/views/UserManagement.vue'),
         meta: {
@@ -74,7 +75,7 @@ const routes = [
         }
       },
       {
-        path: '/auditManagement',
+        path: 'auditManagement',
         name: 'auditManagement',
         component: () => import('@/views/ObjectAudit.vue'),
         meta: {
@@ -84,7 +85,7 @@ const routes = [
         }
       },
       {
-        path: '/auditGroupManagement',
+        path: 'auditGroupManagement',
         name: 'auditGroupManagement',
         component: () => import('@/views/AuditGroupManagement.vue'),
         meta: {
@@ -94,7 +95,7 @@ const routes = [
         }
       },
       {
-        path: '/diseaseCategory',
+        path: 'diseaseCategory',
         name: 'diseaseCategory',
         component: () => import('@/views/DiseaseManagement/DiseaseCategory.vue'),
         meta: {
@@ -104,7 +105,7 @@ const routes = [
         }
       },
       {
-        path: '/diseaseType',
+        path: 'diseaseType',
         name: 'diseaseType',
         component: () => import('@/views/DiseaseManagement/DiseaseType.vue'),
         meta: {
@@ -114,7 +115,7 @@ const routes = [
         }
       },
       {
-        path: '/quickStart',
+        path: 'quickStart',
         name: 'quickStart',
         component: () => import('@/views/ToDo.vue'),
         meta: {
@@ -124,7 +125,7 @@ const routes = [
         }
       },
       {
-        path: '/apiDocs',
+        path: 'apiDocs',
         name: 'apiDocs',
         component: () => import('@/views/ApiDocs.vue'),
         meta: {
@@ -134,7 +135,7 @@ const routes = [
         }
       },
       {
-        path: '/settings',
+        path: 'settings',
         name: 'settings',
         component: () => import('@/views/ToDo.vue'),
         meta: {
@@ -144,7 +145,7 @@ const routes = [
         }
       },
       {
-        path: '/help',
+        path: 'help',
         name: 'help',
         component: () => import('@/views/ToDo.vue'),
         meta: {
@@ -154,7 +155,7 @@ const routes = [
         }
       },
       {
-        path: '/test',
+        path: 'test',
         name: 'test',
         component: () => import('@/views/Test.vue'),
         meta: {
@@ -164,7 +165,7 @@ const routes = [
         }
       },
       {
-        path: '/aiAssistant',
+        path: 'aiAssistant',
         name: 'aiAssistant',
         component: () => import('@/views/AiAssistant.vue'),
         meta: {

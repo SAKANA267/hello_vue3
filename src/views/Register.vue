@@ -136,7 +136,7 @@ const handleRegister = async () => {
         store.setAuth(res.accessToken, res.refreshToken, res.userInfo)
 
         ElMessage.success('注册成功')
-        router.push('/dashboard')
+        router.push('/home/dashboard')
       } catch (error: any) {
         ElMessage.error(error.message || '注册失败')
       } finally {
