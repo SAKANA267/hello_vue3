@@ -14,7 +14,7 @@
         :table-label="tableLabel"
         :get-api="getReportCardsWrapper"
         operation-mode="audit"
-        :status-column="{ prop: 'status', label: '状态' }"
+        :status-column="{ prop: 'auditStatus', label: '审核状态' }"
         :status-tag-types="statusTagTypes"
         :permissions="{
           canAudit: hasPermission('audit:approve'),

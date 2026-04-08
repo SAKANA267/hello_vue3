@@ -8,11 +8,20 @@ const GENDER_MAP: Record<string, string> = {
   FEMALE: '女'
 }
 
-/** 后端状态枚举 → 前端显示 */
-const STATUS_MAP: Record<string, string> = {
+/** 后端审核状态枚举 → 前端显示 (原 status) */
+const AUDIT_STATUS_MAP: Record<string, string> = {
   PENDING: '待审核',
   APPROVED: '已审核',
   REJECTED: '审核不通过'
+}
+
+/** 后端分配状态枚举 → 前端显示 (新增) */
+const ASSIGN_STATUS_MAP: Record<string, string> = {
+  UNASSIGNED: '未分配',
+  ASSIGNED: '已分配',
+  IN_PROGRESS: '处理中',
+  COMPLETED: '已完成',
+  VOID: '已作废'
 }
 
 /** 前端显示 → 后端性别枚举 */
@@ -21,11 +30,20 @@ const GENDER_REVERSE: Record<string, string> = {
   女: 'FEMALE'
 }
 
-/** 前端显示 → 后端状态枚举 */
-const STATUS_REVERSE: Record<string, string> = {
+/** 前端显示 → 后端审核状态枚举 (原 status) */
+const AUDIT_STATUS_REVERSE: Record<string, string> = {
   待审核: 'PENDING',
   已审核: 'APPROVED',
   审核不通过: 'REJECTED'
+}
+
+/** 前端显示 → 后端分配状态枚举 (新增) */
+const ASSIGN_STATUS_REVERSE: Record<string, string> = {
+  未分配: 'UNASSIGNED',
+  已分配: 'ASSIGNED',
+  处理中: 'IN_PROGRESS',
+  已完成: 'COMPLETED',
+  已作废: 'VOID'
 }
 
 // ============== 枚举转换函数 ==============
@@ -40,12 +58,21 @@ export function formatGenderForDisplay(gender: string): string {
 }
 
 /**
- * 将后端状态枚举转换为前端显示文本
- * @param status - PENDING | APPROVED | REJECTED
+ * 将后端审核状态枚举转换为前端显示文本
+ * @param auditStatus - PENDING | APPROVED | REJECTED
  * @returns 待审核 | 已审核 | 审核不通过
  */
-export function formatStatusForDisplay(status: string): string {
-  return STATUS_MAP[status] || status
+export function formatAuditStatusForDisplay(auditStatus: string): string {
+  return AUDIT_STATUS_MAP[auditStatus] || auditStatus
+}
+
+/**
+ * 将后端分配状态枚举转换为前端显示文本 (新增)
+ * @param assignStatus - UNASSIGNED | ASSIGNED | IN_PROGRESS | COMPLETED | VOID
+ * @returns 未分配 | 已分配 | 处理中 | 已完成 | 已作废
+ */
+export function formatAssignStatusForDisplay(assignStatus: string): string {
+  return ASSIGN_STATUS_MAP[assignStatus] || assignStatus
 }
 
 /**
@@ -58,12 +85,21 @@ export function parseGenderFromDisplay(display: string): string {
 }
 
 /**
- * 将前端显示文本转换为后端状态枚举
+ * 将前端显示文本转换为后端审核状态枚举
  * @param display - 待审核 | 已审核 | 审核不通过
  * @returns PENDING | APPROVED | REJECTED
  */
-export function parseStatusFromDisplay(display: string): string {
-  return STATUS_REVERSE[display] || display
+export function parseAuditStatusFromDisplay(display: string): string {
+  return AUDIT_STATUS_REVERSE[display] || display
+}
+
+/**
+ * 将前端显示文本转换为后端分配状态枚举 (新增)
+ * @param display - 未分配 | 已分配 | 处理中 | 已完成 | 已作废
+ * @returns UNASSIGNED | ASSIGNED | IN_PROGRESS | COMPLETED | VOID
+ */
+export function parseAssignStatusFromDisplay(display: string): string {
+  return ASSIGN_STATUS_REVERSE[display] || display
 }
 
 // ============== 数据转换函数 ==============
@@ -76,9 +112,11 @@ export function transformReportCardForDisplay(dto: ReportCardDTO) {
   return {
     ...dto,
     gender: formatGenderForDisplay(dto.gender),
-    status: formatStatusForDisplay(dto.status),
+    auditStatus: formatAuditStatusForDisplay(dto.auditStatus), // 原 status 改为 auditStatus
+    assignStatus: formatAssignStatusForDisplay(dto.assignStatus), // 新增分配状态转换
     auditDate: dto.auditDate ? dto.auditDate.split('T')[0] : '-',
-    auditor: dto.auditor || '-'
+    auditor: dto.auditor || '-',
+    assigneeName: dto.assigneeName || '-' // 新增分配人显示
   }
 }
 
@@ -109,11 +147,11 @@ export function transformFormDataForUpdate(formData: Record<string, any>) {
 // ============== UI 辅助函数 ==============
 
 /**
- * 获取状态对应的 Element Plus Tag 类型
- * @param status - 前端或后端状态值
+ * 获取审核状态对应的 Element Plus Tag 类型
+ * @param auditStatus - 前端或后端审核状态值
  * @returns warning | success | danger | info
  */
-export function getStatusTagType(status: string): string {
+export function getAuditStatusTagType(auditStatus: string): string {
   const map: Record<string, string> = {
     待审核: 'warning',
     PENDING: 'warning',
@@ -122,5 +160,34 @@ export function getStatusTagType(status: string): string {
     审核不通过: 'danger',
     REJECTED: 'danger'
   }
-  return map[status] || 'info'
+  return map[auditStatus] || 'info'
+}
+
+/**
+ * 获取分配状态对应的 Element Plus Tag 类型 (新增)
+ * @param assignStatus - 前端或后端分配状态值
+ * @returns info | primary | success | warning
+ */
+export function getAssignStatusTagType(assignStatus: string): string {
+  const map: Record<string, string> = {
+    未分配: 'info',
+    UNASSIGNED: 'info',
+    已分配: 'primary',
+    ASSIGNED: 'primary',
+    处理中: 'primary',
+    IN_PROGRESS: 'primary',
+    已完成: 'success',
+    COMPLETED: 'success',
+    已作废: 'warning',
+    VOID: 'warning'
+  }
+  return map[assignStatus] || 'info'
+}
+
+/**
+ * @deprecated 使用 getAuditStatusTagType 替代
+ * 获取状态对应的 Element Plus Tag 类型 (兼容旧代码)
+ */
+export function getStatusTagType(status: string): string {
+  return getAuditStatusTagType(status)
 }

@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AssignmentDialog: typeof import('./src/components/AssignmentDialog.vue')['default']
     AuditDialog: typeof import('./src/components/AuditDialog.vue')['default']
     AuditGroupMemberDialog: typeof import('./src/components/AuditGroupMemberDialog.vue')['default']
     CascadedSelector: typeof import('./src/components/DiseaseManagement/CascadedSelector.vue')['default']
@@ -27,6 +28,7 @@ declare module 'vue' {
     DistributionList: typeof import('./src/components/dashboard/DistributionList.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
+    ElBadge: typeof import('element-plus/es')['ElBadge']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -52,6 +54,7 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
+    ElProgress: typeof import('element-plus/es')['ElProgress']
     ElRadio: typeof import('element-plus/es')['ElRadio']
     ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']

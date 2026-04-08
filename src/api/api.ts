@@ -32,7 +32,26 @@ import type {
   AuditGroupPageParams,
   AuditGroupMemberDTO,
   AddGroupMembersRequest,
-  RemoveGroupMembersRequest
+  RemoveGroupMembersRequest,
+  // Assignment types
+  AssignmentDTO,
+  AssignTaskRequest,
+  AutoAssignRequest,
+  AcceptTaskRequest,
+  CompleteTaskRequest,
+  CancelTaskRequest,
+  ReassignTaskRequest,
+  AssignmentPageParams,
+  // AssignmentRule types
+  AssignmentRuleDTO,
+  CreateAssignmentRuleRequest,
+  UpdateAssignmentRuleRequest,
+  AssignmentRulePageParams,
+  // WorkStats types
+  WorkStatsDTO,
+  // AssignmentLog types
+  AssignmentLogDTO,
+  AssignmentLogPageParams
 } from './types'
 
 // ============== 认证 API ==============
@@ -291,6 +310,31 @@ export const reportCardApi = {
       url: '/report-cards/statistics',
       method: 'get'
     })
+  },
+
+  /** 获取未分配的报告卡列表 (用于任务分配) */
+  getUnassignedReportCards(params?: {
+    page?: number
+    size?: number
+    keyword?: string
+    diseaseCategory?: string
+    hospitalArea?: string
+    department?: string
+  }): Promise<RestfulPageResponse<ReportCardDTO>> {
+    return request({
+      url: '/report-cards/unassigned',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 根据分配状态查询报告卡列表 (新增) */
+  getReportCardsByAssignStatus(assignStatus: string, params?: Omit<ReportCardPageParams, 'assignStatus'>): Promise<RestfulPageResponse<ReportCardDTO>> {
+    return request({
+      url: `/report-cards/assign-status/${assignStatus}`,
+      method: 'get',
+      params
+    })
   }
 }
 
@@ -428,6 +472,210 @@ export const auditGroupApi = {
   }
 }
 
+// ============== Task Assignment Management API ==============
+
+/** 任务分配 API */
+export const assignmentApi = {
+  /** 手动分配任务 */
+  assignTask(data: AssignTaskRequest): Promise<AssignmentDTO> {
+    return request({
+      url: '/assignments/assign',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 自动分配任务 */
+  autoAssign(data: AutoAssignRequest): Promise<AssignmentDTO> {
+    return request({
+      url: '/assignments/auto-assign',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 接受任务 */
+  acceptTask(data: AcceptTaskRequest): Promise<AssignmentDTO> {
+    return request({
+      url: `/assignments/${data.assignmentId}/accept`,
+      method: 'post',
+      data
+    })
+  },
+
+  /** 完成任务 */
+  completeTask(data: CompleteTaskRequest): Promise<AssignmentDTO> {
+    return request({
+      url: '/assignments/complete',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 取消任务 */
+  cancelTask(data: CancelTaskRequest): Promise<AssignmentDTO> {
+    return request({
+      url: '/assignments/cancel',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 重新分配任务 */
+  reassignTask(assignmentId: string, data: ReassignTaskRequest): Promise<AssignmentDTO> {
+    return request({
+      url: `/assignments/${assignmentId}/reassign`,
+      method: 'post',
+      params: { newAuditGroupId: data.newAuditGroupId },
+      data
+    })
+  },
+
+  /** 查询任务详情 */
+  getAssignmentById(assignmentId: string): Promise<AssignmentDTO> {
+    return request({
+      url: `/assignments/${assignmentId}`,
+      method: 'get'
+    })
+  },
+
+  /** 查询审核组任务列表 */
+  getGroupAssignments(auditGroupId: string, params?: AssignmentPageParams): Promise<RestfulPageResponse<AssignmentDTO>> {
+    return request({
+      url: `/assignments/group/${auditGroupId}`,
+      method: 'get',
+      params
+    })
+  },
+
+  /** 查询待处理任务 */
+  getPendingAssignments(params?: AssignmentPageParams): Promise<RestfulPageResponse<AssignmentDTO>> {
+    return request({
+      url: '/assignments/pending',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 查询即将超时任务 */
+  getOverdueAssignments(): Promise<AssignmentDTO[]> {
+    return request({
+      url: '/assignments/overdue',
+      method: 'get'
+    })
+  },
+
+  /** 查询报卡分配记录 */
+  getReportCardAssignments(reportCardId: string): Promise<AssignmentDTO[]> {
+    return request({
+      url: `/assignments/report-card/${reportCardId}`,
+      method: 'get'
+    })
+  },
+
+  /** 查询操作日志 */
+  getAssignmentLogs(assignmentId: string, params?: AssignmentLogPageParams): Promise<RestfulPageResponse<AssignmentLogDTO>> {
+    return request({
+      url: `/assignments/${assignmentId}/logs`,
+      method: 'get',
+      params
+    })
+  }
+}
+
+// ============== Assignment Rule Management API ==============
+
+/** 分配规则 API */
+export const assignmentRuleApi = {
+  /** 创建分配规则 */
+  createRule(data: CreateAssignmentRuleRequest): Promise<AssignmentRuleDTO> {
+    return request({
+      url: '/assignment-rules',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 更新分配规则 */
+  updateRule(ruleId: string, data: UpdateAssignmentRuleRequest): Promise<AssignmentRuleDTO> {
+    return request({
+      url: `/assignment-rules/${ruleId}`,
+      method: 'put',
+      data
+    })
+  },
+
+  /** 删除分配规则 */
+  deleteRule(ruleId: string): Promise<{ message: string }> {
+    return request({
+      url: `/assignment-rules/${ruleId}`,
+      method: 'delete'
+    })
+  },
+
+  /** 查询规则详情 */
+  getRuleById(ruleId: string): Promise<AssignmentRuleDTO> {
+    return request({
+      url: `/assignment-rules/${ruleId}`,
+      method: 'get'
+    })
+  },
+
+  /** 查询所有规则 */
+  getRules(params?: AssignmentRulePageParams): Promise<RestfulPageResponse<AssignmentRuleDTO>> {
+    return request({
+      url: '/assignment-rules',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 查询启用的规则 */
+  getActiveRules(): Promise<AssignmentRuleDTO[]> {
+    return request({
+      url: '/assignment-rules/active',
+      method: 'get'
+    })
+  },
+
+  /** 启用/停用规则 */
+  toggleRule(ruleId: string): Promise<AssignmentRuleDTO> {
+    return request({
+      url: `/assignment-rules/${ruleId}/toggle`,
+      method: 'post'
+    })
+  }
+}
+
+// ============== Work Statistics API ==============
+
+/** 工作统计 API */
+export const workStatsApi = {
+  /** 获取审核组工作统计 */
+  getGroupWorkStats(auditGroupId: string): Promise<WorkStatsDTO> {
+    return request({
+      url: `/work-stats/group/${auditGroupId}`,
+      method: 'get'
+    })
+  },
+
+  /** 获取所有审核组统计 */
+  getAllWorkStats(): Promise<WorkStatsDTO[]> {
+    return request({
+      url: '/work-stats/all',
+      method: 'get'
+    })
+  },
+
+  /** 获取任务最少的审核组 */
+  getLeastLoadedGroup(): Promise<string> {
+    return request({
+      url: '/work-stats/least-loaded',
+      method: 'get'
+    })
+  }
+}
+
 // ============== 通用 API (兼容旧代码) ==============
 
 /** API 接口对象 */
@@ -464,6 +712,15 @@ interface ApiInterface {
   withdrawReportCard(id: string): Promise<{ message: string }>
   getPendingReportCards(): Promise<ReportCardDTO[]>
   getReportCardStatistics(): Promise<{ PENDING: number; APPROVED: number; REJECTED: number }>
+  getUnassignedReportCards(params?: {
+    page?: number
+    size?: number
+    keyword?: string
+    diseaseCategory?: string
+    hospitalArea?: string
+    department?: string
+  }): Promise<RestfulPageResponse<ReportCardDTO>>
+  getReportCardsByAssignStatus(assignStatus: string, params?: Omit<ReportCardPageParams, 'assignStatus'>): Promise<RestfulPageResponse<ReportCardDTO>>
 
   // LoginHistory Management
   getLoginHistory(
@@ -489,6 +746,34 @@ interface ApiInterface {
   setAuditGroupLeader(id: string, leaderId: string): Promise<{ message: string }>
   checkGroupNameExists(groupName: string, excludeId?: string): Promise<boolean>
   checkGroupCodeExists(groupCode: string, excludeId?: string): Promise<boolean>
+
+  // Assignment Management
+  assignTask(data: AssignTaskRequest): Promise<AssignmentDTO>
+  autoAssign(data: AutoAssignRequest): Promise<AssignmentDTO>
+  acceptTask(data: AcceptTaskRequest): Promise<AssignmentDTO>
+  completeTask(data: CompleteTaskRequest): Promise<AssignmentDTO>
+  cancelTask(data: CancelTaskRequest): Promise<AssignmentDTO>
+  reassignTask(assignmentId: string, data: ReassignTaskRequest): Promise<AssignmentDTO>
+  getAssignmentById(assignmentId: string): Promise<AssignmentDTO>
+  getGroupAssignments(auditGroupId: string, params?: AssignmentPageParams): Promise<RestfulPageResponse<AssignmentDTO>>
+  getPendingAssignments(params?: AssignmentPageParams): Promise<RestfulPageResponse<AssignmentDTO>>
+  getOverdueAssignments(): Promise<AssignmentDTO[]>
+  getReportCardAssignments(reportCardId: string): Promise<AssignmentDTO[]>
+  getAssignmentLogs(assignmentId: string, params?: AssignmentLogPageParams): Promise<RestfulPageResponse<AssignmentLogDTO>>
+
+  // AssignmentRule Management
+  createAssignmentRule(data: CreateAssignmentRuleRequest): Promise<AssignmentRuleDTO>
+  updateAssignmentRule(ruleId: string, data: UpdateAssignmentRuleRequest): Promise<AssignmentRuleDTO>
+  deleteAssignmentRule(ruleId: string): Promise<{ message: string }>
+  getAssignmentRuleById(ruleId: string): Promise<AssignmentRuleDTO>
+  getAssignmentRules(params?: AssignmentRulePageParams): Promise<RestfulPageResponse<AssignmentRuleDTO>>
+  getActiveAssignmentRules(): Promise<AssignmentRuleDTO[]>
+  toggleAssignmentRule(ruleId: string): Promise<AssignmentRuleDTO>
+
+  // WorkStats Management
+  getGroupWorkStats(auditGroupId: string): Promise<WorkStatsDTO>
+  getAllWorkStats(): Promise<WorkStatsDTO[]>
+  getLeastLoadedGroup(): Promise<string>
 }
 
 /** 通用 API 对象 (兼容旧代码，内部调用新的 authApi/userApi/reportCardApi) */
@@ -603,6 +888,21 @@ const api: ApiInterface = {
     return reportCardApi.getReportCardStatistics()
   },
 
+  getUnassignedReportCards(params?: {
+    page?: number
+    size?: number
+    keyword?: string
+    diseaseCategory?: string
+    hospitalArea?: string
+    department?: string
+  }) {
+    return reportCardApi.getUnassignedReportCards(params)
+  },
+
+  getReportCardsByAssignStatus(assignStatus: string, params?: Omit<ReportCardPageParams, 'assignStatus'>) {
+    return reportCardApi.getReportCardsByAssignStatus(assignStatus, params)
+  },
+
   // ========== LoginHistory Management ==========
   getLoginHistory(params: LoginHistoryPageParams) {
     return authApi.getLoginHistory(params)
@@ -671,6 +971,97 @@ const api: ApiInterface = {
 
   checkGroupCodeExists(groupCode: string, excludeId?: string) {
     return auditGroupApi.checkGroupCodeExists(groupCode, excludeId)
+  },
+
+  // ========== Assignment Management ==========
+  assignTask(data: AssignTaskRequest) {
+    return assignmentApi.assignTask(data)
+  },
+
+  autoAssign(data: AutoAssignRequest) {
+    return assignmentApi.autoAssign(data)
+  },
+
+  acceptTask(data: AcceptTaskRequest) {
+    return assignmentApi.acceptTask(data)
+  },
+
+  completeTask(data: CompleteTaskRequest) {
+    return assignmentApi.completeTask(data)
+  },
+
+  cancelTask(data: CancelTaskRequest) {
+    return assignmentApi.cancelTask(data)
+  },
+
+  reassignTask(assignmentId: string, data: ReassignTaskRequest) {
+    return assignmentApi.reassignTask(assignmentId, data)
+  },
+
+  getAssignmentById(assignmentId: string) {
+    return assignmentApi.getAssignmentById(assignmentId)
+  },
+
+  getGroupAssignments(auditGroupId: string, params?: AssignmentPageParams) {
+    return assignmentApi.getGroupAssignments(auditGroupId, params)
+  },
+
+  getPendingAssignments(params?: AssignmentPageParams) {
+    return assignmentApi.getPendingAssignments(params)
+  },
+
+  getOverdueAssignments() {
+    return assignmentApi.getOverdueAssignments()
+  },
+
+  getReportCardAssignments(reportCardId: string) {
+    return assignmentApi.getReportCardAssignments(reportCardId)
+  },
+
+  getAssignmentLogs(assignmentId: string, params?: AssignmentLogPageParams) {
+    return assignmentApi.getAssignmentLogs(assignmentId, params)
+  },
+
+  // ========== AssignmentRule Management ==========
+  createAssignmentRule(data: CreateAssignmentRuleRequest) {
+    return assignmentRuleApi.createRule(data)
+  },
+
+  updateAssignmentRule(ruleId: string, data: UpdateAssignmentRuleRequest) {
+    return assignmentRuleApi.updateRule(ruleId, data)
+  },
+
+  deleteAssignmentRule(ruleId: string) {
+    return assignmentRuleApi.deleteRule(ruleId)
+  },
+
+  getAssignmentRuleById(ruleId: string) {
+    return assignmentRuleApi.getRuleById(ruleId)
+  },
+
+  getAssignmentRules(params?: AssignmentRulePageParams) {
+    return assignmentRuleApi.getRules(params)
+  },
+
+  getActiveAssignmentRules() {
+    return assignmentRuleApi.getActiveRules()
+  },
+
+  toggleAssignmentRule(ruleId: string) {
+    return assignmentRuleApi.toggleRule(ruleId)
+  },
+
+  // ========== WorkStats Management ==========
+  getGroupWorkStats(auditGroupId: string) {
+    return workStatsApi.getGroupWorkStats(auditGroupId)
+  },
+
+  getAllWorkStats() {
+    return workStatsApi.getAllWorkStats()
+  },
+
+  getLeastLoadedGroup() {
+    return workStatsApi.getLeastLoadedGroup()
   }
 }
 

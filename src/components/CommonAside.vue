@@ -73,7 +73,10 @@ const allMenuItems = [
       { index: '1-3', title: '审核管理', route: '/home/auditManagement', menuIndex: '1-3' },
       { index: '1-4', title: '审核组管理', route: '/home/auditGroupManagement', menuIndex: '1-4' },
       { index: '1-5', title: '疾病分类管理', route: '/home/diseaseCategory', menuIndex: '1-5' },
-      { index: '1-6', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-6' }
+      { index: '1-6', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-6' },
+      { index: '1-7', title: '任务管理', route: '/home/taskManagement', menuIndex: '1-7' },
+      { index: '1-8', title: '分配规则管理', route: '/home/assignmentRuleManagement', menuIndex: '1-8' },
+      { index: '1-9', title: '工作统计', route: '/home/workStatistics', menuIndex: '1-9' }
     ]
   },
   {

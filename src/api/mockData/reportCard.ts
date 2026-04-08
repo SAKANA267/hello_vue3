@@ -5,7 +5,8 @@ import type {
   ReportCardDTO,
   RestfulPageResponse,
   CreateReportCardRequest,
-  UpdateReportCardRequest
+  UpdateReportCardRequest,
+  ReportCardAssignStatusEnum
 } from '../types'
 
 function param2Obj(url: string): any {
@@ -31,10 +32,35 @@ const auditorNames: Record<string, string> = {
   'auditor-003': '王审核员'
 }
 
+// 分配状态枚举
+const assignStatuses: ReportCardAssignStatusEnum[] = ['UNASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'VOID']
+
+// 审核状态枚举
+const auditStatuses = ['PENDING', 'APPROVED', 'REJECTED']
+
+// 用于映射分配人ID到分配人姓名
+const assigneeNames: Record<string, string> = {
+  'assignee-001': '赵分配员',
+  'assignee-002': '钱分配员',
+  'assignee-003': '孙分配员'
+}
+
 for (let i = 0; i < count; i++) {
-  const status = Mock.Random.pick(['PENDING', 'APPROVED', 'REJECTED'])
+  const auditStatus = Mock.Random.pick(auditStatuses)
   const auditorId =
-    status !== 'PENDING' ? Mock.Random.pick(['admin-001', 'auditor-002', 'auditor-003']) : undefined
+    auditStatus !== 'PENDING' ? Mock.Random.pick(['admin-001', 'auditor-002', 'auditor-003']) : undefined
+
+  // 分配状态: COMPLETED 时 auditStatus 为 APPROVED，其他情况随机
+  let assignStatus: ReportCardAssignStatusEnum
+  if (auditStatus === 'APPROVED') {
+    assignStatus = Mock.Random.pick(['COMPLETED', 'VOID', 'UNASSIGNED'])
+  } else {
+    assignStatus = Mock.Random.pick(['UNASSIGNED', 'ASSIGNED', 'IN_PROGRESS'])
+  }
+
+  // 分配人ID（仅在已分配状态时）
+  const assigneeId =
+    assignStatus !== 'UNASSIGNED' ? Mock.Random.pick(['assignee-001', 'assignee-002', 'assignee-003']) : undefined
 
   List.push({
     id: Mock.Random.guid(),
@@ -50,12 +76,15 @@ for (let i = 0; i < count; i++) {
     reportDoctor: Mock.Random.cname(),
     fillDate: Mock.Random.date('yyyy-MM-dd'),
     auditorId,
-    auditorName: auditorId ? auditorNames[auditorId] : undefined,
-    remark: status === 'REJECTED' ? Mock.Random.csentence(10, 30) : undefined,
-    status: status as any,
+    auditor: auditorId ? auditorNames[auditorId] : undefined,
+    remark: auditStatus === 'REJECTED' ? Mock.Random.csentence(10, 30) : undefined,
+    auditStatus: auditStatus as any, // 原 status 改为 auditStatus
+    assignStatus, // 新增分配状态
+    assigneeId, // 新增分配人ID
+    assigneeName: assigneeId ? assigneeNames[assigneeId] : undefined, // 新增分配人姓名
     createTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
     updateTime: Mock.Random.datetime('yyyy-MM-dd HH:mm:ss'),
-    auditTime: status !== 'PENDING' ? Mock.Random.datetime('yyyy-MM-dd HH:mm:ss') : undefined
+    auditDate: auditStatus !== 'PENDING' ? Mock.Random.datetime('yyyy-MM-dd HH:mm:ss') : undefined
   } as ReportCardDTO)
 }
 
@@ -66,7 +95,7 @@ for (let i = 0; i < count; i++) {
  */
 const getReportCards = (config: MockConfig): MockResponse<RestfulPageResponse<ReportCardDTO>> => {
   const urlParams = param2Obj(config.url)
-  const { keyword, page = 1, size = 10, status, department, fillDateStart, fillDateEnd } = urlParams
+  const { keyword, page = 1, size = 10, auditStatus, assignStatus, department, fillDateStart, fillDateEnd } = urlParams
 
   // 搜索过滤
   let mockList = List
@@ -85,9 +114,14 @@ const getReportCards = (config: MockConfig): MockResponse<RestfulPageResponse<Re
     })
   }
 
-  // 状态过滤
-  if (status) {
-    mockList = mockList.filter(item => item.status === status)
+  // 审核状态过滤 (原 status 改为 auditStatus)
+  if (auditStatus) {
+    mockList = mockList.filter(item => item.auditStatus === auditStatus)
+  }
+
+  // 分配状态过滤 (新增)
+  if (assignStatus) {
+    mockList = mockList.filter(item => item.assignStatus === assignStatus)
   }
 
   // 科室过滤
@@ -178,7 +212,8 @@ const createReportCard = (config: MockConfig): MockResponse<ReportCardDTO> => {
     phone: data.phone,
     reportDoctor: data.reportDoctor,
     fillDate: data.fillDate,
-    status: 'PENDING',
+    auditStatus: 'PENDING', // 原 status 改为 auditStatus
+    assignStatus: 'UNASSIGNED', // 新增分配状态，默认未分配
     createTime: new Date().toISOString(),
     updateTime: new Date().toISOString()
   }
@@ -267,7 +302,7 @@ const approveReportCard = (config: MockConfig): MockResponse<{ message: string }
 
   List[index] = {
     ...List[index],
-    status: 'APPROVED',
+    auditStatus: 'APPROVED', // 原 status 改为 auditStatus
     auditorId,
     auditor: auditorNames[auditorId] || '未知审核员',
     auditDate: new Date().toISOString(),
@@ -301,7 +336,7 @@ const rejectReportCard = (config: MockConfig): MockResponse<{ message: string }>
 
   List[index] = {
     ...List[index],
-    status: 'REJECTED',
+    auditStatus: 'REJECTED', // 原 status 改为 auditStatus
     auditorId,
     auditor: auditorNames[auditorId] || '未知审核员',
     remark,
@@ -333,7 +368,7 @@ const withdrawReportCard = (config: MockConfig): MockResponse<{ message: string 
 
   List[index] = {
     ...List[index],
-    status: 'PENDING',
+    auditStatus: 'PENDING', // 原 status 改为 auditStatus
     auditorId: undefined,
     auditor: undefined,
     remark: undefined,
@@ -352,7 +387,7 @@ const withdrawReportCard = (config: MockConfig): MockResponse<{ message: string 
  * GET /api/report-cards/pending - 获取待审核列表
  */
 const getPendingReportCards = (config: MockConfig): MockResponse<ReportCardDTO[]> => {
-  const pendingCards = List.filter(item => item.status === 'PENDING')
+  const pendingCards = List.filter(item => item.auditStatus === 'PENDING')
 
   return {
     code: 200,
@@ -372,15 +407,82 @@ const getReportCardStatistics = (
   REJECTED: number
 }> => {
   const statistics = {
-    PENDING: List.filter(item => item.status === 'PENDING').length,
-    APPROVED: List.filter(item => item.status === 'APPROVED').length,
-    REJECTED: List.filter(item => item.status === 'REJECTED').length
+    PENDING: List.filter(item => item.auditStatus === 'PENDING').length,
+    APPROVED: List.filter(item => item.auditStatus === 'APPROVED').length,
+    REJECTED: List.filter(item => item.auditStatus === 'REJECTED').length
   }
 
   return {
     code: 200,
     message: 'success',
     data: statistics
+  }
+}
+
+/**
+ * GET /api/report-cards/assign-status/:assignStatus - 根据分配状态查询报告卡列表 (新增)
+ */
+const getReportCardsByAssignStatus = (
+  config: MockConfig
+): MockResponse<RestfulPageResponse<ReportCardDTO>> => {
+  const urlParts = config.url.split('/')
+  const assignStatus = urlParts[urlParts.length - 1]
+  const urlParams = param2Obj(config.url)
+  const { keyword, page = 1, size = 10, auditStatus, department, fillDateStart, fillDateEnd } = urlParams
+
+  // 按分配状态过滤
+  let mockList = List.filter(item => item.assignStatus === assignStatus)
+
+  // 搜索过滤
+  if (keyword) {
+    const kw = keyword.toLowerCase()
+    mockList = mockList.filter(item => {
+      return (
+        item.name?.toLowerCase().includes(kw) ||
+        item.hospitalArea?.toLowerCase().includes(kw) ||
+        item.department?.toLowerCase().includes(kw) ||
+        item.diagnosisName?.toLowerCase().includes(kw) ||
+        item.inpatientNo?.includes(kw) ||
+        item.outpatientNo?.includes(kw) ||
+        item.phone?.includes(kw)
+      )
+    })
+  }
+
+  // 审核状态过滤
+  if (auditStatus) {
+    mockList = mockList.filter(item => item.auditStatus === auditStatus)
+  }
+
+  // 科室过滤
+  if (department) {
+    mockList = mockList.filter(item => item.department === department)
+  }
+
+  // 填报日期范围过滤
+  if (fillDateStart) {
+    mockList = mockList.filter(item => item.fillDate >= fillDateStart)
+  }
+  if (fillDateEnd) {
+    mockList = mockList.filter(item => item.fillDate <= fillDateEnd)
+  }
+
+  // 分页 - 确保参数是数字类型
+  const pageNum = Number(page) || 1
+  const pageSize = Number(size) || 10
+  const start = (pageNum - 1) * pageSize
+  const end = start + pageSize
+  const records = mockList.slice(start, end)
+
+  return {
+    code: 200,
+    message: 'success',
+    data: {
+      page: Number(page),
+      size: Number(size),
+      total: mockList.length,
+      records
+    }
   }
 }
 
@@ -394,5 +496,6 @@ export default {
   rejectReportCard,
   withdrawReportCard,
   getPendingReportCards,
-  getReportCardStatistics
+  getReportCardStatistics,
+  getReportCardsByAssignStatus
 }

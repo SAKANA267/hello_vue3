@@ -115,6 +115,36 @@ const routes = [
         }
       },
       {
+        path: 'taskManagement',
+        name: 'taskManagement',
+        component: () => import('@/views/TaskManagement.vue'),
+        meta: {
+          title: '任务管理',
+          roles: MENU_ROLES['1-7'],
+          menuIndex: '1-7'
+        }
+      },
+      {
+        path: 'assignmentRuleManagement',
+        name: 'assignmentRuleManagement',
+        component: () => import('@/views/AssignmentRuleManagement.vue'),
+        meta: {
+          title: '分配规则管理',
+          roles: MENU_ROLES['1-8'],
+          menuIndex: '1-8'
+        }
+      },
+      {
+        path: 'workStatistics',
+        name: 'workStatistics',
+        component: () => import('@/views/WorkStatistics.vue'),
+        meta: {
+          title: '工作统计',
+          roles: MENU_ROLES['1-9'],
+          menuIndex: '1-9'
+        }
+      },
+      {
         path: 'quickStart',
         name: 'quickStart',
         component: () => import('@/views/ToDo.vue'),

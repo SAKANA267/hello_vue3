@@ -18,7 +18,7 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
       code: 200,
       data: {
         token: `mock-${role}-token-${Date.now()}`,
-        menuList: ['1-1', '1-2', '1-3', '2-1', '2-2', '3-1', '3-2', '4-1', '4-2', '4-3'],
+        menuList: ['1-1', '1-2', '1-3', '1-4', '1-5', '1-6', '1-7', '1-8', '1-9', '2-1', '2-2', '2-3', '3-1', '3-2', '4-1', '4-2', '4-3', '5-1'],
         user: {
           id: '1',
           username: 'admin',
@@ -36,7 +36,7 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
       code: 200,
       data: {
         token: `mock-${role}-token-${Date.now()}`,
-        menuList: ['1-3', '2-1', '2-2', '3-1', '3-2', '4-1', '4-2'],
+        menuList: ['1-3', '2-1', '2-2', '2-3', '3-1', '3-2', '4-1', '4-2', '5-1'],
         user: {
           id: '2',
           username: 'user',
@@ -54,7 +54,7 @@ Mock.mock('/api/permission/getMenu', 'post', (options: { body: string }) => {
       code: 200,
       data: {
         token: `mock-${role}-token-${Date.now()}`,
-        menuList: ['1-3', '3-1', '3-2', '4-1', '4-2'],
+        menuList: ['1-3', '1-7', '1-9', '2-1', '2-2', '2-3', '3-1', '3-2', '4-1', '4-2', '5-1'],
         user: {
           id: '3',
           username: 'auditor',

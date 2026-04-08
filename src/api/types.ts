@@ -151,8 +151,11 @@ export type BatchDeleteRequest = string[]
 /** 报告卡性别枚举 (后端) */
 export type ReportCardGenderEnum = 'MALE' | 'FEMALE'
 
-/** 报告卡状态枚举 (后端) */
+/** 报告卡审核状态枚举 (后端) - 原 status */
 export type ReportCardStatusEnum = 'PENDING' | 'APPROVED' | 'REJECTED'
+
+/** 报告卡分配状态枚举 (后端) - 新增 */
+export type ReportCardAssignStatusEnum = 'UNASSIGNED' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'VOID'
 
 /** 报告卡DTO (RESTful) */
 export interface ReportCardDTO {
@@ -171,7 +174,10 @@ export interface ReportCardDTO {
   auditorId?: string
   auditor?: string
   remark?: string
-  status: ReportCardStatusEnum
+  auditStatus: ReportCardStatusEnum // 原 status 改为 auditStatus
+  assignStatus: ReportCardAssignStatusEnum // 新增分配状态
+  assigneeId?: string // 新增分配的审核员ID
+  assigneeName?: string // 新增分配的审核员姓名
   createTime: string
   updateTime?: string
   auditDate?: string
@@ -210,7 +216,8 @@ export interface ReportCardPageParams {
   page?: number
   size?: number
   keyword?: string
-  status?: ReportCardStatusEnum
+  auditStatus?: ReportCardStatusEnum // 原 status 改为 auditStatus
+  assignStatus?: ReportCardAssignStatusEnum // 新增分配状态筛选
   department?: string
   fillDateStart?: string
   fillDateEnd?: string
@@ -400,4 +407,205 @@ export interface UserAuditGroupDTO {
   status: AuditGroupStatusEnum
   isLeader: boolean
   joinTime: string
+}
+
+// ============== 任务分配 (Assignment) ==============
+
+/** 任务状态枚举 */
+export type AssignmentStatusEnum = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
+/** 任务优先级枚举 */
+export type AssignmentPriorityEnum = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
+
+/** 分配策略枚举 */
+export type AssignStrategyEnum = 'ROUND_ROBIN' | 'LEAST_TASKS' | 'MANUAL' | 'LEADER'
+
+/** 操作类型枚举 */
+export type OperationTypeEnum = 'ASSIGN' | 'ACCEPT' | 'COMPLETE' | 'CANCEL' | 'REASSIGN'
+
+/** 任务DTO */
+export interface AssignmentDTO {
+  id: string
+  reportCardId: string
+  auditGroupId: string
+  auditGroupName: string
+  assignerId?: string
+  assignerName?: string
+  accepterId?: string
+  accepterName?: string
+  status: AssignmentStatusEnum
+  statusDescription: string
+  priority: AssignmentPriorityEnum
+  priorityDescription: string
+  assignTime: string
+  acceptTime?: string
+  deadline?: string
+  completeTime?: string
+  remark?: string
+  version: number
+  // 报卡关联信息
+  reportCardInpatientNo?: string
+  reportCardPatientName?: string
+  reportCardDiagnosisName?: string
+}
+
+/** 手动分配任务请求 */
+export interface AssignTaskRequest {
+  reportCardId: string
+  auditGroupId: string
+  priority?: AssignmentPriorityEnum
+  deadline?: string
+  remark?: string
+}
+
+/** 自动分配任务请求 */
+export interface AutoAssignRequest {
+  reportCardId: string
+  diseaseCategory?: string
+  hospitalArea?: string
+  department?: string
+  assignerId: string
+}
+
+/** 接受任务请求 */
+export interface AcceptTaskRequest {
+  assignmentId: string
+  accepterId: string
+}
+
+/** 完成任务请求 */
+export interface CompleteTaskRequest {
+  assignmentId: string
+  status: 'COMPLETED'
+  remark?: string
+  version: number
+}
+
+/** 取消任务请求 */
+export interface CancelTaskRequest {
+  assignmentId: string
+  status: 'CANCELLED'
+  remark?: string
+  version: number
+}
+
+/** 重新分配任务请求 */
+export interface ReassignTaskRequest {
+  newAuditGroupId: string
+  remark?: string
+}
+
+/** 任务分页参数 */
+export interface AssignmentPageParams {
+  page?: number
+  size?: number
+  status?: AssignmentStatusEnum
+  priority?: AssignmentPriorityEnum
+  auditGroupId?: string
+  keyword?: string
+}
+
+// ============== 分配规则 (Assignment Rule) ==============
+
+/** 规则状态枚举 */
+export type RuleStatusEnum = 'ACTIVE' | 'INACTIVE'
+
+/** 分配规则DTO */
+export interface AssignmentRuleDTO {
+  id: string
+  ruleName: string
+  ruleCode: string
+  diseaseCategory?: string
+  hospitalArea?: string
+  department?: string
+  assignStrategy: AssignStrategyEnum
+  assignStrategyDescription: string
+  targetGroupId?: string
+  targetGroupName?: string
+  priority: AssignmentPriorityEnum
+  priorityDescription: string
+  deadlineHours?: number
+  status: RuleStatusEnum
+  statusDescription: string
+  ruleOrder: number
+  createTime: string
+  updateTime?: string
+}
+
+/** 创建分配规则请求 */
+export interface CreateAssignmentRuleRequest {
+  ruleName: string
+  ruleCode: string
+  diseaseCategory?: string
+  hospitalArea?: string
+  department?: string
+  assignStrategy: AssignStrategyEnum
+  targetGroupId?: string
+  priority?: AssignmentPriorityEnum
+  deadlineHours?: number
+  status?: RuleStatusEnum
+  ruleOrder?: number
+}
+
+/** 更新分配规则请求 */
+export interface UpdateAssignmentRuleRequest {
+  ruleName?: string
+  diseaseCategory?: string
+  hospitalArea?: string
+  department?: string
+  assignStrategy?: AssignStrategyEnum
+  targetGroupId?: string
+  priority?: AssignmentPriorityEnum
+  deadlineHours?: number
+  status?: RuleStatusEnum
+  ruleOrder?: number
+}
+
+/** 规则分页参数 */
+export interface AssignmentRulePageParams {
+  page?: number
+  size?: number
+  status?: RuleStatusEnum
+  keyword?: string
+}
+
+// ============== 工作统计 (Work Statistics) ==============
+
+/** 工作统计DTO */
+export interface WorkStatsDTO {
+  id: string
+  auditGroupId: string
+  auditGroupName: string
+  auditGroupCode: string
+  totalAssigned: number
+  totalCompleted: number
+  totalCancelled: number
+  pendingCount: number
+  inProgressCount: number
+  currentTaskCount: number
+  avgProcessTime: number
+  lastTaskTime: string
+}
+
+// ============== 操作日志 (Operation Log) ==============
+
+/** 操作日志DTO */
+export interface AssignmentLogDTO {
+  id: string
+  assignmentId: string
+  reportCardId: string
+  operationType: OperationTypeEnum
+  operationTypeDescription: string
+  operatorId: string
+  operatorName: string
+  beforeStatus?: string
+  afterStatus: string
+  createTime: string
+}
+
+/** 日志分页参数 */
+export interface AssignmentLogPageParams {
+  page?: number
+  size?: number
+  operationType?: OperationTypeEnum
 }
