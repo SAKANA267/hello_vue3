@@ -440,13 +440,13 @@ const rules_validation: FormRules = {
 
 // 获取优先级标签类型
 const getPriorityTagType = (priority: AssignmentPriorityEnum) => {
-  const map: Record<AssignmentPriorityEnum, string> = {
+  const map: Record<AssignmentPriorityEnum, 'primary' | 'success' | 'warning' | 'danger' | 'info' | undefined> = {
     LOW: 'info',
-    NORMAL: '',
+    NORMAL: undefined,
     HIGH: 'warning',
     URGENT: 'danger'
   }
-  return map[priority] || ''
+  return map[priority] || undefined
 }
 
 // 加载数据
@@ -464,14 +464,6 @@ const loadData = async () => {
     // 获取规则列表并按优先级排序
     rules.value = response.records.sort((a: AssignmentRuleDTO, b: AssignmentRuleDTO) => a.ruleOrder - b.ruleOrder)
     pagination.total = response.total
-  } catch (error) {
-    console.error('加载规则失败:', error)
-    ElMessage.error('加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-    rules.value = filtered.slice(start, end)
   } catch (error) {
     console.error('加载规则失败:', error)
     ElMessage.error('加载失败')
@@ -574,14 +566,33 @@ const handleSubmit = async () => {
 
     submitting.value = true
 
+    // 构建提交数据，过滤掉空字符串字段
+    const submitData: Record<string, any> = {
+      ruleName: form.ruleName,
+      ruleCode: form.ruleCode,
+      diseaseCategory: form.diseaseCategory || undefined,
+      hospitalArea: form.hospitalArea || undefined,
+      department: form.department || undefined,
+      assignStrategy: form.assignStrategy,
+      priority: form.priority,
+      deadlineHours: form.deadlineHours,
+      status: form.status,
+      ruleOrder: form.ruleOrder
+    }
+
+    // 只有在手动指定策略且选择了审核组时才提交 targetGroupId
+    if (form.assignStrategy === 'MANUAL' && form.targetGroupId) {
+      submitData.targetGroupId = form.targetGroupId
+    }
+
     if (dialogAction.value === 'add') {
-      await proxy.$api.createAssignmentRule(form)
+      await proxy.$api.createAssignmentRule(submitData)
       ElMessage.success('规则创建成功')
     } else {
       // 编辑模式，找到规则ID
       const ruleId = currentRuleId.value
       if (ruleId) {
-        await proxy.$api.updateAssignmentRule(ruleId, form)
+        await proxy.$api.updateAssignmentRule(ruleId, submitData)
         ElMessage.success('规则更新成功')
       }
     }
