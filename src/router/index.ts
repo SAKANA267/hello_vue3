@@ -30,8 +30,8 @@ const routes = [
         component: () => import('@/views/Dashboard.vue'),
         meta: {
           title: '仪表盘',
-          roles: MENU_ROLES['2-1'],
-          menuIndex: '2-1'
+          roles: MENU_ROLES['4-1'],
+          menuIndex: '4-1'
         }
       },
       {
@@ -40,8 +40,8 @@ const routes = [
         component: () => import('@/views/Profile.vue'),
         meta: {
           title: '个人资料',
-          roles: MENU_ROLES['2-2'],
-          menuIndex: '2-2'
+          roles: MENU_ROLES['4-2'],
+          menuIndex: '4-2'
         }
       },
       {
@@ -50,8 +50,8 @@ const routes = [
         component: () => import('@/views/LoginHistory.vue'),
         meta: {
           title: '登录历史',
-          roles: MENU_ROLES['2-3'],
-          menuIndex: '2-3'
+          roles: MENU_ROLES['4-3'],
+          menuIndex: '4-3'
         }
       },
       {
@@ -70,8 +70,8 @@ const routes = [
         component: () => import('@/views/UserManagement.vue'),
         meta: {
           title: '用户管理',
-          roles: MENU_ROLES['1-2'],
-          menuIndex: '1-2'
+          roles: MENU_ROLES['2-1'],
+          menuIndex: '2-1'
         }
       },
       {
@@ -80,8 +80,8 @@ const routes = [
         component: () => import('@/views/ObjectAudit.vue'),
         meta: {
           title: '审核管理',
-          roles: MENU_ROLES['1-3'],
-          menuIndex: '1-3'
+          roles: MENU_ROLES['3-1'],
+          menuIndex: '3-1'
         }
       },
       {
@@ -90,8 +90,8 @@ const routes = [
         component: () => import('@/views/AuditGroupManagement.vue'),
         meta: {
           title: '审核组管理',
-          roles: MENU_ROLES['1-4'],
-          menuIndex: '1-4'
+          roles: MENU_ROLES['2-2'],
+          menuIndex: '2-2'
         }
       },
       {
@@ -100,8 +100,8 @@ const routes = [
         component: () => import('@/views/DiseaseManagement/DiseaseCategory.vue'),
         meta: {
           title: '疾病分类管理',
-          roles: MENU_ROLES['1-5'],
-          menuIndex: '1-5'
+          roles: MENU_ROLES['1-2'],
+          menuIndex: '1-2'
         }
       },
       {
@@ -110,8 +110,8 @@ const routes = [
         component: () => import('@/views/DiseaseManagement/DiseaseType.vue'),
         meta: {
           title: '疾病种类管理',
-          roles: MENU_ROLES['1-6'],
-          menuIndex: '1-6'
+          roles: MENU_ROLES['1-3'],
+          menuIndex: '1-3'
         }
       },
       {
@@ -120,8 +120,8 @@ const routes = [
         component: () => import('@/views/TaskManagement.vue'),
         meta: {
           title: '任务管理',
-          roles: MENU_ROLES['1-7'],
-          menuIndex: '1-7'
+          roles: MENU_ROLES['3-2'],
+          menuIndex: '3-2'
         }
       },
       {
@@ -130,8 +130,8 @@ const routes = [
         component: () => import('@/views/AssignmentRuleManagement.vue'),
         meta: {
           title: '分配规则管理',
-          roles: MENU_ROLES['1-8'],
-          menuIndex: '1-8'
+          roles: MENU_ROLES['2-3'],
+          menuIndex: '2-3'
         }
       },
       {
@@ -140,8 +140,8 @@ const routes = [
         component: () => import('@/views/WorkStatistics.vue'),
         meta: {
           title: '工作统计',
-          roles: MENU_ROLES['1-9'],
-          menuIndex: '1-9'
+          roles: MENU_ROLES['3-3'],
+          menuIndex: '3-3'
         }
       },
       {
@@ -150,8 +150,8 @@ const routes = [
         component: () => import('@/views/ToDo.vue'),
         meta: {
           title: '快速开始',
-          roles: MENU_ROLES['3-1'],
-          menuIndex: '3-1'
+          roles: MENU_ROLES['4-4'],
+          menuIndex: '4-4'
         }
       },
       {
@@ -160,8 +160,8 @@ const routes = [
         component: () => import('@/views/ApiDocs.vue'),
         meta: {
           title: 'API 文档',
-          roles: MENU_ROLES['3-2'],
-          menuIndex: '3-2'
+          roles: MENU_ROLES['4-5'],
+          menuIndex: '4-5'
         }
       },
       {
@@ -170,8 +170,8 @@ const routes = [
         component: () => import('@/views/ToDo.vue'),
         meta: {
           title: '设置',
-          roles: MENU_ROLES['4-1'],
-          menuIndex: '4-1'
+          roles: MENU_ROLES['2-4'],
+          menuIndex: '2-4'
         }
       },
       {
@@ -180,8 +180,8 @@ const routes = [
         component: () => import('@/views/ToDo.vue'),
         meta: {
           title: '帮助',
-          roles: MENU_ROLES['4-2'],
-          menuIndex: '4-2'
+          roles: MENU_ROLES['4-6'],
+          menuIndex: '4-6'
         }
       },
       {
@@ -190,8 +190,8 @@ const routes = [
         component: () => import('@/views/Test.vue'),
         meta: {
           title: '测试页面',
-          roles: MENU_ROLES['4-3'],
-          menuIndex: '4-3'
+          roles: MENU_ROLES['2-5'],
+          menuIndex: '2-5'
         }
       },
       {
@@ -200,8 +200,8 @@ const routes = [
         component: () => import('@/views/AiAssistant.vue'),
         meta: {
           title: 'AI 助手',
-          roles: MENU_ROLES['5-1'],
-          menuIndex: '5-1'
+          roles: MENU_ROLES['4-7'],
+          menuIndex: '4-7'
         }
       }
     ]

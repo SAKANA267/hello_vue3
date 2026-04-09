@@ -65,54 +65,49 @@ interface MenuItem {
 const allMenuItems = [
   {
     index: '1',
-    title: '导航',
-    icon: markRaw(Location),
+    title: '数据管理',
+    icon: markRaw(Document),
     children: [
       { index: '1-1', title: '对象管理', route: '/home/objectManagement', menuIndex: '1-1' },
-      { index: '1-2', title: '用户管理', route: '/home/userManagement', menuIndex: '1-2' },
-      { index: '1-3', title: '审核管理', route: '/home/auditManagement', menuIndex: '1-3' },
-      { index: '1-4', title: '审核组管理', route: '/home/auditGroupManagement', menuIndex: '1-4' },
-      { index: '1-5', title: '疾病分类管理', route: '/home/diseaseCategory', menuIndex: '1-5' },
-      { index: '1-6', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-6' },
-      { index: '1-7', title: '任务管理', route: '/home/taskManagement', menuIndex: '1-7' },
-      { index: '1-8', title: '分配规则管理', route: '/home/assignmentRuleManagement', menuIndex: '1-8' },
-      { index: '1-9', title: '工作统计', route: '/home/workStatistics', menuIndex: '1-9' }
+      { index: '1-2', title: '疾病分类管理', route: '/home/diseaseCategory', menuIndex: '1-2' },
+      { index: '1-3', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-3' }
     ]
   },
   {
     index: '2',
-    title: '菜单',
+    title: '系统管理',
     icon: markRaw(IconMenu),
     children: [
-      { index: '2-1', title: '首页', route: '/home/dashboard', menuIndex: '2-1' },
-      { index: '2-2', title: '个人资料', route: '/home/profile', menuIndex: '2-2' },
-      { index: '2-3', title: '登录历史', route: '/home/loginHistory', menuIndex: '2-3' }
+      { index: '2-1', title: '用户管理', route: '/home/userManagement', menuIndex: '2-1' },
+      { index: '2-2', title: '审核组管理', route: '/home/auditGroupManagement', menuIndex: '2-2' },
+      { index: '2-3', title: '分配规则管理', route: '/home/assignmentRuleManagement', menuIndex: '2-3' },
+      { index: '2-4', title: '设置', route: '/home/settings', menuIndex: '2-4' },
+      { index: '2-5', title: '测试页面', route: '/home/test', menuIndex: '2-5' }
     ]
   },
   {
     index: '3',
-    title: '文档',
-    icon: markRaw(Document),
+    title: '审核中心',
+    icon: markRaw(Location),
     children: [
-      { index: '3-1', title: '快速开始', route: '/home/quickStart', menuIndex: '3-1' },
-      { index: '3-2', title: 'API 文档', route: '/home/apiDocs', menuIndex: '3-2' }
+      { index: '3-1', title: '审核管理', route: '/home/auditManagement', menuIndex: '3-1' },
+      { index: '3-2', title: '任务管理', route: '/home/taskManagement', menuIndex: '3-2' },
+      { index: '3-3', title: '工作统计', route: '/home/workStatistics', menuIndex: '3-3' }
     ]
   },
   {
     index: '4',
-    title: '其他',
+    title: '个人与帮助',
     icon: markRaw(MoreFilled),
     children: [
-      { index: '4-1', title: '设置', route: '/home/settings', menuIndex: '4-1' },
-      { index: '4-2', title: '帮助', route: '/home/help', menuIndex: '4-2' },
-      { index: '4-3', title: '测试页面', route: '/home/test', menuIndex: '4-3' }
+      { index: '4-1', title: '首页', route: '/home/dashboard', menuIndex: '4-1' },
+      { index: '4-2', title: '个人资料', route: '/home/profile', menuIndex: '4-2' },
+      { index: '4-3', title: '登录历史', route: '/home/loginHistory', menuIndex: '4-3' },
+      { index: '4-4', title: '快速开始', route: '/home/quickStart', menuIndex: '4-4' },
+      { index: '4-5', title: 'API 文档', route: '/home/apiDocs', menuIndex: '4-5' },
+      { index: '4-6', title: '帮助', route: '/home/help', menuIndex: '4-6' },
+      { index: '4-7', title: 'AI 助手', route: '/home/aiAssistant', menuIndex: '4-7' }
     ]
-  },
-  {
-    index: '5',
-    title: 'AI 助手',
-    icon: markRaw(ChatDotRound),
-    children: [{ index: '5-1', title: 'AI 助手', route: '/home/aiAssistant', menuIndex: '5-1' }]
   }
 ]
 

@@ -7,33 +7,31 @@ import type { UserRole } from '@/api/types'
 
 /** 菜单项角色配置 */
 export const MENU_ROLES: Record<string, UserRole[]> = {
-  // 导航
+  // 数据管理
   '1-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER'], // 对象管理
-  '1-2': ['SUPER_ADMIN', 'ADMIN'], // 用户管理
-  '1-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 审核管理
-  '1-4': ['SUPER_ADMIN', 'ADMIN'], // 审核组管理
-  '1-5': ['SUPER_ADMIN', 'ADMIN'], // 疾病分类
-  '1-6': ['SUPER_ADMIN', 'ADMIN'], // 疾病种类
-  '1-7': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 任务管理
-  '1-8': ['SUPER_ADMIN', 'ADMIN'], // 分配规则管理
-  '1-9': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 工作统计
+  '1-2': ['SUPER_ADMIN', 'ADMIN'], // 疾病分类管理
+  '1-3': ['SUPER_ADMIN', 'ADMIN'], // 疾病种类管理
 
-  // 菜单
-  '2-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 首页
-  '2-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 个人资料
-  '2-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 登录历史
+  // 系统管理
+  '2-1': ['SUPER_ADMIN', 'ADMIN'], // 用户管理
+  '2-2': ['SUPER_ADMIN', 'ADMIN'], // 审核组管理
+  '2-3': ['SUPER_ADMIN', 'ADMIN'], // 分配规则管理
+  '2-4': ['SUPER_ADMIN', 'ADMIN'], // 设置
+  '2-5': ['SUPER_ADMIN', 'ADMIN'], // 测试页面
 
-  // 文档
-  '3-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 快速开始
-  '3-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // API 文档
+  // 审核中心
+  '3-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 审核管理
+  '3-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 任务管理
+  '3-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 工作统计
 
-  // 其他
-  '4-1': ['SUPER_ADMIN', 'ADMIN'], // 设置
-  '4-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 帮助
-  '4-3': ['SUPER_ADMIN', 'ADMIN'], // 测试页面
-
-  // AI 助手
-  '5-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER'] // AI 助手
+  // 个人与帮助
+  '4-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 首页
+  '4-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 个人资料
+  '4-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 登录历史
+  '4-4': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 快速开始
+  '4-5': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // API 文档
+  '4-6': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 帮助
+  '4-7': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER'] // AI 助手
 }
 
 /** 根据菜单索引获取允许的角色列表 */
