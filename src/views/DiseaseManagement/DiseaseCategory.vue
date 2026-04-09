@@ -1,17 +1,15 @@
 <template>
   <div class="disease-category-page">
-    <header class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">
-          <span class="title-icon">◈</span>
-          疾病分类管理
-        </h1>
-        <p class="page-subtitle">管理传染病的大类分类体系</p>
+    <!-- 顶部操作栏 -->
+    <div class="header-actions">
+      <div class="title-section">
+        <h2>疾病分类管理</h2>
+        <p class="subtitle">管理传染病的大类分类体系</p>
       </div>
       <el-button type="primary" :icon="Plus" @click="handleCreate">
         新建分类
       </el-button>
-    </header>
+    </div>
 
     <div class="filter-bar">
       <el-input
@@ -256,157 +254,164 @@ onMounted(() => {
 
 <style scoped lang="less">
 .disease-category-page {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.page-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.title-icon {
-  color: #0d9488;
-  font-size: 32px;
-}
-
-.page-subtitle {
-  color: #64748b;
-  font-size: 14px;
-  margin: 0;
-}
-
-.filter-bar {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.search-input {
-  width: 320px;
-}
-
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-  min-height: 200px;
-}
-
-.category-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
   padding: 20px;
-  transition: all 0.2s ease;
+  background: #f5f7fa;
+  min-height: 100%;
 
-  &:hover {
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
-    border-color: #0d9488;
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .title-section {
+      h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+        color: #303133;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #909399;
+      }
+    }
   }
 
-  &.disabled {
-    opacity: 0.6;
-    background: #f8fafc;
+  .filter-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .search-input {
+    width: 320px;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+    min-height: 200px;
+  }
+
+  .category-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+      border-color: #0d9488;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      background: #f8fafc;
+    }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .category-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0d9488;
+    background: #f0fdfa;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .category-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+  }
+
+  .category-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    padding: 12px 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .code-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #475569;
   }
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
+@media (max-width: 768px) {
+  .disease-category-page {
+    padding: 12px;
 
-.category-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0d9488;
-  background: #f0fdfa;
-  padding: 4px 10px;
-  border-radius: 6px;
-  letter-spacing: 0.5px;
-}
+    .header-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
 
-.category-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-}
+    .filter-bar {
+      flex-direction: column;
+      gap: 12px;
 
-.category-desc {
-  font-size: 13px;
-  color: #64748b;
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-stats {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 16px;
-  padding: 12px 0;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.code-cell {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #475569;
+      .search-input {
+        width: 100%;
+      }
+    }
+  }
 }
 </style>

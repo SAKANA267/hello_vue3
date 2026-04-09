@@ -1,17 +1,15 @@
 <template>
   <div class="disease-type-page">
-    <header class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">
-          <span class="title-icon">◉</span>
-          疾病种类管理
-        </h1>
-        <p class="page-subtitle">管理具体的传染病种类</p>
+    <!-- 顶部操作栏 -->
+    <div class="header-actions">
+      <div class="title-section">
+        <h2>疾病种类管理</h2>
+        <p class="subtitle">管理具体的传染病种类</p>
       </div>
       <el-button type="primary" :icon="Plus" @click="handleCreate">
         新建疾病
       </el-button>
-    </header>
+    </div>
 
     <div class="filter-bar">
       <el-select
@@ -233,71 +231,79 @@ onMounted(() => {
 
 <style scoped lang="less">
 .disease-type-page {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .title-section {
+      h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+        color: #303133;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #909399;
+      }
+    }
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    width: 140px;
+  }
+
+  .search-input {
+    width: 280px;
+  }
+
+  .code-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #475569;
+  }
+
+  .disease-table {
+    margin-bottom: 24px;
+  }
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
+@media (max-width: 768px) {
+  .disease-type-page {
+    padding: 12px;
 
-.header-content {
-  flex: 1;
-}
+    .header-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
 
-.page-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+    .filter-bar {
+      flex-direction: column;
+      gap: 12px;
 
-.title-icon {
-  color: #0d9488;
-  font-size: 32px;
-}
-
-.page-subtitle {
-  color: #64748b;
-  font-size: 14px;
-  margin: 0;
-}
-
-.filter-bar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.filter-select {
-  width: 140px;
-}
-
-.search-input {
-  width: 280px;
-}
-
-.code-cell {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #475569;
-}
-
-.disease-table {
-  margin-bottom: 24px;
+      .filter-select,
+      .search-input {
+        width: 100%;
+      }
+    }
+  }
 }
 </style>

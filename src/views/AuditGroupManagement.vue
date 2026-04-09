@@ -6,6 +6,14 @@
 -->
 <template>
   <div class="container">
+    <!-- 顶部操作栏 -->
+    <div class="header-actions">
+      <div class="title-section">
+        <h2>审核组管理</h2>
+        <p class="subtitle">管理审核组配置与成员分配</p>
+      </div>
+    </div>
+
     <CommonSearch v-model="formInline" :fields="searchFields" @search="handleSearch">
       <template #actions>
         <permission-button permission="audit:group:manage" type="primary" @click="openDialog('add', null)">
@@ -290,11 +298,40 @@ const handleStatusChange = async (row: AuditGroupDTO, action: 'activate' | 'deac
 <style scoped lang="less">
 .container {
   padding: 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .title-section {
+      h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+        color: #303133;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #909399;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 12px;
+
+    .header-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
   }
 }
 </style>
