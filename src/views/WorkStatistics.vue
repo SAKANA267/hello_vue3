@@ -23,21 +23,15 @@
     </div>
 
     <!-- 统计概览卡片 -->
-    <el-row :gutter="20" class="overview-cards">
+    <el-row :gutter="20" class="stat-cards">
       <el-col :xs="12" :sm="6" v-for="(card, index) in overviewCards" :key="index">
-        <div class="overview-card" :class="card.type">
-          <div class="card-icon">
-            <component :is="card.icon" />
-          </div>
-          <div class="card-content">
-            <div class="card-value">{{ card.value }}</div>
-            <div class="card-label">{{ card.label }}</div>
-            <div v-if="card.trend !== undefined" class="card-trend" :class="card.trend > 0 ? 'up' : 'down'">
-              <el-icon><Top v-if="card.trend > 0" /><Bottom v-else /></el-icon>
-              {{ Math.abs(card.trend) }}%
-            </div>
-          </div>
-        </div>
+        <StatCard
+          :label="card.label"
+          :value="card.value"
+          :icon="card.icon"
+          :color="card.color"
+          :trend="card.trend ?? 0"
+        />
       </el-col>
     </el-row>
 
@@ -179,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch, getCurrentInstance } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Refresh,
@@ -197,6 +191,12 @@ import * as echarts from 'echarts'
 import type { ECharts } from 'echarts'
 import type { WorkStatsDTO } from '@/api/types'
 
+// 导入 StatCard 组件
+import StatCard from '@/components/dashboard/StatCard.vue'
+
+// 获取全局 API proxy
+const { proxy } = getCurrentInstance() as any
+
 // 图表引用
 const workloadChartRef = ref<HTMLElement>()
 let workloadChart: ECharts | null = null
@@ -210,10 +210,10 @@ const statsData = ref<WorkStatsDTO[]>([])
 
 // 概览卡片数据
 const overviewCards = ref([
-  { label: '总任务数', value: 0, icon: DataLine, type: 'primary', trend: undefined },
-  { label: '已完成', value: 0, icon: Checked, type: 'success', trend: 12.5 },
-  { label: '进行中', value: 0, icon: Loading, type: 'warning', trend: -5.2 },
-  { label: '平均用时', value: '', icon: Timer, type: 'info', trend: undefined }
+  { label: '总任务数', value: '0', icon: DataLine, color: '#409EFF', trend: 0 },
+  { label: '已完成', value: '0', icon: Checked, color: '#67C23A', trend: 12.5 },
+  { label: '进行中', value: '0', icon: Loading, color: '#E6A23C', trend: -5.2 },
+  { label: '平均用时', value: '-', icon: Timer, color: '#909399', trend: 0 }
 ])
 
 // 工作量排行（按当前任务数从少到多排序，推荐给任务少的组）
@@ -360,7 +360,7 @@ const loadStatsData = async () => {
     overviewCards.value[0].value = totalAssigned.toString()
     overviewCards.value[1].value = totalCompleted.toString()
     overviewCards.value[2].value = totalInProgress.toString()
-    overviewCards.value[3].value = formatTime(avgTime)
+    overviewCards.value[3].value = avgTime > 0 ? formatTime(avgTime) : '-'
 
     // 更新图表
     nextTick(() => {
@@ -447,87 +447,8 @@ onUnmounted(() => {
     }
   }
 
-  .overview-cards {
+  .stat-cards {
     margin-bottom: 20px;
-
-    .overview-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s;
-      margin-bottom: 20px;
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-      }
-
-      &.primary .card-icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-
-      &.success .card-icon {
-        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-      }
-
-      &.warning .card-icon {
-        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-      }
-
-      &.info .card-icon {
-        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-      }
-
-      .card-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 28px;
-        flex-shrink: 0;
-      }
-
-      .card-content {
-        flex: 1;
-        min-width: 0;
-
-        .card-value {
-          font-size: 28px;
-          font-weight: bold;
-          color: #303133;
-          line-height: 1.2;
-        }
-
-        .card-label {
-          font-size: 14px;
-          color: #909399;
-          margin-top: 4px;
-        }
-
-        .card-trend {
-          font-size: 12px;
-          margin-top: 6px;
-          display: flex;
-          align-items: center;
-          gap: 2px;
-
-          &.up {
-            color: #67c23a;
-          }
-
-          &.down {
-            color: #f56c6c;
-          }
-        }
-      }
-    }
   }
 
   .charts-section {
@@ -677,22 +598,6 @@ onUnmounted(() => {
 
         .el-select {
           flex: 1;
-        }
-      }
-    }
-
-    .overview-cards {
-      .overview-card {
-        padding: 16px;
-
-        .card-icon {
-          width: 48px;
-          height: 48px;
-          font-size: 24px;
-        }
-
-        .card-content .card-value {
-          font-size: 22px;
         }
       }
     }

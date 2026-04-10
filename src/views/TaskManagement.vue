@@ -19,17 +19,15 @@
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :xs="12" :sm="6" v-for="(stat, index) in stats" :key="index">
-        <div class="stat-card" :class="stat.type">
-          <div class="stat-icon">
-            <component :is="stat.icon" />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
-          </div>
-        </div>
+    <el-row :gutter="20" class="stat-cards">
+      <el-col :xs="12" :sm="6" v-for="(stat, index) in stats" :key="index" :md="6">
+        <StatCard
+          :label="stat.label"
+          :value="stat.value"
+          :icon="stat.icon"
+          :color="stat.color"
+          :trend="stat.trend"
+        />
       </el-col>
     </el-row>
 
@@ -357,6 +355,7 @@ import {
 } from '@element-plus/icons-vue'
 import { getCurrentInstance } from 'vue'
 import AssignmentDialog from '@/components/AssignmentDialog.vue'
+import StatCard from '@/components/dashboard/StatCard.vue'
 import type { AssignmentDTO, AssignmentPriorityEnum, AssignmentStatusEnum } from '@/api/types'
 
 const { proxy } = getCurrentInstance() as any
@@ -366,10 +365,10 @@ const activeTab = ref('pending')
 
 // 统计数据
 const stats = ref([
-  { label: '待分配', value: 0, icon: markRaw(Document), type: 'primary' },
-  { label: '待处理', value: 0, icon: markRaw(Clock), type: 'warning' },
-  { label: '处理中', value: 0, icon: markRaw(MagicStick), type: 'primary' },
-  { label: '已完成', value: 0, icon: markRaw(Finished), type: 'success' }
+  { label: '待分配', value: '0', icon: markRaw(Document), color: '#409EFF', trend: 0 },
+  { label: '待处理', value: '0', icon: markRaw(Clock), color: '#E6A23C', trend: 0 },
+  { label: '处理中', value: '0', icon: markRaw(MagicStick), color: '#67C23A', trend: 0 },
+  { label: '已完成', value: '0', icon: markRaw(Finished), color: '#909399', trend: 0 }
 ])
 
 // 待分配报卡数据
@@ -546,9 +545,9 @@ const loadAssignedTasks = async () => {
 
 // 从任务数据更新统计
 const updateStatsFromTasks = (tasks: AssignmentDTO[]) => {
-  stats.value[1].value = tasks.filter((t) => t.status === 'PENDING').length
-  stats.value[2].value = tasks.filter((t) => t.status === 'IN_PROGRESS').length
-  stats.value[3].value = tasks.filter((t) => t.status === 'COMPLETED').length
+  stats.value[1].value = String(tasks.filter((t) => t.status === 'PENDING').length)
+  stats.value[2].value = String(tasks.filter((t) => t.status === 'IN_PROGRESS').length)
+  stats.value[3].value = String(tasks.filter((t) => t.status === 'COMPLETED').length)
 }
 
 // 加载审核组列表
@@ -568,7 +567,7 @@ const loadAuditGroups = async () => {
 
 // 更新统计数据
 const updateStats = () => {
-  stats.value[0].value = pendingPagination.total
+  stats.value[0].value = String(pendingPagination.total)
 }
 
 // 刷新数据
@@ -843,64 +842,8 @@ onUnmounted(() => {
     }
   }
 
-  .stats-row {
+  .stat-cards {
     margin-bottom: 20px;
-
-    .stat-card {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-
-      &.primary .stat-icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-
-      &.warning .stat-icon {
-        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-      }
-
-      &.success .stat-icon {
-        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-      }
-
-      .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-      }
-
-      .stat-content {
-        flex: 1;
-
-        .stat-value {
-          font-size: 24px;
-          font-weight: bold;
-          color: #303133;
-          line-height: 1;
-          margin-bottom: 4px;
-        }
-
-        .stat-label {
-          font-size: 14px;
-          color: #909399;
-        }
-      }
-    }
   }
 
   .main-card {
@@ -973,23 +916,9 @@ onUnmounted(() => {
       }
     }
 
-    .stats-row {
+    .stat-cards {
       .el-col {
         margin-bottom: 10px;
-      }
-
-      .stat-card {
-        padding: 12px;
-
-        .stat-icon {
-          width: 40px;
-          height: 40px;
-          font-size: 20px;
-        }
-
-        .stat-content .stat-value {
-          font-size: 20px;
-        }
       }
     }
 
