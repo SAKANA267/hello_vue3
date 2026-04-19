@@ -148,13 +148,13 @@ const getAuditGroupsWrapper = async (config: GetAuditGroupsConfig) => {
 
 // 表格列配置
 const tableLabel = [
-  { prop: 'groupName', label: '组名', minWidth: '150' },
-  { prop: 'groupCode', label: '组编码', minWidth: '150' },
-  { prop: 'description', label: '描述', minWidth: '200' },
-  { prop: 'leaderName', label: '组长', minWidth: '100' },
-  { prop: 'memberCount', label: '成员数', minWidth: '80' },
-  { prop: 'status', label: '状态', minWidth: '100' },
-  { prop: 'createTime', label: '创建时间', minWidth: '180' }
+  { prop: 'groupName', label: '组名', minWidth: '140' },
+  { prop: 'groupCode', label: '组编码', width: '130' },
+  { prop: 'description', label: '描述', minWidth: '180' },
+  { prop: 'leaderName', label: '组长', width: '90' },
+  { prop: 'memberCount', label: '成员数', width: '85' },
+  { prop: 'status', label: '状态', width: '85' },
+  { prop: 'createTime', label: '创建时间', width: '160' }
 ]
 
 // 状态列配置

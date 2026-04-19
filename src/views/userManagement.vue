@@ -113,14 +113,14 @@ const getUsersWrapper = async (config: GetUsersConfig) => {
 
 //表格列配置 用于v-for创建表格列
 const tableLabel = [
-  { prop: 'username', label: '用户名', minWidth: '120' },
-  { prop: 'name', label: '姓名', minWidth: '100' },
+  { prop: 'username', label: '用户名', width: '110' },
+  { prop: 'name', label: '姓名', width: '90' },
   { prop: 'email', label: '邮箱', minWidth: '180' },
-  { prop: 'phone', label: '电话', minWidth: '130' },
-  { prop: 'role', label: '角色', minWidth: '100' },
-  { prop: 'status', label: '状态', minWidth: '100' },
-  { prop: 'createTime', label: '创建时间', minWidth: '180' },
-  { prop: 'lastLogin', label: '最后登录', minWidth: '150' }
+  { prop: 'phone', label: '电话', width: '130' },
+  { prop: 'role', label: '角色', width: '90' },
+  { prop: 'status', label: '状态', width: '85' },
+  { prop: 'createTime', label: '创建时间', width: '160' },
+  { prop: 'lastLogin', label: '最后登录', width: '160' }
 ]
 
 // 密码字段（仅新增时使用）

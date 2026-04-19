@@ -16,7 +16,8 @@
         v-for="item in tableLabel"
         :key="item.prop"
         :label="item.label"
-        :width="item.width ? item.width : ''"
+        :width="item.width"
+        :min-width="item.minWidth"
         :prop="item.prop"
         :sortable="/date/i.test(item.prop) || item.label.includes('日期') ? true : false"
       />
