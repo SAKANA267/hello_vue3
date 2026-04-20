@@ -145,6 +145,16 @@ const routes = [
         }
       },
       {
+        path: 'cdcUpload',
+        name: 'cdcUpload',
+        component: () => import('@/views/CdcUpload.vue'),
+        meta: {
+          title: '上报国家疾控中心',
+          roles: MENU_ROLES['3-4'],
+          menuIndex: '3-4'
+        }
+      },
+      {
         path: 'quickStart',
         name: 'quickStart',
         component: () => import('@/views/ToDo.vue'),

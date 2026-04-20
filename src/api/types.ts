@@ -609,3 +609,49 @@ export interface AssignmentLogPageParams {
   size?: number
   operationType?: OperationTypeEnum
 }
+
+// ============== 上报国家疾控中心 (CDC Upload) ==============
+
+/** 上报状态枚举 */
+export type UploadStatusEnum = 'NOT_UPLOADED' | 'UPLOADING' | 'UPLOADED' | 'UPLOAD_FAILED'
+
+/** 上报DTO */
+export interface CdcUploadDTO {
+  id: string
+  reportCardId: string
+  hospitalArea: string
+  department: string
+  diagnosisName: string
+  inpatientNo: string
+  outpatientNo: string
+  name: string
+  gender: ReportCardGenderEnum
+  age: number
+  phone: string
+  reportDoctor: string
+  fillDate: string
+  auditor: string
+  auditDate: string
+  uploadStatus: UploadStatusEnum
+  uploadTime?: string
+  uploadOperator?: string
+  failReason?: string
+  retryCount: number
+}
+
+/** 上报请求 */
+export interface CdcUploadRequest {
+  reportCardIds: string[]
+  operatorId: string
+}
+
+/** 上报分页参数 */
+export interface CdcUploadPageParams {
+  page?: number
+  size?: number
+  keyword?: string
+  uploadStatus?: UploadStatusEnum
+  department?: string
+  fillDateStart?: string
+  fillDateEnd?: string
+}

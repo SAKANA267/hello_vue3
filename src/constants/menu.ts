@@ -23,6 +23,7 @@ export const MENU_ROLES: Record<string, UserRole[]> = {
   '3-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 审核管理
   '3-2': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 任务管理
   '3-3': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 工作统计
+  '3-4': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR'], // 上报国家疾控中心
 
   // 个人与帮助
   '4-1': ['SUPER_ADMIN', 'ADMIN', 'AUDITOR', 'USER', 'GUEST'], // 首页

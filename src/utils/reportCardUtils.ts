@@ -46,6 +46,22 @@ const ASSIGN_STATUS_REVERSE: Record<string, string> = {
   已作废: 'VOID'
 }
 
+/** 后端上报状态枚举 → 前端显示 */
+const UPLOAD_STATUS_MAP: Record<string, string> = {
+  NOT_UPLOADED: '未上报',
+  UPLOADING: '上报中',
+  UPLOADED: '已上报',
+  UPLOAD_FAILED: '上报失败'
+}
+
+/** 前端显示 → 后端上报状态枚举 */
+const UPLOAD_STATUS_REVERSE: Record<string, string> = {
+  未上报: 'NOT_UPLOADED',
+  上报中: 'UPLOADING',
+  已上报: 'UPLOADED',
+  上报失败: 'UPLOAD_FAILED'
+}
+
 // ============== 枚举转换函数 ==============
 
 /**
@@ -100,6 +116,40 @@ export function parseAuditStatusFromDisplay(display: string): string {
  */
 export function parseAssignStatusFromDisplay(display: string): string {
   return ASSIGN_STATUS_REVERSE[display] || display
+}
+
+export function formatUploadStatusForDisplay(uploadStatus: string): string {
+  return UPLOAD_STATUS_MAP[uploadStatus] || uploadStatus
+}
+
+export function parseUploadStatusFromDisplay(display: string): string {
+  return UPLOAD_STATUS_REVERSE[display] || display
+}
+
+export function transformCdcUploadForDisplay(dto: any) {
+  return {
+    ...dto,
+    gender: formatGenderForDisplay(dto.gender),
+    uploadStatus: formatUploadStatusForDisplay(dto.uploadStatus),
+    uploadTime: dto.uploadTime ? dto.uploadTime.split('T')[0] : '-',
+    uploadOperator: dto.uploadOperator || '-',
+    auditor: dto.auditor || '-',
+    auditDate: dto.auditDate ? dto.auditDate.split('T')[0] : '-'
+  }
+}
+
+export function getUploadStatusTagType(uploadStatus: string): string {
+  const map: Record<string, string> = {
+    未上报: 'info',
+    NOT_UPLOADED: 'info',
+    上报中: 'warning',
+    UPLOADING: 'warning',
+    已上报: 'success',
+    UPLOADED: 'success',
+    上报失败: 'danger',
+    UPLOAD_FAILED: 'danger'
+  }
+  return map[uploadStatus] || 'info'
 }
 
 // ============== 数据转换函数 ==============

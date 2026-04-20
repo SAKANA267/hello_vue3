@@ -51,7 +51,11 @@ import type {
   WorkStatsDTO,
   // AssignmentLog types
   AssignmentLogDTO,
-  AssignmentLogPageParams
+  AssignmentLogPageParams,
+  // CDC Upload types
+  CdcUploadDTO,
+  CdcUploadRequest,
+  CdcUploadPageParams
 } from './types'
 
 // ============== 认证 API ==============
@@ -676,6 +680,60 @@ export const workStatsApi = {
   }
 }
 
+// ============== CDC Upload API ==============
+
+/** 上报国家疾控中心 API */
+export const cdcUploadApi = {
+  /** 分页查询已审核通过的报告卡（可上报列表） */
+  getApprovedReportCards(params?: CdcUploadPageParams): Promise<RestfulPageResponse<CdcUploadDTO>> {
+    return request({
+      url: '/cdc-upload/approved',
+      method: 'get',
+      params
+    })
+  },
+
+  /** 上报单个报告卡至国家疾控中心 */
+  uploadSingle(reportCardId: string, operatorId: string): Promise<{ message: string }> {
+    return request({
+      url: `/cdc-upload/upload/${reportCardId}`,
+      method: 'post',
+      data: { operatorId }
+    })
+  },
+
+  /** 批量上报报告卡至国家疾控中心 */
+  batchUpload(data: CdcUploadRequest): Promise<{ successCount: number; failCount: number; message: string }> {
+    return request({
+      url: '/cdc-upload/batch-upload',
+      method: 'post',
+      data
+    })
+  },
+
+  /** 重试上报失败的报告卡 */
+  retryUpload(reportCardId: string, operatorId: string): Promise<{ message: string }> {
+    return request({
+      url: `/cdc-upload/retry/${reportCardId}`,
+      method: 'post',
+      data: { operatorId }
+    })
+  },
+
+  /** 获取上报统计 */
+  getUploadStatistics(): Promise<{
+    total: number
+    notUploaded: number
+    uploaded: number
+    uploadFailed: number
+  }> {
+    return request({
+      url: '/cdc-upload/statistics',
+      method: 'get'
+    })
+  }
+}
+
 // ============== 通用 API (兼容旧代码) ==============
 
 /** API 接口对象 */
@@ -774,6 +832,18 @@ interface ApiInterface {
   getGroupWorkStats(auditGroupId: string): Promise<WorkStatsDTO>
   getAllWorkStats(): Promise<WorkStatsDTO[]>
   getLeastLoadedGroup(): Promise<string>
+
+  // CDC Upload Management
+  getCdcApprovedReportCards(params?: CdcUploadPageParams): Promise<RestfulPageResponse<CdcUploadDTO>>
+  uploadSingleToCdc(reportCardId: string, operatorId: string): Promise<{ message: string }>
+  batchUploadToCdc(data: CdcUploadRequest): Promise<{ successCount: number; failCount: number; message: string }>
+  retryCdcUpload(reportCardId: string, operatorId: string): Promise<{ message: string }>
+  getCdcUploadStatistics(): Promise<{
+    total: number
+    notUploaded: number
+    uploaded: number
+    uploadFailed: number
+  }>
 }
 
 /** 通用 API 对象 (兼容旧代码，内部调用新的 authApi/userApi/reportCardApi) */
@@ -1062,6 +1132,27 @@ const api: ApiInterface = {
 
   getLeastLoadedGroup() {
     return workStatsApi.getLeastLoadedGroup()
+  },
+
+  // ========== CDC Upload Management ==========
+  getCdcApprovedReportCards(params?: CdcUploadPageParams) {
+    return cdcUploadApi.getApprovedReportCards(params)
+  },
+
+  uploadSingleToCdc(reportCardId: string, operatorId: string) {
+    return cdcUploadApi.uploadSingle(reportCardId, operatorId)
+  },
+
+  batchUploadToCdc(data: CdcUploadRequest) {
+    return cdcUploadApi.batchUpload(data)
+  },
+
+  retryCdcUpload(reportCardId: string, operatorId: string) {
+    return cdcUploadApi.retryUpload(reportCardId, operatorId)
+  },
+
+  getCdcUploadStatistics() {
+    return cdcUploadApi.getUploadStatistics()
   }
 }
 
