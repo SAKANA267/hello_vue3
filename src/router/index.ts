@@ -10,9 +10,21 @@ declare module 'vue-router' {
     role?: UserRole
     roles?: UserRole[]
     menuIndex?: string
+    hidden?: boolean
   }
 }
 
+/**
+ * 添加新页面说明：
+ * 1. 在下方 children 数组中添加路由，设置 meta 字段：
+ *    - title: 页面标题（显示在侧边栏和标签页）
+ *    - roles: 允许访问的角色数组，引用 MENU_ROLES['X-Y']
+ *    - menuIndex: 'X-Y' 格式，X=菜单组号，Y=组内排序号
+ *    - hidden: true 可将该页面从侧边栏隐藏（仍可通过路由访问）
+ * 2. 在 src/constants/menu.ts 的 MENU_ROLES 中添加对应的角色映射
+ * 3. 若属于新菜单组，还需在 src/constants/menuGroups.ts 中添加组配置
+ * 侧边栏会自动从路由生成，无需修改 CommonAside.vue
+ */
 const routes = [
   {
     path: '/',

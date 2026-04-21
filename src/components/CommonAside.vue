@@ -1,5 +1,5 @@
 <!--
- * 侧边栏导航组件 - 基于角色控制菜单显示
+ * 侧边栏导航组件 - 基于路由 meta 自动生成菜单
  * @author: SAKANA267
  * @since: 2025-07-22
  * CommonAside.vue
@@ -41,115 +41,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw } from 'vue'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAllDataStore } from '@/stores/index.js'
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  MoreFilled,
-  ChatDotRound
-} from '@element-plus/icons-vue'
-import { useRouter, useRoute } from 'vue-router'
-import { MENU_ROLES } from '@/constants/menu'
-
-// 定义菜单项类型
-interface MenuItem {
-  index: string
-  title: string
-  route: string
-  menuIndex: string
-}
-
-// 定义菜单数据（不再需要 roles 字段，通过 menuIndex 关联）
-const allMenuItems = [
-  {
-    index: '1',
-    title: '数据管理',
-    icon: markRaw(Document),
-    children: [
-      { index: '1-1', title: '对象管理', route: '/home/objectManagement', menuIndex: '1-1' },
-      { index: '1-2', title: '疾病分类管理', route: '/home/diseaseCategory', menuIndex: '1-2' },
-      { index: '1-3', title: '疾病种类管理', route: '/home/diseaseType', menuIndex: '1-3' }
-    ]
-  },
-  {
-    index: '2',
-    title: '系统管理',
-    icon: markRaw(IconMenu),
-    children: [
-      { index: '2-1', title: '用户管理', route: '/home/userManagement', menuIndex: '2-1' },
-      { index: '2-2', title: '审核组管理', route: '/home/auditGroupManagement', menuIndex: '2-2' },
-      { index: '2-3', title: '分配规则管理', route: '/home/assignmentRuleManagement', menuIndex: '2-3' },
-      { index: '2-4', title: '设置', route: '/home/settings', menuIndex: '2-4' },
-      { index: '2-5', title: '测试页面', route: '/home/test', menuIndex: '2-5' }
-    ]
-  },
-  {
-    index: '3',
-    title: '审核中心',
-    icon: markRaw(Location),
-    children: [
-      { index: '3-1', title: '审核管理', route: '/home/auditManagement', menuIndex: '3-1' },
-      { index: '3-2', title: '任务管理', route: '/home/taskManagement', menuIndex: '3-2' },
-      { index: '3-3', title: '工作统计', route: '/home/workStatistics', menuIndex: '3-3' }
-    ]
-  },
-  {
-    index: '4',
-    title: '个人与帮助',
-    icon: markRaw(MoreFilled),
-    children: [
-      { index: '4-1', title: '首页', route: '/home/dashboard', menuIndex: '4-1' },
-      { index: '4-2', title: '个人资料', route: '/home/profile', menuIndex: '4-2' },
-      { index: '4-3', title: '登录历史', route: '/home/loginHistory', menuIndex: '4-3' },
-      { index: '4-4', title: '快速开始', route: '/home/quickStart', menuIndex: '4-4' },
-      { index: '4-5', title: 'API 文档', route: '/home/apiDocs', menuIndex: '4-5' },
-      { index: '4-6', title: '帮助', route: '/home/help', menuIndex: '4-6' },
-      { index: '4-7', title: 'AI 助手', route: '/home/aiAssistant', menuIndex: '4-7' }
-    ]
-  }
-]
+import { useMenuFromRoutes } from '@/composables/useMenuFromRoutes'
+import type { SidebarChild } from '@/composables/useMenuFromRoutes'
 
 const store = useAllDataStore()
-
-// 基于用户角色过滤可见菜单
-const visibleMenuItems = computed(() => {
-  const userRole = store.state.user?.role
-  if (!userRole) return []
-
-  return allMenuItems
-    .map(menu => ({
-      ...menu,
-      // 过滤出用户有权访问的子菜单
-      children: menu.children.filter(child => {
-        const allowedRoles = MENU_ROLES[child.menuIndex]
-        // 如果没有配置角色，默认所有人可访问
-        if (!allowedRoles || allowedRoles.length === 0) return true
-        // 检查用户角色是否在允许列表中
-        return allowedRoles.includes(userRole)
-      })
-    }))
-    .filter(menu => menu.children.length > 0) // 移除没有子菜单的父菜单
-})
+const router = useRouter()
+const { visibleMenuItems, activeMenu } = useMenuFromRoutes()
 
 const isCollapse = computed(() => store.state.isCollapse)
-const width = computed(() => {
-  return store.state.isCollapse ? '64px' : '180px'
-})
+const width = computed(() => (store.state.isCollapse ? '64px' : '180px'))
 
-const router = useRouter()
-const route = useRoute()
-const activeMenu = computed(() => {
-  const path = route.path
-  for (const menu of visibleMenuItems.value) {
-    const child = menu.children.find(c => c.route === path)
-    if (child) return child.index
-  }
-  return ''
-})
-
-const handleMenu = (item: MenuItem) => {
+const handleMenu = (item: SidebarChild) => {
   router.push(item.route)
   store.selectMenu(item)
 }
