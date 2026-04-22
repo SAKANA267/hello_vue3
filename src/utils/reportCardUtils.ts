@@ -132,7 +132,7 @@ export function transformCdcUploadForDisplay(dto: any) {
     gender: formatGenderForDisplay(dto.gender),
     uploadStatus: formatUploadStatusForDisplay(dto.uploadStatus),
     uploadTime: dto.uploadTime ? dto.uploadTime.split('T')[0] : '-',
-    uploadOperator: dto.uploadOperator || '-',
+    uploadOperatorName: dto.uploadOperatorName || '-',
     auditor: dto.auditor || '-',
     auditDate: dto.auditDate ? dto.auditDate.split('T')[0] : '-'
   }

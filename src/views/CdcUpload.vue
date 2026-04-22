@@ -84,7 +84,7 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="上报时间">{{ currentDetailRow.uploadTime }}</el-descriptions-item>
-        <el-descriptions-item label="上报操作人">{{ currentDetailRow.uploadOperator }}</el-descriptions-item>
+        <el-descriptions-item label="上报操作人">{{ currentDetailRow.uploadOperatorName }}</el-descriptions-item>
         <el-descriptions-item label="失败原因" v-if="currentDetailRow.failReason" :span="2">
           <span style="color: #f56c6c">{{ currentDetailRow.failReason }}</span>
         </el-descriptions-item>
@@ -133,7 +133,7 @@ const tableLabel = [
   { prop: 'fillDate', label: '填卡日期', minWidth: '110' },
   { prop: 'auditor', label: '审核人', minWidth: '80' },
   { prop: 'uploadTime', label: '上报时间', minWidth: '110' },
-  { prop: 'uploadOperator', label: '上报人', minWidth: '80' }
+  { prop: 'uploadOperatorName', label: '上报人', minWidth: '80' }
 ]
 
 const uploadStatusTagTypes = {

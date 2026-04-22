@@ -635,6 +635,7 @@ export interface CdcUploadDTO {
   uploadStatus: UploadStatusEnum
   uploadTime?: string
   uploadOperator?: string
+  uploadOperatorName?: string
   failReason?: string
   retryCount: number
 }
