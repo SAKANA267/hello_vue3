@@ -1,6 +1,6 @@
 # 公共卫生平台管理系统
 
-基于 Vue 3 + TypeScript + Element Plus 构建的公共卫生平台管理系统，提供传染病上报、审核流程、用户管理、AI 智能助手和 API 文档等核心功能。
+基于 Vue 3 + TypeScript + Element Plus 构建的公共卫生平台管理系统，提供传染病上报、疾病分类管理、审核流程、任务管理、工作统计、用户管理、AI 智能助手和 API 文档等核心功能。
 
 ## 技术栈
 
@@ -15,6 +15,9 @@
 | Axios | 1.11.0 | HTTP 请求 |
 | ECharts | 6.0 | 数据可视化 |
 | Mock.js | 1.1.0 | 数据模拟 |
+| Faker.js | 10.4.0 | 假数据生成 |
+| bcrypt | 6.0 | 密码加密 |
+| mysql2 | 3.22 | MySQL 数据库驱动 |
 | Less | 4.4 | CSS 预处理器 |
 | Marked & Highlight.js | - | Markdown 渲染与语法高亮 |
 
@@ -50,32 +53,47 @@ src/
 │   ├── PermissionButton.vue # 权限按钮
 │   ├── MarkdownRenderer.vue # Markdown 渲染器
 │   ├── ContributionGraph.vue # 贡献图表
+│   ├── AssignmentDialog.vue # 分配对话框
+│   ├── AuditGroupMemberDialog.vue # 审核组成员对话框
 │   ├── ai/                  # AI 相关组件
 │   │   ├── ChatSidebar.vue  # 聊天侧边栏
 │   │   ├── ChatMessage.vue  # 聊天消息
 │   │   ├── ChatInput.vue    # 聊天输入
 │   │   ├── TypingIndicator.vue
 │   │   ├── DeleteConfirmDialog.vue
+│   │   ├── CreateFormDialog.vue
+│   │   ├── EmptyState.vue
 │   │   └── RequestDataCard.vue
-│   └── dashboard/           # 仪表盘组件
-│       ├── StatCard.vue     # 统计卡片
-│       ├── TrendChart.vue   # 趋势图表
-│       ├── DistributionList.vue
-│       ├── QuickActions.vue
-│       ├── RecentActivities.vue
-│       └── TodoList.vue
+│   ├── dashboard/           # 仪表盘组件
+│   │   ├── StatCard.vue     # 统计卡片
+│   │   ├── TrendChart.vue   # 趋势图表
+│   │   ├── DistributionList.vue
+│   │   ├── QuickActions.vue
+│   │   ├── RecentActivities.vue
+│   │   └── TodoList.vue
+│   └── DiseaseManagement/   # 疾病管理组件
+│       ├── DiseaseDialog.vue # 疾病对话框
+│       ├── CategoryDialog.vue # 分类对话框
+│       ├── CascadedSelector.vue # 级联选择器
+│       ├── InfectiousBadge.vue # 传染病徽章
+│       └── InfectiousReportCardDialog.vue # 传染病报告卡
 ├── composables/              # 组合式函数
-│   └── usePermissions.ts    # 权限钩子
+│   ├── usePermissions.ts    # 权限钩子
+│   └── useMenuFromRoutes.ts # 路由驱动菜单
 ├── config/                   # 配置
 │   └── index.ts             # 环境配置
 ├── constants/                # 常量定义
 │   ├── menu.ts              # 菜单常量
+│   ├── menuGroups.ts        # 菜单分组
 │   ├── permissions.ts       # 权限常量
 │   └── intents.ts           # AI 意图常量
 ├── directives/               # 自定义指令
 │   └── permission.ts        # 权限指令
 ├── router/                   # 路由配置
 │   └── index.ts
+├── scripts/                  # 脚本工具
+│   └── mock-data/           # Mock 数据脚本
+│       └── index.ts
 ├── services/                 # 业务服务层
 │   └── aiService.ts         # AI 服务
 ├── stores/                   # Pinia 状态管理
@@ -100,7 +118,15 @@ src/
 │   ├── ApiDocs.vue          # API 文档
 │   ├── ToDo.vue             # 待办事项
 │   ├── Test.vue             # 测试页
-│   └── Forbidden.vue        # 403 页面
+│   ├── Forbidden.vue        # 403 页面
+│   ├── CdcUpload.vue        # CDC 上传
+│   ├── TaskManagement.vue   # 任务管理
+│   ├── WorkStatistics.vue   # 工作统计
+│   ├── AuditGroupManagement.vue # 审核组管理
+│   ├── AssignmentRuleManagement.vue # 分配规则管理
+│   └── DiseaseManagement/   # 疾病管理页面
+│       ├── DiseaseCategory.vue # 疾病分类
+│       └── DiseaseType.vue  # 疾病类型
 ├── App.vue                   # 根组件
 └── main.ts                   # 应用入口
 ```
@@ -141,7 +167,39 @@ src/
 - 登录历史追踪
 - 贡献统计可视化
 
-### 6. AI 智能助手
+### 6. CDC 上传
+- CDC 数据上传功能
+- 上传操作人记录
+- 文件上传与管理
+
+### 7. 疾病管理
+- 疾病分类管理
+- 疾病类型管理
+- 级联选择器
+- 传染病报告卡
+- 传染病徽章展示
+
+### 8. 审核组管理
+- 审核组 CRUD 操作
+- 审核组成员管理
+- 成员分配对话框
+
+### 9. 任务管理
+- 任务创建与分配
+- 任务状态跟踪
+- 任务优先级设置
+
+### 10. 工作统计
+- 数据统计报表
+- 工作量分析
+- 可视化图表展示
+
+### 11. 分配规则管理
+- 规则配置
+- 条件设置
+- 规则启用/禁用
+
+### 12. AI 智能助手
 - 自然语言对话界面
 - 意图识别与动作执行
 - 会话历史管理（每用户独立存储）
@@ -150,18 +208,18 @@ src/
 - 打字机效果动画
 - 移动端侧边栏抽屉
 
-### 7. API 文档
+### 13. API 文档
 - Markdown 格式 API 文档
 - 代码语法高亮
 - 响应式布局
 
-### 8. 权限管理
+### 14. 权限管理
 - 基于角色的菜单权限
 - 按钮级权限控制
 - 自定义 `v-permission` 指令
 - 权限工具函数
 
-### 9. 系统功能
+### 15. 系统功能
 - 可折叠侧边栏（桌面端/移动端抽屉）
 - 动态标签页导航（支持重命名/关闭）
 - 面包屑导航
@@ -198,6 +256,13 @@ npm run preview        # 预览构建产物
 ```bash
 npm run lint    # ESLint 检查并自动修复
 npm run format  # Prettier 格式化所有 src/ 文件
+```
+
+### Mock 数据管理
+
+```bash
+npm run mock:data       # 插入 mock 数据到数据库
+npm run mock:data:clean # 清理数据库中的 mock 数据
 ```
 
 ## 环境变量
@@ -246,6 +311,33 @@ Mock APIs / Backend APIs
 const { proxy } = getCurrentInstance() as any
 const data = await proxy.$api.getTableData(config)
 ```
+
+### 路由驱动菜单
+
+侧边栏菜单由路由定义自动生成，无需手动维护：
+
+```typescript
+// src/router/index.ts
+{
+  path: '/home/example',
+  meta: {
+    title: '示例页面',
+    roles: ['admin', 'editor'],
+    menuIndex: '1-1'  // 1组第1项
+  }
+}
+```
+
+**架构流程：**
+```
+Routes (meta.menuIndex, meta.roles)
+    ↓
+useMenuFromRoutes composable
+    ↓
+CommonAside.vue (自动渲染)
+```
+
+添加新页面只需编辑路由配置，侧边栏自动更新。
 
 ### 认证流程
 
