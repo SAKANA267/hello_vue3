@@ -97,7 +97,7 @@ const statusTagTypes = {
 const getReportCardsWrapper = async (config: any) => {
   const requestParams: any = {
     page: config.page || 1,
-    size: 10
+    size: config.size || 10
   }
 
   // 搜索参数（keyword, startTime, endTime）通过 CommonTable.search() 传入

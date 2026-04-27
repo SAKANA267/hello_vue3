@@ -153,10 +153,14 @@
   <!--分页-->
   <div class="pagination">
     <el-pagination
+      :current-page="config.page"
+      :page-size="config.size"
       :background="!isMobile"
-      layout="prev, pager, next"
       :total="config.totle"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next, jumper"
       :size="isMobile ? 'small' : 'large'"
+      @size-change="handleSizeChange"
       @current-change="handleChange"
     />
   </div>
@@ -325,6 +329,12 @@ const search = (params?: Record<string, any>) => {
 //分页
 const handleChange = (page: number) => {
   config.page = page
+  getTableData()
+}
+
+const handleSizeChange = (size: number) => {
+  config.size = size
+  config.page = 1
   getTableData()
 }
 

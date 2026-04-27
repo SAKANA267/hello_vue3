@@ -119,10 +119,10 @@
       v-model:current-page="pagination.page"
       v-model:page-size="pagination.size"
       :total="pagination.total"
-      layout="total, sizes, prev, pager, next"
       :page-sizes="[10, 20, 50, 100]"
-      @current-change="loadData"
+      layout="total, sizes, prev, pager, next, jumper"
       @size-change="loadData"
+      @current-change="loadData"
     />
 
     <!-- 创建/编辑弹窗 -->
