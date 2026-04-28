@@ -373,6 +373,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { diseaseTypeApi } from '@/api/disease'
 
 /**
  * 传染病报告卡对话框模式
@@ -443,46 +444,20 @@ const cardNumber = computed(() => {
   return '1432599-0101'
 })
 
-// 疾病选项（模拟数据）
-const diseaseOptions = ref([
-  { label: '鼠疫', value: '鼠疫' },
-  { label: '霍乱', value: '霍乱' },
-  { label: '传染性非典型肺炎', value: '传染性非典型肺炎' },
-  { label: '艾滋病', value: '艾滋病' },
-  { label: '病毒性肝炎', value: '病毒性肝炎' },
-  { label: '脊髓灰质炎', value: '脊髓灰质炎' },
-  { label: '人感染高致病性禽流感', value: '人感染高致病性禽流感' },
-  { label: '麻疹', value: '麻疹' },
-  { label: '流行性出血热', value: '流行性出血热' },
-  { label: '狂犬病', value: '狂犬病' },
-  { label: '流行性乙型脑炎', value: '流行性乙型脑炎' },
-  { label: '登革热', value: '登革热' },
-  { label: '新冠肺炎', value: '新冠肺炎' },
-  { label: '细菌性痢疾', value: '细菌性痢疾' },
-  { label: '肺结核', value: '肺结核' },
-  { label: '伤寒副伤寒', value: '伤寒副伤寒' },
-  { label: '流行性脑脊髓膜炎', value: '流行性脑脊髓膜炎' },
-  { label: '百日咳', value: '百日咳' },
-  { label: '白喉', value: '白喉' },
-  { label: '新生儿破伤风', value: '新生儿破伤风' },
-  { label: '猩红热', value: '猩红热' },
-  { label: '布鲁氏菌病', value: '布鲁氏菌病' },
-  { label: '淋病', value: '淋病' },
-  { label: '梅毒', value: '梅毒' },
-  { label: '钩端螺旋体病', value: '钩端螺旋体病' },
-  { label: '血吸虫病', value: '血吸虫病' },
-  { label: '疟疾', value: '疟疾' },
-  { label: '流行性感冒', value: '流行性感冒' },
-  { label: '流行性腮腺炎', value: '流行性腮腺炎' },
-  { label: '风疹', value: '风疹' },
-  { label: '急性出血性结膜炎', value: '急性出血性结膜炎' },
-  { label: '麻风病', value: '麻风病' },
-  { label: '流行性和地方性斑疹伤寒', value: '流行性和地方性斑疹伤寒' },
-  { label: '黑热病', value: '黑热病' },
-  { label: '包虫病', value: '包虫病' },
-  { label: '丝虫病', value: '丝虫病' },
-  { label: '除霍乱、细菌性和阿米巴性痢疾、伤寒和副伤寒以外的感染性腹泻病', value: '除霍乱、细菌性和阿米巴性痢疾、伤寒和副伤寒以外的感染性腹泻病' }
-])
+// 疾病选项（从API动态获取启用的疾病）
+const diseaseOptions = ref<{ label: string; value: string }[]>([])
+
+const loadDiseaseOptions = async () => {
+  try {
+    const list = await diseaseTypeApi.getActive()
+    diseaseOptions.value = list.map((item) => ({
+      label: item.diseaseName,
+      value: item.diseaseName
+    }))
+  } catch (error) {
+    console.error('获取疾病列表失败：', error)
+  }
+}
 
 // 表单数据
 const formData = reactive<InfectiousReportCardData>({
@@ -707,6 +682,7 @@ const handleResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  loadDiseaseOptions()
 })
 
 onUnmounted(() => {

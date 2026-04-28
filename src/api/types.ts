@@ -223,6 +223,108 @@ export interface ReportCardPageParams {
   fillDateEnd?: string
 }
 
+// ============== 传染病报告卡完整类型（新版） =============
+
+/** 传染病报告卡类别 */
+export type ReportCategoryEnum = '初次报告' | '订正报告'
+
+/** 传染病报告卡上报状态 */
+export type ReportStatusEnum = 'reported' | 'unreported'
+
+/** 地址类型 */
+export type AddressTypeEnum = '本县' | '本市' | '本省' | '外省' | '港澳台' | '外籍'
+
+/** 病人属于 */
+export type PatientBelongEnum = '本地' | '外来'
+
+/** 病例分类 */
+export type CaseTypeEnum = '疑似' | '临床' | '确诊' | '病原'
+
+/** 病例属性 */
+export type CaseAttributeEnum = '急性' | '慢性'
+
+/** 传染病报告卡完整数据结构 */
+export interface InfectiousReportCardData {
+  // 基本信息
+  id?: string
+  cardNumber?: string
+  reportCategory: ReportCategoryEnum
+  reportStatus: ReportStatusEnum
+
+  // 医院信息
+  hospitalArea: string
+  department: string
+  inpatientNo: string
+  outpatientNo: string
+
+  // 患者基本信息
+  patientName: string
+  idCard: string
+  birthday: string
+  phone: string
+  parentName: string
+  workUnit: string
+
+  // 性别和年龄
+  gender: ReportCardGenderEnum
+  age: number
+
+  // 地址信息
+  addressType: AddressTypeEnum
+  detailAddress: string
+
+  // 病例分类
+  patientBelong: PatientBelongEnum
+  crowdCategories: string[]
+  caseType: CaseTypeEnum
+  caseAttribute: CaseAttributeEnum
+
+  // 发病与诊断信息
+  onsetDate: string
+  diagnosisDate: string
+  deathDate?: string
+
+  // 疾病信息
+  diseaseName: string
+  diagnosisName?: string
+
+  // 审核与流程信息
+  doctorName: string
+  reportDoctor?: string
+  fillDate: string
+
+  auditor?: string
+  auditorId?: string
+  auditDate?: string
+
+  status?: string
+  auditStatus: ReportCardStatusEnum
+  assignStatus: ReportCardAssignStatusEnum
+
+  rejectReason?: string
+  remark?: string
+
+  // 系统字段
+  createTime?: string
+  updateTime?: string
+  deleted?: number
+}
+
+/** 创建传染病报告卡请求（简化版，与旧版兼容） */
+export interface CreateInfectiousReportCardRequest {
+  hospitalArea: string
+  department: string
+  diagnosisName: string
+  inpatientNo: string
+  outpatientNo: string
+  name: string
+  gender: ReportCardGenderEnum
+  age: number
+  phone: string
+  reportDoctor: string
+  fillDate: string
+}
+
 // ============== 审核相关 ==============
 
 /** 审核通过参数 */

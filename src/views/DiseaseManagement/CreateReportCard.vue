@@ -34,14 +34,15 @@
           <h3>最近创建的报卡</h3>
           <el-button text type="primary" @click="viewAllCards">查看全部</el-button>
         </div>
-        <el-table :data="recentCards" style="width: 100%">
-          <el-table-column prop="cardNumber" label="卡片编号" width="180" />
-          <el-table-column prop="patientName" label="患者姓名" width="120" />
-          <el-table-column prop="diseaseName" label="疾病名称" />
-          <el-table-column prop="reportStatus" label="状态" width="100">
+        <el-table :data="recentCards" style="width: 100%" v-loading="loading">
+          <el-table-column prop="id" label="卡片编号" width="180" />
+          <el-table-column prop="name" label="患者姓名" width="120" />
+          <el-table-column prop="diagnosisName" label="疾病名称" />
+          <el-table-column prop="auditStatus" label="审核状态" width="100">
             <template #default="{ row }">
-              <el-tag v-if="row.reportStatus === 'reported'" type="success">已上报</el-tag>
-              <el-tag v-else type="info">待审核</el-tag>
+              <el-tag v-if="row.auditStatus === 'APPROVED'" type="success">已通过</el-tag>
+              <el-tag v-else-if="row.auditStatus === 'REJECTED'" type="danger">已驳回</el-tag>
+              <el-tag v-else type="warning">待审核</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="180" />
@@ -66,32 +67,102 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, DocumentAdd } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { getCurrentInstance } from 'vue'
 import InfectiousReportCardDialog, {
   type InfectiousReportCardData
 } from '@/components/DiseaseManagement/InfectiousReportCardDialog.vue'
 import type { ReportCardMode } from '@/components/DiseaseManagement/InfectiousReportCardDialog.vue'
+import type {
+  ReportCardDTO,
+  CreateReportCardRequest
+} from '@/api/types'
 
+const { proxy } = getCurrentInstance() as any
 const router = useRouter()
 
 // 对话框状态
 const dialogVisible = ref(false)
 const dialogMode = ref<ReportCardMode>('add')
 const currentCardData = ref<Partial<InfectiousReportCardData> | null>(null)
+const loading = ref(false)
 
-// 最近创建的报卡（模拟数据）
-const recentCards = ref<
-  Array<{
-    cardNumber: string
-    patientName: string
-    diseaseName: string
-    reportStatus: 'reported' | 'unreported'
-    createTime: string
-  }>
->([])
+// 最近创建的报卡
+const recentCards = ref<ReportCardDTO[]>([])
+
+// 将 InfectiousReportCardData 转换为 CreateReportCardRequest
+const convertToCreateRequest = (data: InfectiousReportCardData): CreateReportCardRequest => {
+  return {
+    hospitalArea: data.hospitalArea || '',
+    department: data.department || '',
+    diagnosisName: data.diseaseName || data.diagnosisName || '',
+    inpatientNo: data.inpatientNo || '',
+    outpatientNo: data.outpatientNo || '',
+    name: data.patientName,
+    gender: data.gender,
+    age: data.age,
+    phone: data.phone,
+    reportDoctor: data.doctorName || data.reportDoctor,
+    fillDate: data.diagnosisDate || data.fillDate
+  }
+}
+
+// 将 ReportCardDTO 转换为 InfectiousReportCardData
+const convertToInfectiousData = (dto: ReportCardDTO): Partial<InfectiousReportCardData> => {
+  return {
+    id: dto.id,
+    cardNumber: dto.id,
+    patientName: dto.name,
+    diseaseName: dto.diagnosisName,
+    phone: dto.phone,
+    gender: dto.gender,
+    age: dto.age,
+    hospitalArea: dto.hospitalArea,
+    department: dto.department,
+    doctorName: dto.reportDoctor,
+    fillDate: dto.fillDate,
+    diagnosisDate: dto.fillDate,
+    reportStatus: 'unreported',
+    reportCategory: '初次报告',
+    auditStatus: dto.auditStatus,
+    assignStatus: dto.assignStatus,
+    // 默认值
+    idCard: '',
+    birthday: '',
+    parentName: '',
+    workUnit: '',
+    addressType: '本县',
+    detailAddress: '',
+    patientBelong: '本地',
+    crowdCategories: [],
+    caseType: '疑似',
+    caseAttribute: '急性',
+    onsetDate: '',
+    deathDate: '',
+    remark: dto.remark
+  }
+}
+
+// 加载最近创建的报卡
+const loadRecentCards = async () => {
+  try {
+    loading.value = true
+    const res = await proxy.$api.getReportCards({
+      page: 1,
+      size: 5,
+      sortBy: 'createTime',
+      sortOrder: 'desc'
+    })
+    recentCards.value = res.data || []
+  } catch (error) {
+    console.error('加载报卡列表失败：', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // 创建新报卡
 const handleCreate = () => {
@@ -101,49 +172,55 @@ const handleCreate = () => {
 }
 
 // 保存报卡
-const handleSave = (data: InfectiousReportCardData) => {
-  console.log('保存的报卡数据：', data)
-
-  // 模拟API调用
-  const newCard = {
-    cardNumber: data.cardNumber || '1432599-0101',
-    patientName: data.patientName,
-    diseaseName: data.diseaseName,
-    reportStatus: data.reportStatus,
-    createTime: new Date().toLocaleString('zh-CN')
+const handleSave = async (data: InfectiousReportCardData) => {
+  try {
+    loading.value = true
+    // 转换数据格式
+    const createRequest = convertToCreateRequest(data)
+    const res = await proxy.$api.createReportCard(createRequest)
+    ElMessage.success('报卡创建成功，已提交审核')
+    dialogVisible.value = false
+    // 刷新列表
+    await loadRecentCards()
+  } catch (error: any) {
+    console.error('创建报卡失败：', error)
+    ElMessage.error(error.message || '创建失败，请重试')
+  } finally {
+    loading.value = false
   }
-
-  // 添加到最近列表
-  recentCards.value.unshift(newCard)
-  if (recentCards.value.length > 5) {
-    recentCards.value.pop()
-  }
-
-  ElMessage.success('报卡创建成功，已提交审核')
 }
 
 // 查看报卡
-const handleView = (row: any) => {
-  dialogMode.value = 'view'
-  currentCardData.value = {
-    cardNumber: row.cardNumber,
-    patientName: row.patientName,
-    diseaseName: row.diseaseName,
-    reportStatus: row.reportStatus
+const handleView = async (row: ReportCardDTO) => {
+  try {
+    loading.value = true
+    const res = await proxy.$api.getReportCardById(row.id)
+    dialogMode.value = 'view'
+    currentCardData.value = convertToInfectiousData(res)
+    dialogVisible.value = true
+  } catch (error) {
+    console.error('获取报卡详情失败：', error)
+    ElMessage.error('获取详情失败')
+  } finally {
+    loading.value = false
   }
-  dialogVisible.value = true
 }
 
 // 撤销报卡
-const handleRevoke = () => {
+const handleRevoke = async () => {
   ElMessage.success('报卡已撤销')
+  await loadRecentCards()
 }
 
 // 查看全部报卡
 const viewAllCards = () => {
   // 可以跳转到报卡列表页面
-  ElMessage.info('跳转到报卡列表页面')
+  router.push('/home/reportCardList')
 }
+
+onMounted(() => {
+  loadRecentCards()
+})
 </script>
 
 <style scoped lang="less">
