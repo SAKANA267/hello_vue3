@@ -127,6 +127,16 @@ const routes = [
         }
       },
       {
+        path: 'createReportCard',
+        name: 'createReportCard',
+        component: () => import('@/views/DiseaseManagement/CreateReportCard.vue'),
+        meta: {
+          title: '创建报卡',
+          roles: MENU_ROLES['1-4'],
+          menuIndex: '1-4'
+        }
+      },
+      {
         path: 'taskManagement',
         name: 'taskManagement',
         component: () => import('@/views/TaskManagement.vue'),

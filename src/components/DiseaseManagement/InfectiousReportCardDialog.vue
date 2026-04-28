@@ -40,7 +40,7 @@
       <div class="card-number">卡片编号：{{ cardNumber }}</div>
       <div class="report-category">
         <span class="category-label">报卡类别：</span>
-        <el-radio-group v-model="formData.reportCategory" size="small">
+        <el-radio-group v-model="formData.reportCategory" size="small" :disabled="isReadonly">
           <el-radio-button label="初次报告" />
           <el-radio-button label="订正报告" />
         </el-radio-group>
@@ -68,6 +68,7 @@
                 placeholder="请输入患者姓名"
                 maxlength="50"
                 clearable
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -79,6 +80,7 @@
                 placeholder="请输入18位身份证号"
                 maxlength="18"
                 clearable
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -92,6 +94,7 @@
                 value-format="YYYY-MM-DD"
                 format="YYYY-MM-DD"
                 :editable="false"
+                :disabled="isReadonly"
                 style="width: 100%"
               />
             </el-form-item>
@@ -106,7 +109,7 @@
                 placeholder="请输入11位联系电话"
                 maxlength="11"
                 clearable
-                class="phone-input"
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -118,6 +121,7 @@
                 placeholder="14岁以下必填"
                 maxlength="50"
                 clearable
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -129,6 +133,7 @@
                 placeholder="请输入工作单位"
                 maxlength="100"
                 clearable
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -136,7 +141,7 @@
 
         <!-- 地址选择 -->
         <el-form-item label="现住址" prop="addressType" required>
-          <el-radio-group v-model="formData.addressType">
+          <el-radio-group v-model="formData.addressType" :disabled="isReadonly">
             <el-radio label="本县">本县(区)</el-radio>
             <el-radio label="本市">本市其他县(区)</el-radio>
             <el-radio label="本省">本省其他市</el-radio>
@@ -152,6 +157,7 @@
             placeholder="请输入详细地址（省/市/区/街道/门牌号）"
             maxlength="200"
             clearable
+            :disabled="isReadonly"
           />
         </el-form-item>
       </div>
@@ -161,14 +167,14 @@
         <div class="section-title">病例分类</div>
 
         <el-form-item label="病人属于" prop="patientBelong">
-          <el-radio-group v-model="formData.patientBelong">
+          <el-radio-group v-model="formData.patientBelong" :disabled="isReadonly">
             <el-radio label="本地">本地病人</el-radio>
             <el-radio label="外来">外来病人</el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item label="人群分类" prop="crowdCategories">
-          <el-checkbox-group v-model="formData.crowdCategories">
+          <el-checkbox-group v-model="formData.crowdCategories" :disabled="isReadonly">
             <el-checkbox label="散居儿童">散居儿童</el-checkbox>
             <el-checkbox label="幼托儿童">幼托儿童</el-checkbox>
             <el-checkbox label="学生">学生</el-checkbox>
@@ -195,7 +201,7 @@
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12">
             <el-form-item label="病例分类" prop="caseType" required>
-              <el-radio-group v-model="formData.caseType">
+              <el-radio-group v-model="formData.caseType" :disabled="isReadonly">
                 <el-radio label="疑似">疑似病例</el-radio>
                 <el-radio label="临床">临床诊断</el-radio>
                 <el-radio label="确诊">确诊病例</el-radio>
@@ -206,7 +212,7 @@
 
           <el-col :xs="24" :sm="12">
             <el-form-item label="病例属性" prop="caseAttribute" required>
-              <el-radio-group v-model="formData.caseAttribute">
+              <el-radio-group v-model="formData.caseAttribute" :disabled="isReadonly">
                 <el-radio label="急性">急性</el-radio>
                 <el-radio label="慢性">慢性</el-radio>
               </el-radio-group>
@@ -229,6 +235,7 @@
                 value-format="YYYY-MM-DD"
                 format="YYYY-MM-DD"
                 :editable="false"
+                :disabled="isReadonly"
                 style="width: 100%"
               />
             </el-form-item>
@@ -243,6 +250,7 @@
                 value-format="YYYY-MM-DD"
                 format="YYYY-MM-DD"
                 :editable="false"
+                :disabled="isReadonly"
                 style="width: 100%"
               />
             </el-form-item>
@@ -257,6 +265,7 @@
                 value-format="YYYY-MM-DD"
                 format="YYYY-MM-DD"
                 :editable="false"
+                :disabled="isReadonly"
                 style="width: 100%"
               />
             </el-form-item>
@@ -270,6 +279,7 @@
                 v-model="formData.diseaseName"
                 placeholder="请选择疾病"
                 filterable
+                :disabled="isReadonly"
                 style="width: 100%"
               >
                 <el-option
@@ -289,6 +299,7 @@
                 placeholder="请输入医生姓名"
                 maxlength="50"
                 clearable
+                :disabled="isReadonly"
               />
             </el-form-item>
           </el-col>
@@ -302,6 +313,7 @@
             placeholder="请输入备注说明"
             maxlength="500"
             show-word-limit
+            :disabled="isReadonly"
           />
         </el-form-item>
       </div>
@@ -414,6 +426,8 @@ const emit = defineEmits<{
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const isMobile = ref(window.innerWidth <= 768)
+
+const isReadonly = computed(() => props.mode === 'view' || props.mode === 'audit')
 
 // 对话框宽度
 const dialogWidth = computed(() => {
@@ -806,22 +820,6 @@ defineExpose({
         margin-bottom: 16px;
         padding-left: 8px;
         border-left: 3px solid @primary-color;
-      }
-    }
-
-    // 联系电话高亮样式
-    .phone-input {
-      :deep(.el-input__wrapper) {
-        border-color: @primary-color;
-        box-shadow: 0 0 0 1px @primary-color inset;
-
-        &:hover {
-          box-shadow: 0 0 0 1px @primary-color inset;
-        }
-
-        &.is-focus {
-          box-shadow: 0 0 0 1px @primary-color inset !important;
-        }
       }
     }
 
