@@ -68,18 +68,16 @@ const tableRef = ref<CommonTableInstance | null>(null)
 // 搜索字段配置（关键词已内置到CommonSearch）
 const searchFields: SearchField[] = []
 
-// 表格列配置
+// 表格列配置（v2 字段名）
 const tableLabel = [
+  { prop: 'cardNumber', label: '卡片编号', minWidth: '130' },
   { prop: 'hospitalArea', label: '院区', minWidth: '100' },
   { prop: 'department', label: '科室', minWidth: '120' },
-  { prop: 'diagnosisName', label: '诊断名称', minWidth: '150' },
+  { prop: 'diseaseName', label: '疾病名称', minWidth: '150' },
   { prop: 'inpatientNo', label: '住院号', minWidth: '120' },
   { prop: 'outpatientNo', label: '门诊号', minWidth: '120' },
-  { prop: 'name', label: '姓名', minWidth: '80' },
-  { prop: 'gender', label: '性别', minWidth: '60' },
-  { prop: 'age', label: '年龄', minWidth: '60' },
-  { prop: 'phone', label: '联系电话', minWidth: '120' },
-  { prop: 'reportDoctor', label: '报告医生', minWidth: '100' },
+  { prop: 'patientName', label: '患者姓名', minWidth: '100' },
+  { prop: 'doctorName', label: '填卡医生', minWidth: '100' },
   { prop: 'fillDate', label: '填卡日期', minWidth: '120' }
 ]
 
@@ -91,7 +89,7 @@ const statusTagTypes = {
 }
 
 // 审核对话框展示的字段列表
-const auditDetailFields = ['name', 'department', 'diagnosisName', 'fillDate']
+const auditDetailFields = ['patientName', 'department', 'diseaseName', 'fillDate']
 
 // 当前审核人ID（从 store 获取）
 const currentAuditorId = computed(() => store.state.user?.id || '')

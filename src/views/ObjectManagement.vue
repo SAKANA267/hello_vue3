@@ -32,6 +32,7 @@
         :table-label="tableLabel"
         :get-api="getReportCardsWrapper"
         :delete-api="deleteReportCardWrapper"
+        :status-column="{ prop: 'auditStatus', label: '审核状态' }"
         :status-tag-types="statusTagTypes"
         :permissions="{
           canEdit: hasPermission('object:edit'),
@@ -132,65 +133,46 @@ const updateReportCardWrapper = async (formData: any) => {
   return await proxy.$api.updateReportCard(formData.id, transformedData)
 }
 
-//表格列配置
+//表格列配置（v2 字段名）
 const tableLabel = [
+  { prop: 'cardNumber', label: '卡片编号', width: '130' },
   { prop: 'hospitalArea', label: '院区', width: '80' },
   { prop: 'department', label: '科室', minWidth: '100' },
-  { prop: 'diagnosisName', label: '诊断名称', minWidth: '140' },
+  { prop: 'diseaseName', label: '疾病名称', minWidth: '140' },
   { prop: 'inpatientNo', label: '住院号', width: '170' },
   { prop: 'outpatientNo', label: '门诊号', width: '170' },
-  { prop: 'name', label: '姓名', width: '80' },
-  { prop: 'gender', label: '性别', width: '60' },
-  { prop: 'age', label: '年龄', width: '60' },
-  { prop: 'phone', label: '联系电话', width: '130' },
-  { prop: 'reportDoctor', label: '报告医生', minWidth: '90' },
+  { prop: 'patientName', label: '患者姓名', width: '90' },
+  { prop: 'doctorName', label: '填卡医生', minWidth: '90' },
   { prop: 'fillDate', label: '填卡日期', width: '110' },
-  { prop: 'auditDate', label: '审核日期', width: '110' },
-  { prop: 'auditor', label: '审核人', width: '90' },
-  { prop: 'status', label: '状态', width: '85' }
+  { prop: 'reportCategory', label: '报卡类别', width: '100' },
+  { prop: 'reportStatus', label: '上报状态', width: '100' }
 ]
 
-//编辑与创建用户 用于v-for创建编辑/新增表单
+//编辑与创建用户 用于v-for创建编辑/新增表单（v2 字段名）
 const formFields = [
   { prop: 'hospitalArea', label: '院区', type: 'input' },
   { prop: 'department', label: '科室', type: 'input' },
-  { prop: 'diagnosisName', label: '诊断名称', type: 'input' },
+  { prop: 'diseaseName', label: '疾病名称', type: 'input' },
   { prop: 'inpatientNo', label: '住院号', type: 'input' },
   { prop: 'outpatientNo', label: '门诊号', type: 'input' },
-  { prop: 'name', label: '姓名', type: 'input' },
-  {
-    prop: 'gender',
-    label: '性别',
-    type: 'radio',
-    options: [
-      { label: '男', value: '男' },
-      { label: '女', value: '女' }
-    ]
-  },
-  { prop: 'age', label: '年龄', type: 'input' },
-  { prop: 'phone', label: '联系电话', type: 'input' },
-  { prop: 'reportDoctor', label: '报告医生', type: 'input' },
+  { prop: 'patientName', label: '患者姓名', type: 'input' },
+  { prop: 'doctorName', label: '填卡医生', type: 'input' },
   { prop: 'fillDate', label: '填卡日期', type: 'date' }
-  // 审核相关字段 (auditDate, auditor, status) 由审核流程管理，不在表单中编辑
 ]
 
-// 表单验证规则 用于el-form的rules属性
+// 表单验证规则（v2 字段名）
 const rules = reactive({
   hospitalArea: [{ required: true, message: '请输入院区', trigger: 'blur' }],
   department: [{ required: true, message: '请输入科室', trigger: 'blur' }],
-  diagnosisName: [{ required: true, message: '请输入诊断名称', trigger: 'blur' }],
+  diseaseName: [{ required: true, message: '请输入疾病名称', trigger: 'blur' }],
   inpatientNo: [{ required: true, message: '请输入住院号', trigger: 'blur' }],
   outpatientNo: [{ required: true, message: '请输入门诊号', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  age: [{ required: true, message: '请输入年龄', trigger: 'blur' }],
-  phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
-  reportDoctor: [{ required: true, message: '请输入报告医生', trigger: 'blur' }],
+  patientName: [{ required: true, message: '请输入患者姓名', trigger: 'blur' }],
+  doctorName: [{ required: true, message: '请输入填卡医生', trigger: 'blur' }],
   fillDate: [
     { required: true, message: '请选择填卡日期', trigger: 'blur' },
     { pattern: /^\d{4}-\d{2}-\d{2}$/, message: '日期格式必须为 yyyy-MM-dd', trigger: 'blur' }
   ]
-  // 审核相关字段验证已移除，由审核流程管理
 })
 
 //搜索相关

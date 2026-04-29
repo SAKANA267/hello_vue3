@@ -98,51 +98,62 @@ const convertToCreateRequest = (data: InfectiousReportCardData): CreateReportCar
   return {
     hospitalArea: data.hospitalArea || '',
     department: data.department || '',
-    diagnosisName: data.diseaseName || data.diagnosisName || '',
-    inpatientNo: data.inpatientNo || '',
-    outpatientNo: data.outpatientNo || '',
-    name: data.patientName,
-    gender: data.gender,
-    age: data.age,
-    phone: data.phone,
-    reportDoctor: data.doctorName || data.reportDoctor,
-    fillDate: data.diagnosisDate || data.fillDate
+    inpatientNo: data.inpatientNo || undefined,
+    outpatientNo: data.outpatientNo || undefined,
+    doctorName: data.doctorName,
+    fillDate: data.fillDate || data.diagnosisDate || '',
+    reportCategory: data.reportCategory === '初次报告' ? 'INITIAL' : 'CORRECTION',
+    patientInfo: {
+      patientName: data.patientName,
+      idCard: data.idCard,
+      birthday: data.birthday || undefined,
+      phone: data.phone,
+      parentName: data.parentName || undefined,
+      workUnit: data.workUnit || undefined,
+      detailAddress: data.detailAddress
+    },
+    diagnosisInfo: {
+      diseaseName: data.diseaseName,
+      diagnosisDate: data.diagnosisDate,
+      onsetDate: data.onsetDate || undefined,
+      deathDate: data.deathDate || undefined,
+      remark: data.remark || undefined
+    }
   }
 }
 
 // 将 ReportCardDTO 转换为 InfectiousReportCardData
 const convertToInfectiousData = (dto: ReportCardDTO): Partial<InfectiousReportCardData> => {
+  const patientInfo = dto.patientInfo
+  const diagnosisInfo = dto.diagnosisInfo
   return {
     id: dto.id,
-    cardNumber: dto.id,
-    patientName: dto.name,
-    diseaseName: dto.diagnosisName,
-    phone: dto.phone,
-    gender: dto.gender,
-    age: dto.age,
+    cardNumber: dto.cardNumber || dto.id,
+    patientName: dto.patientName,
+    diseaseName: dto.diseaseName,
+    phone: patientInfo?.phone || '',
     hospitalArea: dto.hospitalArea,
     department: dto.department,
-    doctorName: dto.reportDoctor,
+    doctorName: dto.doctorName,
     fillDate: dto.fillDate,
-    diagnosisDate: dto.fillDate,
-    reportStatus: 'unreported',
-    reportCategory: '初次报告',
+    diagnosisDate: diagnosisInfo?.diagnosisDate || dto.fillDate,
+    reportStatus: dto.reportStatus === 'REPORTED' ? 'reported' : 'unreported',
+    reportCategory: dto.reportCategory === 'CORRECTION' ? '订正报告' : '初次报告',
     auditStatus: dto.auditStatus,
-    assignStatus: dto.assignStatus,
-    // 默认值
-    idCard: '',
-    birthday: '',
-    parentName: '',
-    workUnit: '',
-    addressType: '本县',
-    detailAddress: '',
-    patientBelong: '本地',
-    crowdCategories: [],
-    caseType: '疑似',
-    caseAttribute: '急性',
-    onsetDate: '',
-    deathDate: '',
-    remark: dto.remark
+    // 默认值（嵌套对象可能为 null）
+    idCard: patientInfo?.idCard || '',
+    birthday: patientInfo?.birthday || '',
+    parentName: patientInfo?.parentName || '',
+    workUnit: patientInfo?.workUnit || '',
+    addressType: patientInfo?.addressType || '本县',
+    detailAddress: patientInfo?.detailAddress || '',
+    patientBelong: diagnosisInfo?.patientBelong || '本地',
+    crowdCategories: diagnosisInfo?.crowdCategories || [],
+    caseType: diagnosisInfo?.caseType || '疑似',
+    caseAttribute: diagnosisInfo?.caseAttribute || '急性',
+    onsetDate: diagnosisInfo?.onsetDate || '',
+    deathDate: diagnosisInfo?.deathDate || '',
+    remark: diagnosisInfo?.remark || ''
   }
 }
 

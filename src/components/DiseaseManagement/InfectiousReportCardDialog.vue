@@ -381,12 +381,13 @@ import { diseaseTypeApi } from '@/api/disease'
 export type ReportCardMode = 'add' | 'edit' | 'view' | 'audit'
 
 /**
- * 表单数据接口
+ * 表单数据接口（前端显示值）
  */
 export interface InfectiousReportCardData {
   // 基本信息
+  id?: string
   cardNumber?: string
-  reportCategory: string
+  reportCategory: '初次报告' | '订正报告'
   reportStatus: 'reported' | 'unreported'
   patientName: string
   idCard: string
@@ -408,6 +409,13 @@ export interface InfectiousReportCardData {
   diseaseName: string
   doctorName: string
   remark: string
+  // 审核与流程
+  hospitalArea?: string
+  department?: string
+  inpatientNo?: string
+  outpatientNo?: string
+  fillDate?: string
+  auditStatus?: string
 }
 
 const props = defineProps<{

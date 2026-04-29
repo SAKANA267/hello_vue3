@@ -146,63 +146,182 @@ export interface ChangePasswordRequest {
 /** 批量删除请求 */
 export type BatchDeleteRequest = string[]
 
-// ============== 报告卡相关 (RESTful) ==============
+// ============== 报告卡相关 (v2 多表迁移版) ==============
 
-/** 报告卡性别枚举 (后端) */
-export type ReportCardGenderEnum = 'MALE' | 'FEMALE'
+/** 性别 */
+export type Gender = 'MALE' | 'FEMALE'
 
-/** 报告卡审核状态枚举 (后端) - 原 status */
-export type ReportCardStatusEnum = 'PENDING' | 'APPROVED' | 'REJECTED'
+/** 审核状态 */
+export type AuditStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
-/** 报告卡分配状态枚举 (后端) - 新增 */
-export type ReportCardAssignStatusEnum = 'UNASSIGNED' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'VOID'
+/** 分配状态 */
+export type AssignStatus = 'UNASSIGNED' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'VOID'
 
-/** 报告卡DTO (RESTful) */
+/** 报卡类别 */
+export type ReportCategory = 'INITIAL' | 'CORRECTION'
+
+/** 上报状态 */
+export type ReportStatus = 'REPORTED' | 'UNREPORTED'
+
+/** 现住址类型 */
+export type AddressType =
+  | 'COUNTY'
+  | 'CITY'
+  | 'PROVINCE'
+  | 'OTHER_PROVINCE'
+  | 'HK_MACAO_TAIWAN'
+  | 'FOREIGN'
+
+/** 病人属于 */
+export type PatientBelong = 'LOCAL' | 'NON_LOCAL'
+
+/** 病例分类 */
+export type CaseType = 'SUSPECTED' | 'CLINICAL' | 'CONFIRMED' | 'PATHOGEN'
+
+/** 病例属性 */
+export type CaseAttribute = 'ACUTE' | 'CHRONIC'
+
+/** 向后兼容别名 */
+export type ReportCardGenderEnum = Gender
+export type ReportCardStatusEnum = AuditStatus
+export type ReportCardAssignStatusEnum = AssignStatus
+
+/** 患者信息DTO（嵌套在详情中） */
+export interface PatientInfoDTO {
+  id: string
+  patientName: string
+  idCard: string
+  birthday: string | null
+  gender: Gender | null
+  age: number | null
+  phone: string
+  parentName: string | null
+  workUnit: string | null
+  addressType: AddressType | null
+  detailAddress: string
+}
+
+/** 诊断信息DTO（嵌套在详情中） */
+export interface DiagnosisInfoDTO {
+  id: string
+  diseaseName: string
+  diagnosisCode: string | null
+  patientBelong: PatientBelong | null
+  crowdCategories: string[] | null
+  caseType: CaseType | null
+  caseAttribute: CaseAttribute | null
+  onsetDate: string | null
+  diagnosisDate: string
+  deathDate: string | null
+  remark: string | null
+}
+
+/** 审核信息DTO（嵌套在详情中） */
+export interface AuditInfoDTO {
+  id: string
+  auditorId: string | null
+  auditorName: string | null
+  auditStatus: AuditStatus
+  auditDate: string | null
+  rejectReason: string | null
+  assignStatus: AssignStatus
+  assigneeId: string | null
+}
+
+/** 报告卡DTO（v2 列表 & 详情通用）
+ * 列表查询时 patientInfo/diagnosisInfo/auditInfo 为 null；详情查询时填充
+ */
 export interface ReportCardDTO {
   id: string
+  cardNumber: string | null
+  reportCategory: ReportCategory | null
+  reportStatus: ReportStatus | null
   hospitalArea: string
   department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: ReportCardGenderEnum
-  age: number
-  phone: string
-  reportDoctor: string
+  inpatientNo: string | null
+  outpatientNo: string | null
+  doctorName: string
   fillDate: string
-  auditorId?: string
-  auditor?: string
-  remark?: string
-  auditStatus: ReportCardStatusEnum // 原 status 改为 auditStatus
-  assignStatus: ReportCardAssignStatusEnum // 新增分配状态
-  assigneeId?: string // 新增分配的审核员ID
-  assigneeName?: string // 新增分配的审核员姓名
+  patientName: string
+  diseaseName: string
+  auditStatus: AuditStatus
   createTime: string
-  updateTime?: string
-  auditDate?: string
+  updateTime: string
+
+  /** 详情时有值，列表时为 null */
+  patientInfo?: PatientInfoDTO | null
+  diagnosisInfo?: DiagnosisInfoDTO | null
+  auditInfo?: AuditInfoDTO | null
 }
 
 /** 创建报告卡请求 */
 export interface CreateReportCardRequest {
   hospitalArea: string
   department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: ReportCardGenderEnum
-  age: number
-  phone: string
-  reportDoctor: string
+  inpatientNo?: string
+  outpatientNo?: string
+  doctorName: string
   fillDate: string
+  cardNumber?: string
+  reportCategory?: ReportCategory
+
+  patientInfo: {
+    patientName: string
+    idCard: string
+    birthday?: string
+    gender?: Gender
+    age?: number
+    phone: string
+    parentName?: string
+    workUnit?: string
+    addressType?: AddressType
+    detailAddress: string
+  }
+
+  diagnosisInfo: {
+    diseaseName: string
+    diagnosisCode?: string
+    patientBelong?: PatientBelong
+    crowdCategories?: string[]
+    caseType?: CaseType
+    caseAttribute?: CaseAttribute
+    onsetDate?: string
+    diagnosisDate: string
+    deathDate?: string
+    remark?: string
+  }
 }
 
-/** 更新报告卡请求 (仅部分字段) */
+/** 更新报告卡请求（仅允许更新待审核状态） */
 export interface UpdateReportCardRequest {
-  diagnosisName?: string
-  phone?: string
-  reportDoctor?: string
+  cardNumber?: string
+  reportCategory?: ReportCategory
+  reportStatus?: ReportStatus
+  doctorName?: string
+
+  patientInfo?: {
+    phone?: string
+    birthday?: string
+    gender?: Gender
+    age?: number
+    parentName?: string
+    workUnit?: string
+    addressType?: AddressType
+    detailAddress?: string
+  }
+
+  diagnosisInfo?: {
+    diseaseName?: string
+    diagnosisCode?: string
+    patientBelong?: PatientBelong
+    crowdCategories?: string[]
+    caseType?: CaseType
+    caseAttribute?: CaseAttribute
+    onsetDate?: string
+    diagnosisDate?: string
+    deathDate?: string
+    remark?: string
+  }
 }
 
 /** 审核请求 */
@@ -211,150 +330,26 @@ export interface ReportCardAuditRequest {
   remark?: string
 }
 
-/** 报告卡分页参数 */
-export interface ReportCardPageParams {
+/** 报告卡查询参数 (v2) */
+export interface ReportCardQueryRequest {
   page?: number
   size?: number
   keyword?: string
-  auditStatus?: ReportCardStatusEnum // 原 status 改为 auditStatus
-  assignStatus?: ReportCardAssignStatusEnum // 新增分配状态筛选
+  status?: AuditStatus
+  assignStatus?: AssignStatus
+  reportCategory?: ReportCategory
+  reportStatus?: ReportStatus
+  hospitalArea?: string
   department?: string
-  fillDateStart?: string
-  fillDateEnd?: string
-}
-
-// ============== 传染病报告卡完整类型（新版） =============
-
-/** 传染病报告卡类别 */
-export type ReportCategoryEnum = '初次报告' | '订正报告'
-
-/** 传染病报告卡上报状态 */
-export type ReportStatusEnum = 'reported' | 'unreported'
-
-/** 地址类型 */
-export type AddressTypeEnum = '本县' | '本市' | '本省' | '外省' | '港澳台' | '外籍'
-
-/** 病人属于 */
-export type PatientBelongEnum = '本地' | '外来'
-
-/** 病例分类 */
-export type CaseTypeEnum = '疑似' | '临床' | '确诊' | '病原'
-
-/** 病例属性 */
-export type CaseAttributeEnum = '急性' | '慢性'
-
-/** 传染病报告卡完整数据结构 */
-export interface InfectiousReportCardData {
-  // 基本信息
-  id?: string
-  cardNumber?: string
-  reportCategory: ReportCategoryEnum
-  reportStatus: ReportStatusEnum
-
-  // 医院信息
-  hospitalArea: string
-  department: string
-  inpatientNo: string
-  outpatientNo: string
-
-  // 患者基本信息
-  patientName: string
-  idCard: string
-  birthday: string
-  phone: string
-  parentName: string
-  workUnit: string
-
-  // 性别和年龄
-  gender: ReportCardGenderEnum
-  age: number
-
-  // 地址信息
-  addressType: AddressTypeEnum
-  detailAddress: string
-
-  // 病例分类
-  patientBelong: PatientBelongEnum
-  crowdCategories: string[]
-  caseType: CaseTypeEnum
-  caseAttribute: CaseAttributeEnum
-
-  // 发病与诊断信息
-  onsetDate: string
-  diagnosisDate: string
-  deathDate?: string
-
-  // 疾病信息
-  diseaseName: string
-  diagnosisName?: string
-
-  // 审核与流程信息
-  doctorName: string
-  reportDoctor?: string
-  fillDate: string
-
-  auditor?: string
   auditorId?: string
-  auditDate?: string
-
-  status?: string
-  auditStatus: ReportCardStatusEnum
-  assignStatus: ReportCardAssignStatusEnum
-
-  rejectReason?: string
-  remark?: string
-
-  // 系统字段
-  createTime?: string
-  updateTime?: string
-  deleted?: number
+  caseType?: CaseType
+  startTime?: string
+  endTime?: string
+  includeDeleted?: boolean
 }
 
-/** 创建传染病报告卡请求（简化版，与旧版兼容） */
-export interface CreateInfectiousReportCardRequest {
-  hospitalArea: string
-  department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: ReportCardGenderEnum
-  age: number
-  phone: string
-  reportDoctor: string
-  fillDate: string
-}
-
-// ============== 审核相关 ==============
-
-/** 审核通过参数 */
-export interface AuditPassParams {
-  id: string
-  auditor: string
-  auditDate: string
-  status: '已审核'
-}
-
-/** 审核不通过参数 */
-export interface AuditRejectParams {
-  id: string
-  auditor: string
-  auditDate: string
-  status: '审核不通过'
-  remark?: string
-}
-
-/** 审核响应 */
-export interface AuditResponse {
-  success: boolean
-  msg?: string
-}
-
-/** 审核撤回参数 */
-export interface AuditRevokeParams {
-  id: string
-  status: '待审核'
-}
+/** @deprecated Use ReportCardQueryRequest instead */
+export type ReportCardPageParams = ReportCardQueryRequest
 
 // ============== 权限类型 ==============
 
@@ -723,17 +718,17 @@ export interface CdcUploadDTO {
   reportCardId: string
   hospitalArea: string
   department: string
-  diagnosisName: string
-  inpatientNo: string
-  outpatientNo: string
-  name: string
-  gender: ReportCardGenderEnum
-  age: number
+  diseaseName: string
+  inpatientNo: string | null
+  outpatientNo: string | null
+  patientName: string
+  gender: Gender | null
+  age: number | null
   phone: string
-  reportDoctor: string
+  doctorName: string
   fillDate: string
-  auditor: string
-  auditDate: string
+  auditorName: string | null
+  auditDate: string | null
   uploadStatus: UploadStatusEnum
   uploadTime?: string
   uploadOperator?: string
