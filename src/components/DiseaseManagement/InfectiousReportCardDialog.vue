@@ -62,6 +62,47 @@
 
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="院区" prop="hospitalArea">
+              <el-select
+                v-model="formData.hospitalArea"
+                placeholder="请选择院区"
+                :disabled="isReadonly"
+                style="width: 100%"
+              >
+                <el-option label="总院" value="总院" />
+                <el-option label="东院区" value="东院区" />
+                <el-option label="西院区" value="西院区" />
+                <el-option label="南院区" value="南院区" />
+                <el-option label="北院区" value="北院区" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="科室" prop="department">
+              <el-select
+                v-model="formData.department"
+                placeholder="请选择科室"
+                :disabled="isReadonly"
+                style="width: 100%"
+              >
+                <el-option label="内科" value="内科" />
+                <el-option label="外科" value="外科" />
+                <el-option label="儿科" value="儿科" />
+                <el-option label="妇产科" value="妇产科" />
+                <el-option label="骨科" value="骨科" />
+                <el-option label="心血管内科" value="心血管内科" />
+                <el-option label="呼吸内科" value="呼吸内科" />
+                <el-option label="消化内科" value="消化内科" />
+                <el-option label="神经内科" value="神经内科" />
+                <el-option label="急诊科" value="急诊科" />
+                <el-option label="传染科" value="传染科" />
+                <el-option label="感染科" value="感染科" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :xs="24" :sm="12" :md="8">
             <el-form-item label="患者姓名" prop="patientName">
               <el-input
                 v-model="formData.patientName"
@@ -410,8 +451,8 @@ export interface InfectiousReportCardData {
   doctorName: string
   remark: string
   // 审核与流程
-  hospitalArea?: string
-  department?: string
+  hospitalArea: string
+  department: string
   inpatientNo?: string
   outpatientNo?: string
   fillDate?: string
@@ -471,6 +512,8 @@ const loadDiseaseOptions = async () => {
 const formData = reactive<InfectiousReportCardData>({
   reportCategory: '初次报告',
   reportStatus: 'unreported',
+  hospitalArea: '',
+  department: '',
   patientName: '',
   idCard: '',
   birthday: '',
@@ -493,6 +536,12 @@ const formData = reactive<InfectiousReportCardData>({
 
 // 表单验证规则
 const formRules: FormRules = {
+  hospitalArea: [
+    { required: true, message: '请选择院区', trigger: 'change' }
+  ],
+  department: [
+    { required: true, message: '请选择科室', trigger: 'change' }
+  ],
   patientName: [
     { required: true, message: '请输入患者姓名', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
@@ -554,6 +603,8 @@ const resetForm = () => {
   Object.assign(formData, {
     reportCategory: '初次报告',
     reportStatus: 'unreported',
+    hospitalArea: '',
+    department: '',
     patientName: '',
     idCard: '',
     birthday: '',
